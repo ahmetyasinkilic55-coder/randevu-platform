@@ -1,0 +1,1 @@
+-- Migration to add publicId to GalleryItem for Cloudinary integration\nALTER TABLE \"gallery_items\" ADD COLUMN \"publicId\" TEXT;

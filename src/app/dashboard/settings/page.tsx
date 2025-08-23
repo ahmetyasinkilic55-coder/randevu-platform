@@ -15,6 +15,8 @@ import {
   Cog6ToothIcon
 } from '@heroicons/react/24/outline'
 import { Camera, Loader2 } from 'lucide-react'
+import { CloudinaryUpload, CloudinaryImage } from '@/components/cloudinary'
+import { useCloudinary } from '@/hooks/useCloudinary'
 import {
   BusinessData,
   UserData,
@@ -27,14 +29,12 @@ import {
 
 export default function SettingsPage() {
   const { data: session } = useSession()
+  const { uploadImage, deleteImage } = useCloudinary()
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [activeTab, setActiveTab] = useState('business')
   const [loading, setLoading] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
   const [error, setError] = useState('')
-
-  const [uploadingProfile, setUploadingProfile] = useState(false)
-  const [uploadingCover, setUploadingCover] = useState(false)
   const [businessData, setBusinessData] = useState<BusinessData | null>(null)
   const [userData, setUserData] = useState<UserData | null>(null)
   const [workingHours, setWorkingHours] = useState<WorkingHour[]>([])
@@ -500,14 +500,20 @@ export default function SettingsPage() {
           <div className="relative">
             <div className="h-48 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl overflow-hidden relative">
               {businessData.coverPhotoUrl ? (
-                <>
-                  <img 
-                    src={businessData.coverPhotoUrl} 
-                    alt="Kapak Fotoğrafı" 
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/20"></div>
-                </>  
+                <CloudinaryImage
+                  publicId={businessData.coverPhotoUrl.includes('cloudinary') 
+                    ? businessData.coverPhotoUrl.split('/').pop()?.split('.')[0] || ''
+                    : businessData.coverPhotoUrl
+                  }
+                  alt="Kapak Fotoğrafı"
+                  className="w-full h-full object-cover"
+                  transformation={{
+                    width: 1200,
+                    height: 400,
+                    crop: 'fill',
+                    quality: 'auto'
+                  }}
+                />
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center">
                   <div className="text-center text-white">
@@ -520,26 +526,15 @@ export default function SettingsPage() {
               {/* Upload/Delete Buttons */}
               <div className="absolute top-4 right-4">
                 <div className="flex gap-2">
-                  <label className={`cursor-pointer p-3 rounded-lg transition-colors ${
-                    uploadingCover ? 'opacity-50 cursor-not-allowed' : 'bg-black/50 hover:bg-black/70'
-                  } backdrop-blur-sm text-white`}>
-                    {uploadingCover ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <Camera className="w-5 h-5" />
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      disabled={uploadingCover}
-                      onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          handleCoverPhotoUpload(e.target.files[0])
-                        }
-                      }}
-                    />
-                  </label>
+                  <CloudinaryUpload
+                    onUpload={handleCoverPhotoUpload}
+                    folder="business-covers"
+                    tags={`business_${businessData.id},cover`}
+                    maxFiles={1}
+                    className="cursor-pointer p-3 rounded-lg transition-colors bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white"
+                  >
+                    <Camera className="w-5 h-5" />
+                  </CloudinaryUpload>
                   
                   {businessData.coverPhotoUrl && (
                     <button
@@ -557,7 +552,7 @@ export default function SettingsPage() {
             <p className={`text-sm mt-2 transition-colors ${
               isDarkMode ? 'text-gray-400' : 'text-gray-500'
             }`}>
-              Önerilen boyut: 1200x400 px. Maksimum dosya boyutu: 5MB
+              Önerilen boyut: 1200x400 px. Maksimum dosya boyutu: 10MB. Cloudinary otomatik optimize eder.
             </p>
           </div>
         </div>
@@ -575,10 +570,20 @@ export default function SettingsPage() {
             <div className="relative">
               <div className="w-32 h-32 rounded-full border-4 border-gray-200 overflow-hidden bg-gray-100">
                 {businessData.profilePhotoUrl ? (
-                  <img 
-                    src={businessData.profilePhotoUrl} 
-                    alt={businessData.name} 
-                    className="w-full h-full object-cover" 
+                  <CloudinaryImage
+                    publicId={businessData.profilePhotoUrl.includes('cloudinary') 
+                      ? businessData.profilePhotoUrl.split('/').pop()?.split('.')[0] || ''
+                      : businessData.profilePhotoUrl
+                    }
+                    alt={businessData.name}
+                    className="w-full h-full object-cover"
+                    transformation={{
+                      width: 300,
+                      height: 300,
+                      crop: 'fill',
+                      gravity: 'face',
+                      quality: 'auto'
+                    }}
                   />
                 ) : (
                   <div className="w-full h-full bg-purple-100 flex items-center justify-center">
@@ -589,26 +594,15 @@ export default function SettingsPage() {
               
               {/* Upload Button */}
               <div className="absolute -bottom-2 -right-2">
-                <label className={`cursor-pointer w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-lg ${
-                  uploadingProfile ? 'opacity-50 cursor-not-allowed bg-gray-400' : 'bg-purple-600 hover:bg-purple-700 hover:shadow-xl'
-                } text-white`}>
-                  {uploadingProfile ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Camera className="w-5 h-5" />
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    disabled={uploadingProfile}
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files[0]) {
-                        handleProfilePhotoUpload(e.target.files[0])
-                      }
-                    }}
-                  />
-                </label>
+                <CloudinaryUpload
+                  onUpload={handleProfilePhotoUpload}
+                  folder="business-profiles"
+                  tags={`business_${businessData.id},profile`}
+                  maxFiles={1}
+                  className="cursor-pointer w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-lg bg-purple-600 hover:bg-purple-700 hover:shadow-xl text-white"
+                >
+                  <Camera className="w-5 h-5" />
+                </CloudinaryUpload>
               </div>
             </div>
             
@@ -648,7 +642,7 @@ export default function SettingsPage() {
               <p className={`text-xs mt-3 transition-colors ${
                 isDarkMode ? 'text-gray-400' : 'text-gray-500'
               }`}>
-                Önerilen boyut: 400x400 px (kare). Maksimum dosya boyutu: 5MB
+                Önerilen boyut: 400x400 px (kare). Maksimum dosya boyutu: 10MB. Cloudinary otomatik optimize eder.
               </p>
             </div>
           </div>
@@ -661,15 +655,17 @@ export default function SettingsPage() {
           <h5 className={`font-medium mb-2 transition-colors ${
             isDarkMode ? 'text-white' : 'text-gray-900'
           }`}>
-            💡 Fotoğraf Yükleme İpuçları
+            💡 Cloudinary Fotoğraf Yönetimi
           </h5>
           <ul className={`text-sm space-y-1 transition-colors ${
             isDarkMode ? 'text-gray-300' : 'text-gray-600'
           }`}>
-            <li>• Desteklenen formatlar: JPG, PNG, WebP</li>
-            <li>• Yüksek çözünürlüklü fotoğraflar kullanın</li>
-            <li>• Kapak fotoğrafı işletmenizin genel görünümünü yansıtmalı</li>
-            <li>• Profil fotoğrafı logo veya işletme vitrinini gösterebilir</li>
+            <li>• Desteklenen formatlar: JPG, PNG, WEBP, GIF</li>
+            <li>• Görseller otomatik olarak optimize ve sıkıştırılır</li>
+            <li>• CDN üzerinden hızlı erişim sağlanır</li>
+            <li>• Farklı boyutlarda otomatik dönüştürme</li>
+            <li>• Güvenli ve ölçeklenebilir depolama</li>
+            <li>• Mobil uyumlu responsive görseller</li>
           </ul>
         </div>
       </div>
@@ -879,126 +875,93 @@ export default function SettingsPage() {
     }
   }
 
-  // Photo upload and delete functions
-  const handleProfilePhotoUpload = async (file: File) => {
+  // Photo upload and delete functions - Now using Cloudinary
+  const handleProfilePhotoUpload = async (result: any) => {
     if (!businessData?.id) {
       showMessage('İşletme bulunamadı', true)
       return
     }
     
-    // File size check (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      showMessage('Dosya boyutu 5MB\'dan büyük olamaz', true)
-      return
-    }
-    
-    // File type check
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-    if (!allowedTypes.includes(file.type)) {
-      showMessage('Sadece JPG, PNG ve WebP formatları desteklenir', true)
-      return
-    }
-    
     try {
-      setUploadingProfile(true)
-      setError('')
-      
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('businessId', businessData.id)
-      formData.append('type', 'profile')
-      
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
+      // Update business data in database with Cloudinary public_id
+      const response = await fetch('/api/settings/business', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...businessData,
+          profilePhotoUrl: result.public_id
+        })
       })
       
       if (response.ok) {
-        const result = await response.json()
-        setBusinessData(prev => prev ? { ...prev, profilePhotoUrl: result.url } : null)
+        setBusinessData(prev => prev ? { ...prev, profilePhotoUrl: result.public_id } : null)
         showMessage('Profil fotoğrafı başarıyla yüklendi!')
       } else {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Yükleme başarısız')
+        throw new Error(errorData.error || 'Güncelleme başarısız')
       }
     } catch (error: any) {
       console.error('Profile photo upload error:', error)
-      showMessage('Profil fotoğrafı yüklenirken bir hata oluştu: ' + error.message, true)
-    } finally {
-      setUploadingProfile(false)
+      showMessage('Profil fotoğrafı güncellenirken bir hata oluştu: ' + error.message, true)
     }
   }
   
-  const handleCoverPhotoUpload = async (file: File) => {
+  const handleCoverPhotoUpload = async (result: any) => {
     if (!businessData?.id) {
       showMessage('İşletme bulunamadı', true)
       return
     }
     
-    // File size check (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      showMessage('Dosya boyutu 5MB\'dan büyük olamaz', true)
-      return
-    }
-    
-    // File type check
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-    if (!allowedTypes.includes(file.type)) {
-      showMessage('Sadece JPG, PNG ve WebP formatları desteklenir', true)
-      return
-    }
-    
     try {
-      setUploadingCover(true)
-      setError('')
-      
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('businessId', businessData.id)
-      formData.append('type', 'cover')
-      
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
+      // Update business data in database with Cloudinary public_id
+      const response = await fetch('/api/settings/business', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...businessData,
+          coverPhotoUrl: result.public_id
+        })
       })
       
       if (response.ok) {
-        const result = await response.json()
-        setBusinessData(prev => prev ? { ...prev, coverPhotoUrl: result.url } : null)
+        setBusinessData(prev => prev ? { ...prev, coverPhotoUrl: result.public_id } : null)
         showMessage('Kapak fotoğrafı başarıyla yüklendi!')
       } else {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Yükleme başarısız')
+        throw new Error(errorData.error || 'Güncelleme başarısız')
       }
     } catch (error: any) {
       console.error('Cover photo upload error:', error)
-      showMessage('Kapak fotoğrafı yüklenirken bir hata oluştu: ' + error.message, true)
-    } finally {
-      setUploadingCover(false)
+      showMessage('Kapak fotoğrafı güncellenirken bir hata oluştu: ' + error.message, true)
     }
   }
   
   const handleProfilePhotoDelete = async () => {
-    if (!businessData?.id) return
+    if (!businessData?.id || !businessData.profilePhotoUrl) return
     
     if (!confirm('Profil fotoğrafını silmek istediğinizden emin misiniz?')) return
     
     try {
-      const params = new URLSearchParams({
-        businessId: businessData.id,
-        type: 'profile'
-      })
+      // Delete from Cloudinary
+      const deleteSuccess = await deleteImage(businessData.profilePhotoUrl)
       
-      const response = await fetch(`/api/upload?${params}`, {
-        method: 'DELETE'
-      })
-      
-      if (response.ok) {
-        setBusinessData(prev => prev ? { ...prev, profilePhotoUrl: undefined } : null)
-        showMessage('Profil fotoğrafı başarıyla silindi!')
-      } else {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Silme başarısız')
+      if (deleteSuccess) {
+        // Update business data in database
+        const response = await fetch('/api/settings/business', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...businessData,
+            profilePhotoUrl: null
+          })
+        })
+        
+        if (response.ok) {
+          setBusinessData(prev => prev ? { ...prev, profilePhotoUrl: undefined } : null)
+          showMessage('Profil fotoğrafı başarıyla silindi!')
+        } else {
+          throw new Error('Veritabanı güncellemesi başarısız')
+        }
       }
     } catch (error: any) {
       console.error('Profile photo delete error:', error)
@@ -1007,26 +970,31 @@ export default function SettingsPage() {
   }
   
   const handleCoverPhotoDelete = async () => {
-    if (!businessData?.id) return
+    if (!businessData?.id || !businessData.coverPhotoUrl) return
     
     if (!confirm('Kapak fotoğrafını silmek istediğinizden emin misiniz?')) return
     
     try {
-      const params = new URLSearchParams({
-        businessId: businessData.id,
-        type: 'cover'
-      })
+      // Delete from Cloudinary
+      const deleteSuccess = await deleteImage(businessData.coverPhotoUrl)
       
-      const response = await fetch(`/api/upload?${params}`, {
-        method: 'DELETE'
-      })
-      
-      if (response.ok) {
-        setBusinessData(prev => prev ? { ...prev, coverPhotoUrl: undefined } : null)
-        showMessage('Kapak fotoğrafı başarıyla silindi!')
-      } else {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Silme başarısız')
+      if (deleteSuccess) {
+        // Update business data in database
+        const response = await fetch('/api/settings/business', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...businessData,
+            coverPhotoUrl: null
+          })
+        })
+        
+        if (response.ok) {
+          setBusinessData(prev => prev ? { ...prev, coverPhotoUrl: undefined } : null)
+          showMessage('Kapak fotoğrafı başarıyla silindi!')
+        } else {
+          throw new Error('Veritabanı güncellemesi başarısız')
+        }
       }
     } catch (error: any) {
       console.error('Cover photo delete error:', error)

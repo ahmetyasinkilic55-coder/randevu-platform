@@ -7,10 +7,14 @@ import {
   Upload, Trash2, Eye, X, Loader2, Image as ImageIcon,
   Plus, AlertCircle, Check, Camera, Grid3x3, List, Search
 } from 'lucide-react'
+import { CloudinaryUpload, CloudinaryImage } from '@/components/cloudinary'
+import { useCloudinary } from '@/hooks/useCloudinary'
+import toast from 'react-hot-toast'
 
 // Types
 interface GalleryPhoto {
   id: string
+  publicId: string  // Cloudinary public_id
   imageUrl: string
   title?: string
   description?: string
@@ -27,10 +31,10 @@ interface BusinessData {
 
 export default function GalleryManagement() {
   const { data: session, status } = useSession()
+  const { uploadImage, deleteImage, uploading: cloudinaryUploading } = useCloudinary()
   const [businessData, setBusinessData] = useState<BusinessData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchTerm, setSearchTerm] = useState('')
   const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all')
@@ -87,79 +91,70 @@ export default function GalleryManagement() {
     }
   }
 
-  const handlePhotoUpload = async (files: FileList) => {
-    if (!businessData?.id) return
-    
-    const uploadPromises = Array.from(files).map(async (file) => {
-      // File size check (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error(`${file.name}: Dosya boyutu 5MB'dan büyük olamaz`)
-      }
-      
-      // File type check
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-      if (!allowedTypes.includes(file.type)) {
-        throw new Error(`${file.name}: Sadece JPG, PNG ve WebP formatları desteklenir`)
-      }
-      
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('businessId', businessData.id)
-      formData.append('type', 'gallery')
-      
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
-      
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || `${file.name} yükleme başarısız`)
-      }
-      
-      return response.json()
-    })
-    
+  // Cloudinary upload handler
+  const handleCloudinaryUpload = async (result: any) => {
+    if (!businessData?.id) {
+      toast.error('İşletme bulunamadı')
+      return
+    }
+
     try {
-      setUploading(true)
-      setError(null)
-      
-      await Promise.all(uploadPromises)
-      
-      // Reload gallery data
-      await loadBusinessData()
-      
+      // Save to database with Cloudinary data
+      const response = await fetch('/api/gallery', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          businessId: businessData.id,
+          publicId: result.public_id,
+          imageUrl: result.secure_url,
+          title: '',
+          description: '',
+          order: (businessData.gallery.length || 0) + 1,
+          isActive: true
+        })
+      })
+
+      if (response.ok) {
+        toast.success('Fotoğraf başarıyla eklendi!')
+        await loadBusinessData() // Reload gallery
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Kaydetme başarısız')
+      }
     } catch (error: any) {
-      console.error('Photo upload error:', error)
-      setError('Fotoğraf yüklenirken bir hata oluştu: ' + error.message)
-    } finally {
-      setUploading(false)
+      console.error('Gallery save error:', error)
+      toast.error('Fotoğraf kaydedilirken hata oluştu: ' + error.message)
     }
   }
 
-  const handlePhotoDelete = async (photoId: string) => {
+  const handlePhotoDelete = async (photoId: string, publicId: string) => {
     if (!businessData?.id) return
     
+    if (!confirm('Bu fotoğrafı silmek istediğinizden emin misiniz?')) return
+    
     try {
-      const params = new URLSearchParams({
-        businessId: businessData.id,
-        type: 'gallery',
-        galleryId: photoId
-      })
+      // Delete from Cloudinary first
+      const cloudinaryDeleteSuccess = await deleteImage(publicId)
       
-      const response = await fetch(`/api/upload?${params}`, {
-        method: 'DELETE'
-      })
-      
-      if (response.ok) {
-        await loadBusinessData()
-      } else {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Silme başarısız')
+      if (cloudinaryDeleteSuccess) {
+        // Delete from database
+        const response = await fetch(`/api/gallery/${photoId}`, {
+          method: 'DELETE'
+        })
+        
+        if (response.ok) {
+          toast.success('Fotoğraf başarıyla silindi!')
+          await loadBusinessData()
+        } else {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Veritabanından silme başarısız')
+        }
       }
     } catch (error: any) {
       console.error('Photo delete error:', error)
-      setError('Fotoğraf silinirken bir hata oluştu: ' + error.message)
+      toast.error('Fotoğraf silinirken hata oluştu: ' + error.message)
     }
   }
 
@@ -223,29 +218,27 @@ export default function GalleryManagement() {
             </p>
           </div>
           
-          {/* Upload Button */}
+          {/* Upload Button - Cloudinary */}
           <div className="flex gap-3">
-            <label className="cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl">
-              {uploading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+            <CloudinaryUpload
+              onUpload={handleCloudinaryUpload}
+              folder="business-gallery"
+              tags={`business_${businessData?.id || 'unknown'},gallery`}
+              maxFiles={10}
+              className="cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
+            >
+              {cloudinaryUploading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Yükleniyor...</span>
+                </>
               ) : (
-                <Upload className="w-5 h-5" />
+                <>
+                  <Upload className="w-5 h-5" />
+                  <span>Fotoğraf Yükle</span>
+                </>
               )}
-              {uploading ? 'Yükleniyor...' : 'Fotoğraf Yükle'}
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                disabled={uploading}
-                onChange={(e) => {
-                  if (e.target.files && e.target.files.length > 0) {
-                    handlePhotoUpload(e.target.files)
-                    e.target.value = ''
-                  }
-                }}
-              />
-            </label>
+            </CloudinaryUpload>
           </div>
         </div>
       </div>
@@ -358,6 +351,17 @@ export default function GalleryManagement() {
 
       {/* Gallery Content */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+        {/* Drag & Drop Upload Zone - Show when no photos or as header */}
+        <div className="mb-6">
+          <CloudinaryUpload
+            onUpload={handleCloudinaryUpload}
+            folder="business-gallery"
+            tags={`business_${businessData?.id || 'unknown'},gallery`}
+            maxFiles={10}
+            className="w-full"
+          />
+        </div>
+        
         {filteredPhotos.length === 0 ? (
           <div className="text-center py-8 sm:py-12">
             <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -373,23 +377,17 @@ export default function GalleryManagement() {
               }
             </p>
             {businessData?.gallery.length === 0 && (
-              <label className="cursor-pointer bg-purple-600 text-white px-4 sm:px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors inline-flex items-center gap-2 text-sm sm:text-base">
+              <CloudinaryUpload
+                onUpload={handleCloudinaryUpload}
+                folder="business-gallery"
+                tags={`business_${businessData?.id || 'unknown'},gallery`}
+                maxFiles={10}
+                className="cursor-pointer bg-purple-600 text-white px-4 sm:px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors inline-flex items-center gap-2 text-sm sm:text-base"
+              >
                 <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="hidden sm:inline">İlk Fotoğrafı Ekle</span>
                 <span className="sm:hidden">Fotoğraf Ekle</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files.length > 0) {
-                      handlePhotoUpload(e.target.files)
-                      e.target.value = ''
-                    }
-                  }}
-                />
-              </label>
+              </CloudinaryUpload>
             )}
           </div>
         ) : (
@@ -403,10 +401,16 @@ export default function GalleryManagement() {
               >
                 {viewMode === 'grid' ? (
                   <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
-                    <img
-                      src={photo.imageUrl}
+                    <CloudinaryImage
+                      publicId={photo.publicId || photo.imageUrl}
                       alt={photo.title || 'Galeri fotoğrafı'}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                      transformation={{
+                        width: 400,
+                        height: 400,
+                        crop: 'fill',
+                        quality: 'auto'
+                      }}
                     />
                     
                     {!photo.isActive && (
@@ -424,7 +428,7 @@ export default function GalleryManagement() {
                         <Eye className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handlePhotoDelete(photo.id)}
+                        onClick={() => handlePhotoDelete(photo.id, photo.publicId || photo.imageUrl)}
                         className="bg-red-500/80 backdrop-blur-sm text-white p-2 rounded-lg hover:bg-red-600/80 transition-colors"
                         title="Sil"
                       >
@@ -441,10 +445,16 @@ export default function GalleryManagement() {
                 ) : (
                   <>
                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                      <img
-                        src={photo.imageUrl}
+                      <CloudinaryImage
+                        publicId={photo.publicId || photo.imageUrl}
                         alt={photo.title || 'Galeri fotoğrafı'}
                         className="w-full h-full object-cover"
+                        transformation={{
+                          width: 100,
+                          height: 100,
+                          crop: 'fill',
+                          quality: 'auto'
+                        }}
                       />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -461,7 +471,7 @@ export default function GalleryManagement() {
                     </div>
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => handlePhotoDelete(photo.id)}
+                        onClick={() => handlePhotoDelete(photo.id, photo.publicId || photo.imageUrl)}
                         className="p-2 text-red-400 hover:text-red-600 transition-colors"
                         title="Sil"
                       >
