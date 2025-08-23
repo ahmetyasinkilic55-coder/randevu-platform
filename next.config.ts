@@ -1,10 +1,8 @@
 import type { NextConfig } from "next";
 
+// Web deployment için - API routes destekli
 const nextConfig: NextConfig = {
-  output: 'export', // Capacitor için static export gerekli
-  trailingSlash: true, // Capacitor için önerilen
   images: {
-    unoptimized: true, // Static export için gerekli
     domains: ['localhost'],
     remotePatterns: [
       {
@@ -20,14 +18,7 @@ const nextConfig: NextConfig = {
       }
     ]
   },
-  serverExternalPackages: ['fs', 'path'],
-  // Capacitor için asset path
-  assetPrefix: '',
-  basePath: '',
-  // API routes mobilde çalışmayacak, bu yüzden sadece static export
-  experimental: {
-    esmExternals: true
-  }
+  serverExternalPackages: ['fs', 'path']
 };
 
 export default nextConfig;

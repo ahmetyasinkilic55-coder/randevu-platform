@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "build:mobile": "next build && npx cap sync",
+    "build:mobile": "npm run build:mobile:config && next build && npm run build:mobile:restore && npx cap sync",
+    "build:mobile:config": "copy next.config.mobile.js next.config.js",
+    "build:mobile:restore": "git checkout next.config.js || copy next.config.ts next.config.js",
     "start": "next start",
-    "cap:build": "npm run build && npx cap sync",
+    "cap:build": "npm run build:mobile",
     "cap:open:ios": "npx cap open ios",
     "cap:open:android": "npx cap open android",
     "cap:run:ios": "npm run cap:build && npx cap run ios",
