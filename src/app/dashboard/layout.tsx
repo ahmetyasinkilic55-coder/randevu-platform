@@ -42,6 +42,7 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
   
+  
   // İşletme verilerini al
   const { businessData, loading: businessLoading, error: businessError } = useBusinessData()
   
