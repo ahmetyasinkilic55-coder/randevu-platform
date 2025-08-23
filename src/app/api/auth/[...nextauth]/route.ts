@@ -1,10 +1,10 @@
-import NextAuth from 'next-auth'
+import NextAuth, { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
 // Basitleştirilmiş NextAuth config
-const authConfig = {
+const authConfig: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || "randevu-platform-secret-key-2025-very-secure",
   providers: [
     CredentialsProvider({
@@ -50,7 +50,7 @@ const authConfig = {
       }
     })
   ],
-  session: { strategy: 'jwt' },
+  session: { strategy: 'jwt' as const },
   pages: {
     signIn: '/auth/signin',
     error: '/auth/error',
