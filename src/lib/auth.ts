@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs'
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
+  secret: process.env.NEXTAUTH_SECRET || "randevu-platform-secret-key-2025-very-secure",
   providers: [
     CredentialsProvider({
       name: 'credentials',

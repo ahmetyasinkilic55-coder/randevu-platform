@@ -1,0 +1,2 @@
+# Icon placeholder - gerçek icon dosyalarını ekleyin
+# 192x192 ve 512x512 PNG dosyaları gerekli
