@@ -1,0 +1,730 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String?
+  name          String?
+  phone         String?
+  avatar        String?   // Profile photo URL
+  position      String?   // Job title/position
+  role          Role      @default(BUSINESS_OWNER)
+  emailVerified DateTime?
+  image         String?
+  
+  // Additional profile fields
+  birthDate     DateTime?
+  gender        Gender?
+  city          String?
+  district      String?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  businesses Business[]
+  accounts   Account[]
+  sessions   Session[]
+  favorites  Favorite[]
+  notificationSettings NotificationSettings?
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Category {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  slug        String  @unique
+  description String?
+  icon        String? // Emoji or icon class
+  color       String? // Hex color code
+  orderIndex  Int     @default(0)
+  isActive    Boolean @default(true)
+  
+  // Relations
+  subcategories Subcategory[]
+  businesses    Business[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("categories")
+}
+
+model Subcategory {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String?
+  icon        String?
+  orderIndex  Int     @default(0)
+  isActive    Boolean @default(true)
+  
+  // Category relation
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  // Relations  
+  businesses Business[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("subcategories")
+}
+
+model Business {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  category    String  @default("BARBER") // Legacy field - BARBER, BEAUTY_SALON, etc
+  phone       String
+  email       String?
+  address     String
+  description String?
+  website     String? // Website URL
+  logo        String? // Logo URL
+  coverImage  String? // Cover image URL
+  
+  // New Category Relations
+  categoryId    String?
+  subcategoryId String?
+  categoryRef   Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  subcategory   Subcategory? @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
+  
+  // Location fields for il/ilçe
+  province   String? // İl
+  district   String? // İlçe
+  provinceId Int?    // İl ID from API
+  districtId Int?    // İlçe ID from API
+  
+  // Profile & Cover Photos
+  profilePhotoUrl String?
+  coverPhotoUrl   String?
+  
+  // Location
+  latitude  Float?
+  longitude Float?
+  
+  // Business Info
+  established Int?
+  languages   String? // JSON string of languages
+  
+  // Social Media
+  instagramUrl String?
+  facebookUrl  String?
+  tiktokUrl    String?
+  websiteUrl   String?
+  
+  // Business Status
+  isActive    Boolean @default(true)
+  isVerified  Boolean @default(false)
+  isPremium   Boolean @default(false)
+  
+  // Appointment Settings (JSON string)
+  appointmentSettings String? // JSON serialized appointment configuration
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Owner
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  services      Service[]
+  staff         Staff[]
+  workingHours  WorkingHour[]
+  gallery       GalleryItem[]
+  reviews            Review[]
+  appointments       Appointment[]
+  favorites          Favorite[]
+  websiteConfig      WebsiteConfig?
+  settings           BusinessSettings?
+  projectRequests    ProjectRequest[]
+  consultationRequests ConsultationRequest[]
+  
+  @@map("businesses")
+}
+
+model Service {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  duration    Int     // in minutes
+  category    String  @default("Temel Hizmetler") // Service category
+  isActive    Boolean @default(true)
+  popularity  Int     @default(0) // 0-100 scale
+  
+  // Business relation
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  appointments Appointment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([businessId, name])
+  @@map("services")
+}
+
+model Staff {
+  id          String  @id @default(cuid())
+  name        String
+  phone       String?
+  email       String?
+  specialty   String?
+  experience  Int?    // years of experience
+  rating      Float?  // average rating
+  bio         String?
+  photoUrl    String?
+  isActive    Boolean @default(true)
+  
+  // Business relation
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  appointments    Appointment[]
+  staffSchedules  StaffSchedule[]
+  staffLeaves     StaffLeave[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([businessId, name])
+  @@map("staff")
+}
+
+model WorkingHour {
+  id        String  @id @default(cuid())
+  dayOfWeek Int     // 0 = Sunday, 1 = Monday, etc.
+  isOpen    Boolean @default(true)
+  openTime  String  // HH:MM format
+  closeTime String  // HH:MM format
+  
+  // Lunch break
+  lunchStartTime String? // HH:MM format
+  lunchEndTime   String? // HH:MM format
+  
+  // Business relation
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  @@unique([businessId, dayOfWeek])
+  @@map("working_hours")
+}
+
+model StaffSchedule {
+  id        String    @id @default(cuid())
+  dayOfWeek DayOfWeek
+  startTime String    // HH:MM format
+  endTime   String    // HH:MM format
+  isWorking Boolean   @default(true)
+  
+  // Staff relation
+  staffId String
+  staff   Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  
+  @@unique([staffId, dayOfWeek])
+  @@map("staff_schedules")
+}
+
+model StaffLeave {
+  id        String          @id @default(cuid())
+  startDate DateTime
+  endDate   DateTime
+  startTime String?         // HH:MM format for partial day leaves
+  endTime   String?         // HH:MM format for partial day leaves
+  type      StaffLeaveType  @default(FULL_DAY)
+  reason    String
+  status    StaffLeaveStatus @default(PENDING)
+  notes     String?
+  
+  // Staff relation
+  staffId String
+  staff   Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("staff_leaves")
+}
+
+model GalleryItem {
+  id          String      @id @default(cuid())
+  imageUrl    String
+  title       String?
+  description String?
+  type        GalleryType @default(WORK)
+  order       Int         @default(0)
+  isActive    Boolean     @default(true)
+  
+  // Business relation
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("gallery_items")
+}
+
+model Review {
+  id      String @id @default(cuid())
+  rating  Int    // 1-5 stars
+  comment String
+  
+  // Customer info
+  customerName   String
+  customerPhone  String?
+  customerEmail  String?
+  customerAvatar String?
+  
+  // Rating breakdown
+  serviceRating    Int? // 1-5 stars for service
+  staffRating      Int? // 1-5 stars for staff
+  facilitiesRating Int? // 1-5 stars for facilities
+  priceRating      Int? // 1-5 stars for price
+  
+  // Review status
+  isApproved Boolean @default(false)
+  isVisible  Boolean @default(true)
+  canReview  Boolean @default(false) // Can user review (appointment completed?)
+  
+  // Business relation
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  // Required appointment relation - only allow reviews after completed appointments
+  appointmentId String     @unique
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  
+  // Business owner reply
+  ownerReply    String?
+  ownerReplyAt  DateTime?
+  
+  // Media
+  photos        String? // JSON array of photo URLs
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("reviews")
+}
+
+model Appointment {
+  id     String            @id @default(cuid())
+  date   DateTime
+  status AppointmentStatus @default(PENDING)
+  notes  String?
+  
+  // Customer info
+  customerName  String
+  customerPhone String
+  customerEmail String?
+  
+  // Business relation
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  // Service relation
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+  
+  // Staff relation (optional)
+  staffId String?
+  staff   Staff?  @relation(fields: [staffId], references: [id])
+  
+  // Relations
+  review Review?
+  videoCall VideoCall?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("appointments")
+}
+
+model VideoCall {
+  id            String   @id @default(cuid())
+  appointmentId String   @unique
+  
+  // Jitsi room info
+  roomName      String?  // Jitsi room name
+  roomUrl       String?  // Full Jitsi room URL
+  
+  // Timing
+  scheduledAt   DateTime? // Planned start time
+  startedAt     DateTime? // Actual start time
+  endedAt       DateTime? // Actual end time
+  duration      Int?     // Duration in minutes
+  
+  // Status
+  status        VideoCallStatus @default(SCHEDULED)
+  
+  // Participants (JSON array)
+  participants  Json?    // Array of participant names
+  
+  // Recording
+  recordingUrl  String?  // Jitsi recording URL if available
+  isRecorded    Boolean  @default(false)
+  
+  // Moderation
+  moderatorNotes String?
+  flaggedContent Boolean @default(false)
+  reportCount    Int     @default(0)
+  
+  // Relations
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("video_calls")
+}
+
+model WebsiteConfig {
+  id String @id @default(cuid())
+  
+  // URL Management
+  urlSlug      String  @unique
+  isPublished  Boolean @default(false)
+  template     String  @default("modern") // berber, kuafor, dishekimi, etc.
+  
+  // Color Theme
+  primaryColor   String @default("#2563eb")
+  secondaryColor String @default("#1d4ed8")
+  gradientColors String @default("linear-gradient(135deg, #2563eb, #1d4ed8)")
+  
+  // Hero Section
+  heroTitle    String
+  heroSubtitle String
+  buttonText   String @default("Randevu Al")
+  
+  // Section Visibility
+  showServices Boolean @default(true)
+  showTeam     Boolean @default(true)
+  showGallery  Boolean @default(true)
+  showReviews  Boolean @default(true)
+  showMap      Boolean @default(true)
+  showContact  Boolean @default(true)
+  
+  // Photo URLs
+  profilePhoto String?
+  coverPhoto   String?
+  galleryPhotos String? // JSON array of photo URLs
+  
+  // SEO Settings
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String?
+  
+  // Analytics
+  googleAnalyticsId String?
+  facebookPixelId   String?
+  
+  // Statistics
+  viewCount    Int @default(0)
+  lastViewedAt DateTime?
+  
+  // Custom CSS/JS
+  customCss String?
+  customJs  String?
+  
+  // Business relation
+  businessId String   @unique
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("website_configs")
+}
+
+model BusinessSettings {
+  id String @id @default(cuid())
+  
+  // Service Type Selection - NEW FEATURE
+  serviceType String @default("APPOINTMENT") // APPOINTMENT, PROJECT, CONSULTATION, HYBRID
+  buttonText String @default("Randevu Al")
+  consultationFee Float @default(0.0)
+  isConsultationFree Boolean @default(true)
+  minimumProjectAmount Float @default(0.0)
+  workingRadius String? // JSON array of districts
+  supportedMeetingTypes String? // JSON array: ["face_to_face", "online", "phone"]
+  
+  // Notification Settings
+  newAppointmentNotification Boolean @default(true)
+  appointmentCancellationNotification Boolean @default(true)
+  dailySummaryNotification Boolean @default(true)
+  weeklyReportNotification Boolean @default(false)
+  monthlyAnalysisNotification Boolean @default(true)
+  marketingTipsNotification Boolean @default(false)
+  
+  // Communication Preferences
+  emailNotifications Boolean @default(true)
+  smsNotifications Boolean @default(true)
+  pushNotifications Boolean @default(true)
+  
+  // Business Preferences
+  allowOnlineBooking Boolean @default(true)
+  requireBookingApproval Boolean @default(false)
+  bookingLeadTime Int @default(60) // minutes
+  cancellationPolicy String? // Cancellation policy text
+  
+  // Payment Settings
+  acceptCashPayment Boolean @default(true)
+  acceptCardPayment Boolean @default(false)
+  requireDepositForBooking Boolean @default(false)
+  depositPercentage Float @default(0.0)
+  
+  // Business relation
+  businessId String @unique
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("business_settings")
+}
+
+// Enums
+enum Role {
+  BUSINESS_OWNER
+  STAFF
+  ADMIN
+  CUSTOMER
+}
+
+enum Sector {
+  BERBER
+  KUAFOR
+  DISHEKIMI
+  OTOYIKAMA
+  SPORSALONU
+  GUZELLIKMERKEZI
+  VETERINER
+  MASAJ
+  DUGUNSALONU
+  KURSMERKEZI
+  OTHER
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum GalleryType {
+  WORK        // Work examples
+  SALON       // Salon photos
+  STAFF       // Staff photos
+  CERTIFICATE // Certificates
+  OTHER
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum VideoCallStatus {
+  SCHEDULED
+  LIVE
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum ProjectRequestStatus {
+  PENDING
+  RESPONDED
+  ACCEPTED
+  REJECTED
+  COMPLETED
+}
+
+enum ConsultationRequestStatus {
+  PENDING
+  RESPONDED
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum ConsultationMeetingType {
+  FACE_TO_FACE
+  ONLINE
+  PHONE
+}
+
+enum StaffLeaveType {
+  FULL_DAY    // Tam gün izin
+  PARTIAL     // Kısmi izin (saat bazlı)
+  MULTI_DAY   // Çok günlük izin
+}
+
+enum StaffLeaveStatus {
+  PENDING     // Beklemede
+  APPROVED    // Onaylandı
+  REJECTED    // Reddedildi
+}
+
+model NotificationSettings {
+  id                    String  @id @default(cuid())
+  userId                String  @unique
+  emailNotifications    Boolean @default(true)
+  smsNotifications      Boolean @default(true)
+  appointmentReminders  Boolean @default(true)
+  promotionalMessages   Boolean @default(false)
+  
+  user                  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("notification_settings")
+}
+
+model ProjectRequest {
+  id          String  @id @default(cuid())
+  
+  // Customer info
+  customerName    String
+  customerPhone   String
+  customerEmail   String?
+  
+  // Project details
+  projectDescription String
+  estimatedBudget    Float?
+  preferredDate      DateTime?
+  location          String?
+  
+  // Request status
+  status ProjectRequestStatus @default(PENDING)
+  notes  String?
+  
+  // Business relation
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  // Business response
+  businessResponse  String?
+  estimatedPrice    Float?
+  responseDate      DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("project_requests")
+}
+
+model ConsultationRequest {
+  id          String  @id @default(cuid())
+  
+  // Customer info
+  customerName    String
+  customerPhone   String
+  customerEmail   String?
+  
+  // Consultation details
+  consultationTopic   String
+  preferredDateTime   DateTime?
+  meetingType        ConsultationMeetingType @default(FACE_TO_FACE)
+  
+  // Request status
+  status ConsultationRequestStatus @default(PENDING)
+  notes  String?
+  
+  // Business relation
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  // Business response
+  businessResponse   String?
+  proposedDateTime   DateTime?
+  proposedMeetingUrl String? // For online meetings
+  responseDate       DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("consultation_requests")
+}
+
+model Favorite {
+  id         String   @id @default(cuid())
+  
+  // User relation
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Business relation
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  createdAt  DateTime @default(now())
+  
+  @@unique([userId, businessId])
+  @@map("favorites")
+}

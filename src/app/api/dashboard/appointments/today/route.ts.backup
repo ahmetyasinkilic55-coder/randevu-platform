@@ -1,0 +1,78 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+
+export async function GET(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const userId = session.user.id
+
+    // Bugünün tarih aralığını al
+    const today = new Date()
+    const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
+
+    // Bugünkü randevuları getir
+    const appointments = await prisma.appointment.findMany({
+      where: {
+        businessId: userId,
+        date: {
+          gte: startOfDay,
+          lt: endOfDay
+        }
+      },
+      include: {
+        service: {
+          select: {
+            name: true,
+            duration: true,
+            price: true
+          }
+        },
+        staff: {
+          select: {
+            name: true
+          }
+        }
+      },
+      orderBy: {
+        date: 'asc'
+      }
+    })
+
+    // Response formatını düzenle
+    const formattedAppointments = appointments.map(appointment => ({
+      id: appointment.id,
+      time: appointment.date.toLocaleTimeString('tr-TR', {
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
+      clientName: appointment.customerName || 'Bilinmeyen Müşteri',
+      clientEmail: appointment.customerEmail,
+      serviceName: appointment.service?.name || 'Hizmet Belirtilmemiş',
+      staffName: appointment.staff?.name,
+      status: appointment.status,
+      duration: appointment.service?.duration,
+      price: appointment.service?.price
+    }))
+
+    return NextResponse.json({
+      success: true,
+      data: formattedAppointments,
+      count: formattedAppointments.length
+    })
+
+  } catch (error) {
+    console.error('Dashboard today appointments API error:', error)
+    return NextResponse.json(
+      { error: 'Sunucu hatası' }, 
+      { status: 500 }
+    )
+  }
+}

@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RandeVur - Randevu Yönetim Platformu
 
-## Getting Started
+RandeVur, tüm sektörler için entegre randevu ve web sitesi çözümü sunan kapsamlı bir dijital platformdur.
 
-First, run the development server:
+## Özellikler
+
+### İşletmeler İçin
+- **3-in-1 Çözüm:** Website + Randevu + Raporlama
+- **Sürükle-bırak Website Builder**
+- **Otomatik Randevu Yönetimi**
+- **Personel ve Hizmet Yönetimi**
+- **Detaylı Analitik ve Raporlar**
+- **Müşteri İletişim Araçları**
+
+### Müşteriler İçin
+- **Tek Platform:** Tüm işletmelere tek yerden erişim
+- **7/24 Online Randevu**
+- **Şeffaf Fiyatlandırma**
+- **Değerlendirme ve Yorum Sistemi**
+- **Konum Bazlı Arama**
+
+## Teknoloji Stack
+
+- **Frontend:** Next.js 15, React 19, TypeScript
+- **Backend:** Next.js API Routes
+- **Database:** SQLite + Prisma ORM
+- **Authentication:** NextAuth.js
+- **Styling:** Tailwind CSS
+- **UI Components:** Headless UI, Heroicons
+- **Animations:** Framer Motion
+
+## Kurulum
 
 ```bash
+# Gerekli paketleri yükle
+npm install
+
+# Veritabanını başlat
+npm run db:generate
+npm run db:push
+
+# Development server'ı başlat
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## API Endpoints
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Public API
+- `GET /api/public/businesses` - İşletme listesi
+- `GET /api/categories` - Kategori listesi
+- `GET /api/locations/provinces` - İl listesi
+- `GET /api/locations/districts` - İlçe listesi
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Auth API
+- `POST /api/auth/register` - Kullanıcı kaydı
+- `POST /api/auth/[...nextauth]` - Authentication
 
-## Learn More
+### Business API
+- `GET /api/businesses` - İşletme bilgileri
+- `POST /api/businesses` - İşletme oluşturma
+- `PUT /api/businesses` - İşletme güncelleme
 
-To learn more about Next.js, take a look at the following resources:
+### Dashboard API
+- `GET /api/dashboard/stats` - İstatistikler
+- `GET /api/inquiries/all` - Talepler
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Folder Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/                 # Next.js App Router
+├── components/          # Reusable components
+├── hooks/              # Custom React hooks
+├── lib/                # Utility libraries
+├── types/              # TypeScript type definitions
+└── styles/             # Global styles
+```
 
-## Deploy on Vercel
+## Lisans
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Bu proje MIT lisansı altında lisanslanmıştır.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## İletişim
+
+RandeVur ekibi ile iletişime geçmek için: [İletişim Bilgileri]
