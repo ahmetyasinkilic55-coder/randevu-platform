@@ -3,8 +3,17 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
-// Production için kesin secret
+// Production için kesin secret - hem hardcoded hem env
 const NEXTAUTH_SECRET = "randevu-platform-secret-key-2025-very-secure-production"
+
+// Environment variable'ı force et
+if (!process.env.NEXTAUTH_SECRET) {
+  process.env.NEXTAUTH_SECRET = NEXTAUTH_SECRET
+}
+
+if (!process.env.NEXTAUTH_URL) {
+  process.env.NEXTAUTH_URL = "https://randevu-platform.vercel.app"
+}
 
 // Basitleştirilmiş NextAuth config
 const authConfig: NextAuthOptions = {
@@ -75,6 +84,12 @@ const authConfig: NextAuthOptions = {
   }
 }
 
-const handler = NextAuth(authConfig)
+// NextAuth handler'da da secret override
+const handler = NextAuth({
+  ...authConfig,
+  secret: NEXTAUTH_SECRET,
+  // Production overrides
+  debug: process.env.NODE_ENV === 'development',
+})
 
 export { handler as GET, handler as POST }
