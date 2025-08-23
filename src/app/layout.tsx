@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from '@/components/providers'
 import { Toaster } from 'react-hot-toast'
@@ -20,8 +20,6 @@ export const metadata: Metadata = {
   title: "RandeVur - Randevu Yönetim Platformu",
   description: "Tüm sektörler için entegre randevu ve web sitesi çözümü",
   manifest: '/manifest.json',
-  themeColor: '#667eea',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -31,6 +29,15 @@ export const metadata: Metadata = {
     icon: ['/favicon.ico'],
     apple: ['/icon-192.png'],
   }
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#667eea'
 };
 
 export default function RootLayout({
