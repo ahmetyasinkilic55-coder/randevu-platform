@@ -6,13 +6,6 @@ import bcrypt from 'bcryptjs'
 // Production için kesin secret
 const NEXTAUTH_SECRET = "randevu-platform-secret-key-2025-very-secure-production"
 
-// Debug log
-console.log('NextAuth Secret Status:', {
-  hasEnvSecret: !!process.env.NEXTAUTH_SECRET,
-  hasHardcodedSecret: !!NEXTAUTH_SECRET,
-  nodeEnv: process.env.NODE_ENV
-})
-
 // Basitleştirilmiş NextAuth config
 const authConfig: NextAuthOptions = {
   secret: NEXTAUTH_SECRET,
