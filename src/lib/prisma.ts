@@ -4,19 +4,31 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-// Production için hard-coded DATABASE_URL (geçici çözüm)
-const databaseUrl = process.env.DATABASE_URL || 
-  "postgresql://c66f332901e55d5ffbbfd4dd9e5c432121bb8842a192a556708158ea29c85d92:sk_NIMf_YB6citjSXnq3asJX@db.prisma.io:5432?sslmode=require"
+// Only initialize Prisma on server-side
+let prisma: PrismaClient
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    datasources: {
-      db: {
-        url: databaseUrl
-      }
-    },
-    log: ['error'],
-  })
+if (typeof window === 'undefined') {
+  // Server-side: Use environment variable DATABASE_URL (Vercel Postgres Accelerate)
+  const databaseUrl = process.env.DATABASE_URL
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL environment variable is not set')
+  }
+
+  prisma = globalForPrisma.prisma ??
+    new PrismaClient({
+      datasources: {
+        db: {
+          url: databaseUrl
+        }
+      },
+      log: ['error'],
+    })
+
+  if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+} else {
+  // Client-side: Create a dummy object
+  prisma = {} as PrismaClient
+}
+
+export { prisma }

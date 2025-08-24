@@ -3,13 +3,15 @@
 import React, { useState } from 'react'
 import { 
   Star, MapPin, Phone, Mail, Clock, Calendar, MessageCircle, ExternalLink,
-  Camera, Eye, ArrowRight, Plus, Check, Award, Heart, Sparkles, Users, Play
+  Camera, Eye, ArrowRight, Plus, Check, Award, Heart, Sparkles, Users, Play,
+  ChevronLeft, ChevronRight, X
 } from 'lucide-react'
 import AppointmentModal from '../AppointmentModal'
 import ProjectInquiryModal from '../modals/ProjectInquiryModal'
 import ConsultationModal from '../modals/ConsultationModal'
 import ContactModal from '../modals/ContactModal'
 import AIChatWidget from '../ai/AIChatWidget'
+import { CloudinaryImage } from '@/components/cloudinary'
 
 interface BusinessData {
   id: string
@@ -135,6 +137,56 @@ export default function WebsitePreview({
   const [consultationModalOpen, setConsultationModalOpen] = useState(false)
   const [contactModalOpen, setContactModalOpen] = useState(false)
   
+  // Gallery lightbox states
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
+  const [touchStartX, setTouchStartX] = useState<number | null>(null)
+  const [touchStartY, setTouchStartY] = useState<number | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+  
+  // Check if mobile on mount
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+  
+  // Gallery navigation functions
+  const nextImage = () => {
+    if (selectedImageIndex !== null && businessData?.gallery) {
+      setSelectedImageIndex((selectedImageIndex + 1) % businessData.gallery.length)
+    }
+  }
+  
+  const prevImage = () => {
+    if (selectedImageIndex !== null && businessData?.gallery) {
+      setSelectedImageIndex(
+        selectedImageIndex === 0 ? businessData.gallery.length - 1 : selectedImageIndex - 1
+      )
+    }
+  }
+  
+  const closeLightbox = () => {
+    setSelectedImageIndex(null)
+  }
+  
+  // Keyboard navigation for lightbox
+  React.useEffect(() => {
+    if (selectedImageIndex === null) return
+    
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') nextImage()
+      if (e.key === 'ArrowLeft') prevImage()
+      if (e.key === 'Escape') closeLightbox()
+    }
+    
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [selectedImageIndex, businessData?.gallery])
+  
   // Get colors from customizations or defaults
   const colors = {
     primary: customizations.primaryColor || '#2563eb',
@@ -193,10 +245,11 @@ export default function WebsitePreview({
             <>
               {/* Cover Photo */}
               <div className="absolute inset-0">
-                <img 
+                <CloudinaryImage
                   src={customizations.coverPhoto || businessData?.coverPhotoUrl}
                   alt="Cover"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full"
+                  style={{ objectFit: 'cover', minHeight: '100vh' }}
                 />
                 {/* Dark overlay for readability */}
                 <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70"></div>
@@ -239,10 +292,16 @@ export default function WebsitePreview({
                 ></div>
                 <div className="relative bg-black/50 backdrop-blur-xl border border-white/10 rounded-2xl p-3 hover:bg-black/60 transition-all">
                   {(customizations.profilePhoto || businessData?.profilePhotoUrl) ? (
-                    <img 
-                      src={customizations.profilePhoto || businessData?.profilePhotoUrl} 
-                      alt={businessData?.name || 'Logo'} 
+                    <CloudinaryImage
+                      publicId={(customizations.profilePhoto || businessData?.profilePhotoUrl) || ''}
+                      alt={businessData?.name || 'Logo'}
                       className="w-12 h-12 rounded-xl object-cover border-2 border-white/20 group-hover:border-white/40 transition-all"
+                      transformation={{
+                        width: 100,
+                        height: 100,
+                        crop: 'fill',
+                        quality: 'auto'
+                      }}
                     />
                   ) : (
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-2xl border-2 border-white/20 group-hover:border-white/40 transition-all">
@@ -315,10 +374,16 @@ export default function WebsitePreview({
                   
                   {/* Profile photo container */}
                   <div className="relative w-full h-full rounded-full border-4 border-white/30 group-hover:border-white/50 transition-all duration-300 overflow-hidden bg-white/10 backdrop-blur-sm">
-                    <img 
-                      src={customizations.profilePhoto || businessData?.profilePhotoUrl}
-                      alt={businessData?.name}
+                    <CloudinaryImage
+                      publicId={(customizations.profilePhoto || businessData?.profilePhotoUrl) || ''}
+                      alt={businessData?.name || ''}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      transformation={{
+                        width: 300,
+                        height: 300,
+                        crop: 'fill',
+                        quality: 'auto'
+                      }}
                     />
                   </div>
                   
@@ -818,21 +883,29 @@ export default function WebsitePreview({
             
             {businessData?.gallery?.length ? (
               <>
-                {/* Modern Fixed Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {/* Modern Horizontal Grid - 16:9 aspect ratio */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {businessData.gallery.map((photo, index) => (
                     <div 
                       key={photo.id} 
-                      className="group relative overflow-hidden rounded-2xl cursor-pointer bg-gray-200 border-2 border-gray-300"
-                      style={{ aspectRatio: '1/1', minHeight: '200px' }}
+                      className="group relative overflow-hidden rounded-2xl cursor-pointer bg-gray-200 border-2 border-gray-300 hover:border-gray-400 transition-all duration-300 hover:shadow-xl"
+                      style={{ aspectRatio: '16/9' }}
+                      onClick={() => setSelectedImageIndex(index)}
                     >
-                      {/* Sabit boyutlu görsel container */}
+                      {/* Yatay çerçeveli görsel container */}
                       <div className="absolute inset-0">
-                        <img 
+                        <CloudinaryImage
                           src={photo.imageUrl} 
-                          alt={`Galeri ${index + 1}`}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          style={{ display: 'block' }}
+                          alt={photo.title || `Galeri ${index + 1}`}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          style={{ objectFit: 'cover' }}
+                          transformation={{
+                            width: 600,
+                            height: 338, // 16:9 ratio için
+                            crop: 'fill',
+                            gravity: 'auto',
+                            quality: 'auto:good'
+                          }}
                         />
                       </div>
                       
@@ -840,27 +913,30 @@ export default function WebsitePreview({
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
                       
                       {/* Hover Content */}
-                      <div className="absolute inset-0 p-4 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-all duration-300">
-                        {/* Sadece sıra numarası */}
-                        <div className="absolute top-4 left-4">
+                      <div className="absolute inset-0 p-6 flex flex-col justify-between opacity-0 group-hover:opacity-100 transition-all duration-300">
+                        {/* Üst kısım - sıra numarası ve zoom ikonu */}
+                        <div className="flex justify-between items-start">
                           <div className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full">
                             <span className="text-white font-bold text-sm">{(index + 1).toString().padStart(2, '0')}</span>
                           </div>
-                        </div>
-                        
-                        {/* View Button */}
-                        <div className="absolute top-4 right-4">
                           <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center transform scale-0 group-hover:scale-100 transition-transform duration-300">
                             <Eye className="w-5 h-5 text-white" />
                           </div>
                         </div>
                         
-                        {/* Sadece açıklama varsa göster */}
-                        {photo.description && (
-                          <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                            <p className="text-white/90 text-sm line-clamp-2">{photo.description}</p>
+                        {/* Alt kısım - açıklama ve tıklama ipucu */}
+                        <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                          {photo.title && (
+                            <h3 className="text-white font-bold text-lg mb-1 line-clamp-1">{photo.title}</h3>
+                          )}
+                          {photo.description && (
+                            <p className="text-white/90 text-sm line-clamp-2 mb-2">{photo.description}</p>
+                          )}
+                          <div className="text-white/70 text-xs flex items-center gap-1">
+                            <Eye className="w-3 h-3" />
+                            <span>Büyütmek için tıklayın</span>
                           </div>
-                        )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -869,6 +945,7 @@ export default function WebsitePreview({
                 {/* View All Button */}
                 <div className="text-center mt-16">
                   <button 
+                    onClick={() => setSelectedImageIndex(0)}
                     className="group text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center gap-3 mx-auto"
                     style={{ background: colors.gradient }}
                   >
@@ -1280,6 +1357,152 @@ export default function WebsitePreview({
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Gallery Lightbox Modal */}
+      {selectedImageIndex !== null && businessData?.gallery && (
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center">
+          {/* Close button */}
+          <button
+            onClick={closeLightbox}
+            className="absolute top-6 right-6 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all z-50"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          
+          {/* Image counter */}
+          <div className="absolute top-6 left-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 text-white text-sm z-50">
+            {selectedImageIndex + 1} / {businessData.gallery.length}
+          </div>
+          
+          {/* Navigation buttons - Sadece desktop'ta görünür */}
+          {businessData.gallery.length > 1 && (
+            <>
+              <button
+                onClick={prevImage}
+                className="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-full items-center justify-center text-white hover:bg-white/20 transition-all z-50"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              
+              <button
+                onClick={nextImage}
+                className="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-full items-center justify-center text-white hover:bg-white/20 transition-all z-50"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </>
+          )}
+          
+          {/* Main image container with touch support */}
+          <div 
+            className="w-full h-full flex items-center justify-center p-6 cursor-pointer touch-pan-x"
+            onClick={closeLightbox}
+            onTouchStart={(e) => {
+              const touch = e.touches[0]
+              setTouchStartX(touch.clientX)
+              setTouchStartY(touch.clientY)
+            }}
+            onTouchMove={(e) => {
+              if (!touchStartX || !touchStartY) return
+              
+              const touch = e.touches[0]
+              const deltaX = touchStartX - touch.clientX
+              const deltaY = touchStartY - touch.clientY
+              
+              // Sadece yatay kaydırmayı algıla ve dikey kaydırmayı önle
+              if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+                e.preventDefault()
+              }
+            }}
+            onTouchEnd={(e) => {
+              if (!touchStartX || !touchStartY) return
+              
+              const touch = e.changedTouches[0]
+              const deltaX = touchStartX - touch.clientX
+              const deltaY = touchStartY - touch.clientY
+              
+              // Minimum kaydırma mesafesi (50px)
+              const minSwipeDistance = 50
+              
+              // Yatay kaydırma dikey kaydırmadan fazlaysa ve minimum mesafeyi geçtiyse
+              if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+                if (deltaX > 0) {
+                  // Sola kaydır = sonraki görsel
+                  nextImage()
+                } else {
+                  // Sağa kaydır = önceki görsel  
+                  prevImage()
+                }
+              }
+              
+              setTouchStartX(null)
+              setTouchStartY(null)
+            }}
+          >
+           <div 
+  className="relative max-w-6xl max-h-full w-full h-full flex items-center justify-center"
+  onClick={(e) => e.stopPropagation()}
+  onDragStart={(e) => e.preventDefault()}
+>
+  <CloudinaryImage
+    src={businessData.gallery[selectedImageIndex].imageUrl}
+    alt={businessData.gallery[selectedImageIndex].title || `Galeri ${selectedImageIndex + 1}`}
+    className="max-w-full max-h-full object-contain rounded-lg shadow-2xl select-none"
+    transformation={{
+      width: 1200,
+      height: 800,
+      crop: 'limit',
+      quality: 'auto:good'
+    }}
+  />
+</div>
+          </div>
+          
+          {/* Image info overlay */}
+          {(businessData.gallery[selectedImageIndex].title || businessData.gallery[selectedImageIndex].description) && (
+            <div className="absolute bottom-6 left-6 right-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 md:p-6 text-white">
+              {businessData.gallery[selectedImageIndex].title && (
+                <h3 className="text-lg md:text-xl font-bold mb-2">{businessData.gallery[selectedImageIndex].title}</h3>
+              )}
+              {businessData.gallery[selectedImageIndex].description && (
+                <p className="text-sm md:text-base text-white/90">{businessData.gallery[selectedImageIndex].description}</p>
+              )}
+            </div>
+          )}
+          
+          {/* Thumbnail navigation - Sadece desktop'ta tam, mobile'da basitleştirilmiş */}
+          {businessData.gallery.length > 1 && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full p-2">
+              {businessData.gallery.slice(0, isMobile ? 3 : 5).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedImageIndex(index)
+                  }}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    index === selectedImageIndex ? 'bg-white' : 'bg-white/40 hover:bg-white/60'
+                  }`}
+                />
+              ))}
+              {businessData.gallery.length > (isMobile ? 3 : 5) && (
+                <div className="text-white/60 text-xs flex items-center ml-2">+{businessData.gallery.length - (isMobile ? 3 : 5)}</div>
+              )}
+            </div>
+          )}
+          
+          {/* Keyboard shortcuts info - Sadece desktop'ta */}
+          <div className="hidden md:block absolute top-20 left-6 text-white/60 text-xs space-y-1">
+            <div>← / → Gezinme</div>
+            <div>ESC Çıkış</div>
+          </div>
+          
+          {/* Mobile swipe instruction */}
+          <div className="md:hidden absolute top-20 left-6 right-6 text-center text-white/60 text-xs">
+            <div>Fotoğraflar arasında geçiş için kaydırın</div>
           </div>
         </div>
       )}

@@ -99,6 +99,9 @@ export default function GalleryManagement() {
     }
 
     try {
+      // Show loading state
+      const loadingToast = toast.loading('Fotoğraf kaydediliyor...')
+      
       // Save to database with Cloudinary data
       const response = await fetch('/api/gallery', {
         method: 'POST',
@@ -107,7 +110,6 @@ export default function GalleryManagement() {
         },
         body: JSON.stringify({
           businessId: businessData.id,
-          publicId: result.public_id,
           imageUrl: result.secure_url,
           title: '',
           description: '',
@@ -117,15 +119,24 @@ export default function GalleryManagement() {
       })
 
       if (response.ok) {
+        toast.dismiss(loadingToast)
         toast.success('Fotoğraf başarıyla eklendi!')
         await loadBusinessData() // Reload gallery
       } else {
         const errorData = await response.json()
+        console.error('API Error:', errorData)
         throw new Error(errorData.error || 'Kaydetme başarısız')
       }
     } catch (error: any) {
-      console.error('Gallery save error:', error)
+      console.error('Upload error:', error)
       toast.error('Fotoğraf kaydedilirken hata oluştu: ' + error.message)
+      
+      // If database save fails, try to delete from Cloudinary to avoid orphaned files
+      try {
+        await deleteImage(result.public_id)
+      } catch (cleanupError) {
+        console.warn('Cloudinary cleanup hatası:', cleanupError)
+      }
     }
   }
 
@@ -135,22 +146,29 @@ export default function GalleryManagement() {
     if (!confirm('Bu fotoğrafı silmek istediğinizden emin misiniz?')) return
     
     try {
-      // Delete from Cloudinary first
-      const cloudinaryDeleteSuccess = await deleteImage(publicId)
+      // Show loading state
+      const loadingToast = toast.loading('Fotoğraf siliniyor...')
       
-      if (cloudinaryDeleteSuccess) {
-        // Delete from database
-        const response = await fetch(`/api/gallery/${photoId}`, {
-          method: 'DELETE'
-        })
-        
-        if (response.ok) {
-          toast.success('Fotoğraf başarıyla silindi!')
-          await loadBusinessData()
-        } else {
-          const errorData = await response.json()
-          throw new Error(errorData.error || 'Veritabanından silme başarısız')
+      // Delete from database first (safer approach)
+      const response = await fetch(`/api/gallery/${photoId}`, {
+        method: 'DELETE'
+      })
+      
+      if (response.ok) {
+        // Then delete from Cloudinary (optional, can fail silently)
+        try {
+          await deleteImage(publicId)
+        } catch (cloudinaryError) {
+          console.warn('Cloudinary silme hatası:', cloudinaryError)
+          // Don't fail the whole operation if Cloudinary delete fails
         }
+        
+        toast.dismiss(loadingToast)
+        toast.success('Fotoğraf başarıyla silindi!')
+        await loadBusinessData()
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Veritabanından silme başarısız')
       }
     } catch (error: any) {
       console.error('Photo delete error:', error)
@@ -406,10 +424,12 @@ export default function GalleryManagement() {
                       alt={photo.title || 'Galeri fotoğrafı'}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                       transformation={{
-                        width: 400,
-                        height: 400,
+                        width: 500,
+                        height: 500,
                         crop: 'fill',
-                        quality: 'auto'
+                        gravity: 'auto',
+                        quality: 'auto',
+                        format: 'auto'
                       }}
                     />
                     
@@ -450,10 +470,12 @@ export default function GalleryManagement() {
                         alt={photo.title || 'Galeri fotoğrafı'}
                         className="w-full h-full object-cover"
                         transformation={{
-                          width: 100,
-                          height: 100,
+                          width: 150,
+                          height: 150,
                           crop: 'fill',
-                          quality: 'auto'
+                          gravity: 'auto',
+                          quality: 'auto',
+                          format: 'auto'
                         }}
                       />
                     </div>

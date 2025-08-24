@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { toast } from 'react-hot-toast'
 import Link from 'next/link'
+import { CloudinaryImage } from '@/components/cloudinary'
 import AuthModal from '@/components/AuthModal'
 import { 
   MagnifyingGlassIcon, 
@@ -1246,10 +1247,18 @@ export default function Home() {
                     className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200 group cursor-pointer block hover:border-emerald-300"
                   >
                     <div className="relative h-48 overflow-hidden">
-                      <img
-                        src={business.image || business.profileImage || business.logo || business.coverPhotoUrl || '/default-business.svg'}
+                      <CloudinaryImage
+                        src={business.image || business.profileImage || business.logo || business.coverPhotoUrl}
                         alt={business.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        transformation={{
+                          width: 600,
+                          height: 400,
+                          crop: 'fill',
+                          gravity: 'auto',
+                          quality: 'auto',
+                          format: 'auto'
+                        }}
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.src = '/default-business.svg';

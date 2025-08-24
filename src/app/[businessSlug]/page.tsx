@@ -100,7 +100,8 @@ async function getBusinessBySlug(slug: string) {
       reviewsCount: websiteConfig.business.reviews?.length || 0,
       hasSettings: !!websiteConfig.business.settings,
       settingsType: websiteConfig.business.settings?.serviceType,
-      lastUpdate: websiteConfig.updatedAt
+      lastUpdate: websiteConfig.updatedAt,
+      galleryData: websiteConfig.business.gallery // Tam gallery verilerini göster
     })
 
     const business = websiteConfig.business

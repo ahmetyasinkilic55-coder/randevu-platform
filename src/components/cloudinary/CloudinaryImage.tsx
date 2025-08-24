@@ -3,11 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 
 interface CloudinaryImageProps {
-  publicId: string;
+  publicId?: string;
+  src?: string;
   alt?: string;
   width?: number;
   height?: number;
   className?: string;
+  style?: React.CSSProperties;
+  onError?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
   onDelete?: () => void;
   showDeleteButton?: boolean;
   transformation?: {
@@ -22,10 +25,13 @@ interface CloudinaryImageProps {
 
 export default function CloudinaryImage({
   publicId,
+  src,
   alt = '',
   width,
   height,
   className = '',
+  style,
+  onError,
   onDelete,
   showDeleteButton = false,
   transformation
@@ -34,7 +40,7 @@ export default function CloudinaryImage({
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (deleting) return;
+    if (deleting || !publicId) return;
     
     if (confirm('Bu görseli silmek istediğinizden emin misiniz?')) {
       setDeleting(true);
@@ -59,6 +65,30 @@ export default function CloudinaryImage({
 
   // Generate Cloudinary URL manually
   const generateImageUrl = () => {
+    // If src is provided, use it directly (for backward compatibility)
+    if (src) {
+      // If it's already a full URL, return as is
+      if (src.startsWith('http')) {
+        return src;
+      }
+      // If it's a Cloudinary public ID, generate Cloudinary URL
+      return generateCloudinaryUrl(src);
+    }
+    
+    // If publicId is provided, generate Cloudinary URL
+    if (publicId) {
+      // Handle publicId that might already be a full URL
+      if (publicId.startsWith('http')) {
+        return publicId;
+      }
+      return generateCloudinaryUrl(publicId);
+    }
+    
+    // Return empty string if no image source
+    return '';
+  };
+  
+  const generateCloudinaryUrl = (id: string) => {
     const baseUrl = 'https://res.cloudinary.com/ddapurgju/image/upload';
     const transforms = [];
     
@@ -82,16 +112,12 @@ export default function CloudinaryImage({
       transforms.push(`w_${width},h_${height},c_fill`);
     }
     
-    transforms.push('q_auto', 'f_auto');
+    transforms.push('q_auto');
+    // f_auto kaldırıldı - Cloudinary hatası nedeniyle
     
     const transformString = transforms.length > 0 ? `/${transforms.join(',')}` : '';
     
-    // Handle publicId that might already be a full URL
-    if (publicId.startsWith('http')) {
-      return publicId;
-    }
-    
-    return `${baseUrl}${transformString}/${publicId}`;
+    return `${baseUrl}${transformString}/${id}`;
   };
 
   if (imageError) {
@@ -103,6 +129,15 @@ export default function CloudinaryImage({
   }
 
   const imageUrl = generateImageUrl();
+  
+  // Don't render anything if no image URL
+  if (!imageUrl) {
+    return (
+      <div className={`flex items-center justify-center bg-gray-100 text-gray-400 ${className}`} style={style}>
+        <span>No image</span>
+      </div>
+    );
+  }
 
   return (
     <div className="relative group">
@@ -110,7 +145,11 @@ export default function CloudinaryImage({
         src={imageUrl}
         alt={alt}
         className={`object-cover ${className}`}
-        onError={() => setImageError(true)}
+        style={style}
+        onError={(e) => {
+          setImageError(true);
+          if (onError) onError(e);
+        }}
         loading="lazy"
       />
       

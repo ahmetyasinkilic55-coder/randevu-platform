@@ -10,6 +10,8 @@ import {
   Users, MessageCircle, Upload, Image as ImageIcon, AlertCircle, 
   Trash2, Plus, Calendar, Check, Award, Heart, Play
 } from 'lucide-react'
+import { CloudinaryImage } from '@/components/cloudinary'
+import { CloudinaryUpload } from '@/components/cloudinary'
 
 // Types
 interface BusinessData {
@@ -677,15 +679,16 @@ export default function SmartWebsiteBuilder() {
         <div className="relative min-h-[100vh] overflow-hidden">
           
           {/* Dynamic Cover Photo or Gradient Background */}
-          <div className="absolute inset-0">
+          <div className="absolute inset-0 min-h-[100vh]">
             {(customizations.coverPhoto || businessData?.coverPhotoUrl) ? (
               <>
                 {/* Cover Photo */}
-                <div className="absolute inset-0">
-                  <img 
+                <div className="absolute inset-0 min-h-[100vh]">
+                  <CloudinaryImage 
                     src={customizations.coverPhoto || businessData?.coverPhotoUrl}
                     alt="Cover"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full"
+                    style={{ objectFit: 'cover', minHeight: '100vh' }}
                   />
                   {/* Dark overlay for readability - daha koyu */}
                   <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70"></div>
@@ -804,10 +807,16 @@ export default function SmartWebsiteBuilder() {
                   <div className="relative bg-black/50 backdrop-blur-xl border border-white/10 rounded-2xl p-3 hover:bg-black/60 transition-all">
                     {(customizations.profilePhoto || businessData?.profilePhotoUrl) ? (
                       <div className="relative">
-                        <img 
-                          src={customizations.profilePhoto || businessData?.profilePhotoUrl} 
+                        <CloudinaryImage 
+                          publicId={(customizations.profilePhoto || businessData?.profilePhotoUrl) || ''} 
                           alt={businessData?.name || 'Logo'} 
                           className="w-12 h-12 rounded-xl object-cover border-2 border-white/20 group-hover:border-white/40 transition-all"
+                          transformation={{
+                            width: 100,
+                            height: 100,
+                            crop: 'fill',
+                            quality: 'auto'
+                          }}
                         />
                         {/* Edit button overlay for profile photo in edit mode */}
                         {showCustomizer && (
@@ -936,10 +945,16 @@ export default function SmartWebsiteBuilder() {
                     
                     {/* Profile photo container */}
                     <div className="relative w-full h-full rounded-full border-4 border-white/30 group-hover:border-white/50 transition-all duration-300 overflow-hidden bg-white/10 backdrop-blur-sm">
-                      <img 
-                        src={customizations.profilePhoto || businessData?.profilePhotoUrl}
-                        alt={businessData?.name}
+                      <CloudinaryImage 
+                        publicId={(customizations.profilePhoto || businessData?.profilePhotoUrl) || ''}
+                        alt={businessData?.name || 'Profile'}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        transformation={{
+                          width: 300,
+                          height: 300,
+                          crop: 'fill',
+                          quality: 'auto'
+                        }}
                       />
                     </div>
                     
@@ -1306,7 +1321,7 @@ export default function SmartWebsiteBuilder() {
                             <div className="relative w-full h-full rounded-full border-3 border-white/20 group-hover:border-white/40 transition-all duration-300 overflow-hidden">
                               {member.photoUrl ? (
                                 <img 
-                                  src={member.photoUrl} 
+                                  src={member.photoUrl || ''} 
                                   alt={member.name}
                                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                 />
@@ -1474,7 +1489,7 @@ export default function SmartWebsiteBuilder() {
                         {/* Sabit boyutlu görsel container */}
                         <div className="absolute inset-0">
                           <img 
-                            src={photo.imageUrl} 
+                            src={photo.imageUrl || ''} 
                             alt={`Galeri ${index + 1}`}
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                             style={{ display: 'block' }}
@@ -2440,10 +2455,10 @@ export default function SmartWebsiteBuilder() {
                         <div className="relative group">
                           <div className="w-24 h-24 rounded-2xl border-3 border-white overflow-hidden bg-white shadow-xl group-hover:scale-105 transition-all duration-300">
                             {(customizations.profilePhoto || businessData?.profilePhotoUrl) ? (
-                              <img 
-                                src={customizations.profilePhoto || businessData?.profilePhotoUrl} 
-                                alt="Profil" 
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                               <CloudinaryImage
+                                src={customizations.profilePhoto || businessData?.profilePhotoUrl}
+                                alt="Kapak Fotoğrafı"
+                                className="w-full h-full object-cover"
                               />
                             ) : (
                               <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-2xl">
@@ -2511,63 +2526,41 @@ export default function SmartWebsiteBuilder() {
                     </h4>
                     <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
                       <div className="space-y-4">
-                        <div className="w-full h-40 rounded-2xl border-2 border-dashed border-purple-200 overflow-hidden bg-white/50 backdrop-blur-sm relative group hover:border-purple-300 transition-colors">
-                          {(customizations.coverPhoto || businessData?.coverPhotoUrl) ? (
-                            <>
-                              <img 
-                                src={customizations.coverPhoto || businessData?.coverPhotoUrl} 
-                                alt="Kapak" 
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+
+                        {/* Cover Photo Preview */}
+                        {(customizations.coverPhoto || businessData?.coverPhotoUrl) && (
+                          <div className="mb-4">
+                            <div className="relative group aspect-video rounded-xl overflow-hidden border-2 border-white shadow-lg hover:shadow-xl transition-all duration-300">
+                              <CloudinaryImage
+                                src={customizations.coverPhoto || businessData?.coverPhotoUrl}
+                                alt="Kapak Fotoğrafı"
+                                className="w-full h-full object-cover"
                               />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                              <div className="absolute bottom-3 left-3 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <p className="text-sm font-semibold">✨ Kapak Fotoğrafı</p>
-                                <p className="text-xs opacity-80">Ana sayfanızda görünecek</p>
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <button
+                                  onClick={() => handlePhotoDelete('cover')}
+                                  className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors shadow-lg transform scale-75 group-hover:scale-100 duration-300"
+                                  title="Sil"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
                               </div>
-                            </>
-                          ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center text-center">
-                              <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
-                                <ImageIcon className="w-8 h-8 text-purple-400" />
-                              </div>
-                              <p className="text-sm font-semibold text-gray-700 mb-1">Kapak fotoğrafı ekleyin</p>
-                              <p className="text-xs text-gray-500">Web sitenizin üst kısmında görünecek</p>
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                         
-                        <div className="flex gap-3">
-                          <label className="flex-1 cursor-pointer bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-3 text-sm font-semibold group">
-                            {uploadingCover ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Upload className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                            )}
-                            {uploadingCover ? 'Yükleniyor...' : 'Kapak Yükle'}
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              disabled={uploadingCover}
-                              onChange={(e) => {
-                                const file = e.target.files?.[0]
-                                if (file) {
-                                  handlePhotoUpload(file, 'cover')
-                                  e.target.value = ''
-                                }
-                              }}
-                            />
-                          </label>
-                          
-                          {(customizations.coverPhoto || businessData?.coverPhotoUrl) && (
-                            <button
-                              onClick={() => handlePhotoDelete('cover')}
-                              className="bg-red-500 text-white px-6 py-3 rounded-xl hover:bg-red-600 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-3 text-sm font-semibold group"
-                            >
-                              <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                              Kaldır
-                            </button>
-                          )}
+                        <div className="mb-4">
+                          <CloudinaryUpload
+                            onUpload={(result) => {
+      if (result.secure_url) {
+        setCustomizations(prev => ({ ...prev, coverPhoto: result.public_id }));
+        setUploadingCover(false);
+      }
+    }}
+    folder="business-covers"
+    tags="cover,website"
+    maxFiles={1}
+  />
                         </div>
                         
                         <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4">
@@ -2622,7 +2615,7 @@ export default function SmartWebsiteBuilder() {
                           {businessData?.gallery?.map((photo) => (
                             <div key={photo.id} className="relative group aspect-square rounded-xl overflow-hidden border-2 border-white shadow-lg hover:shadow-xl transition-all duration-300">
                               <img 
-                                src={photo.imageUrl} 
+                                src={photo.imageUrl || ''} 
                                 alt={photo.title || 'Galeri fotoğrafı'}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                               />
@@ -2639,31 +2632,37 @@ export default function SmartWebsiteBuilder() {
                           )) || []}
                           
                           {/* Yeni Fotoğraf Ekleme */}
-                          <label className="aspect-square rounded-xl border-2 border-dashed border-green-300 hover:border-green-400 transition-colors cursor-pointer flex items-center justify-center bg-white/50 backdrop-blur-sm hover:bg-white/70 group">
-                            {uploadingGallery ? (
-                              <Loader2 className="w-8 h-8 text-green-500 animate-spin" />
-                            ) : (
-                              <div className="text-center">
-                                <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform duration-300">
-                                  <Plus className="w-5 h-5 text-green-500" />
+                          <div className="aspect-square rounded-xl border-2 border-dashed border-green-300 hover:border-green-400 transition-colors bg-white/50 backdrop-blur-sm hover:bg-white/70 group overflow-hidden">
+                            <CloudinaryUpload
+  onUpload={(result) => {
+    if (result.secure_url) {
+      // Yeni galeri fotoğrafını ekle
+      const newPhoto = {
+        id: Date.now().toString(),
+        imageUrl: result.secure_url,
+        title: 'Galeri Fotoğrafı'
+      };
+      // Bu kısım backend'e kaydetme işlemi yapılmalı
+      setUploadingGallery(false);
+    }
+  }}
+  folder="business-gallery"
+  tags="gallery,website"
+  maxFiles={1}
+  className="w-full h-full flex items-center justify-center"
+>
+                              {uploadingGallery ? (
+                                <Loader2 className="w-8 h-8 text-green-500 animate-spin" />
+                              ) : (
+                                <div className="text-center">
+                                  <div className="w-10 h-10 bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform duration-300">
+                                    <Plus className="w-5 h-5 text-green-500" />
+                                  </div>
+                                  <p className="text-xs text-green-600 font-semibold">Ekle</p>
                                 </div>
-                                <p className="text-xs text-green-600 font-semibold">Ekle</p>
-                              </div>
-                            )}
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              disabled={uploadingGallery}
-                              onChange={(e) => {
-                                const file = e.target.files?.[0]
-                                if (file) {
-                                  handlePhotoUpload(file, 'gallery')
-                                  e.target.value = ''
-                                }
-                              }}
-                            />
-                          </label>
+                              )}
+                            </CloudinaryUpload>
+                          </div>
                         </div>
                         
                         <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4">

@@ -3,6 +3,14 @@
 
 import { v2 as cloudinary } from 'cloudinary';
 
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
+
 // Server-side Cloudinary operations
 export async function uploadImageToCloudinary(
   file: File | string,
@@ -15,6 +23,12 @@ export async function uploadImageToCloudinary(
     format?: string;
   } = {}
 ) {
+  console.log('=== uploadImageToCloudinary called ===');
+  console.log('Config check:');
+  console.log('- cloud_name:', process.env.CLOUDINARY_CLOUD_NAME);
+  console.log('- api_key:', process.env.CLOUDINARY_API_KEY);
+  console.log('- api_secret:', process.env.CLOUDINARY_API_SECRET ? 'SET' : 'NOT SET');
+  
   try {
     let fileData: string;
 
@@ -35,6 +49,9 @@ export async function uploadImageToCloudinary(
       format: options.format || 'auto',
       ...options.transformation && { transformation: options.transformation }
     };
+    
+    console.log('Upload options:', uploadOptions);
+    console.log('Calling cloudinary.uploader.upload...');
 
     const result = await cloudinary.uploader.upload(fileData, uploadOptions);
     
@@ -109,7 +126,8 @@ export function generateCloudinaryUrl(
   }
   
   // Always add auto optimization
-  transforms.push('q_auto', 'f_auto');
+  transforms.push('q_auto');
+  // f_auto kaldırıldı - Cloudinary hatası nedeniyle
   
   const transformString = transforms.length > 0 ? `/${transforms.join(',')}` : '';
   

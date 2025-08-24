@@ -15,7 +15,7 @@ import {
   Cog6ToothIcon
 } from '@heroicons/react/24/outline'
 import { Camera, Loader2 } from 'lucide-react'
-import { CloudinaryUpload, CloudinaryImage } from '@/components/cloudinary'
+import { CloudinaryImage } from '@/components/cloudinary'
 import { useCloudinary } from '@/hooks/useCloudinary'
 import {
   BusinessData,
@@ -526,15 +526,26 @@ export default function SettingsPage() {
               {/* Upload/Delete Buttons */}
               <div className="absolute top-4 right-4">
                 <div className="flex gap-2">
-                  <CloudinaryUpload
-                    onUpload={handleCoverPhotoUpload}
-                    folder="business-covers"
-                    tags={`business_${businessData.id},cover`}
-                    maxFiles={1}
-                    className="cursor-pointer p-3 rounded-lg transition-colors bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white"
-                  >
+                  <label className="cursor-pointer p-3 rounded-lg transition-colors bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white">
                     <Camera className="w-5 h-5" />
-                  </CloudinaryUpload>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          const file = e.target.files[0]
+                          const result = await uploadImage(file, {
+                            folder: 'business-covers',
+                            tags: `business_${businessData.id},cover`
+                          })
+                          if (result) {
+                            handleCoverPhotoUpload(result)
+                          }
+                        }
+                      }}
+                    />
+                  </label>
                   
                   {businessData.coverPhotoUrl && (
                     <button
@@ -594,15 +605,26 @@ export default function SettingsPage() {
               
               {/* Upload Button */}
               <div className="absolute -bottom-2 -right-2">
-                <CloudinaryUpload
-                  onUpload={handleProfilePhotoUpload}
-                  folder="business-profiles"
-                  tags={`business_${businessData.id},profile`}
-                  maxFiles={1}
-                  className="cursor-pointer w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-lg bg-purple-600 hover:bg-purple-700 hover:shadow-xl text-white"
-                >
+                <label className="cursor-pointer w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-lg bg-purple-600 hover:bg-purple-700 hover:shadow-xl text-white">
                   <Camera className="w-5 h-5" />
-                </CloudinaryUpload>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        const file = e.target.files[0]
+                        const result = await uploadImage(file, {
+                          folder: 'business-profiles',
+                          tags: `business_${businessData.id},profile`
+                        })
+                        if (result) {
+                          handleProfilePhotoUpload(result)
+                        }
+                      }
+                    }}
+                  />
+                </label>
               </div>
             </div>
             

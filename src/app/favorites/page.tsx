@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { toast } from 'react-hot-toast'
 import Link from 'next/link'
+import { CloudinaryImage } from '@/components/cloudinary'
 import { 
   HeartIcon,
   StarIcon,
@@ -209,10 +210,18 @@ export default function FavoritesPage() {
                 className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200 group"
               >
                 <div className="relative h-48 overflow-hidden">
-                  <img
-                    src={business.image || business.profileImage || business.logo || business.coverPhotoUrl || '/default-business.svg'}
+                  <CloudinaryImage
+                    src={business.image || business.profileImage || business.logo || business.coverPhotoUrl}
                     alt={business.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    transformation={{
+                      width: 600,
+                      height: 400,
+                      crop: 'fill',
+                      gravity: 'auto',
+                      quality: 'auto',
+                      format: 'auto'
+                    }}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.src = '/default-business.svg';
