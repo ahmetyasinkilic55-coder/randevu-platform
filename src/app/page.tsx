@@ -1399,7 +1399,7 @@ export default function Home() {
       {/* Kampanya Popup */}
       {showCampaignModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-8 relative animate-fadeIn shadow-2xl">
+          <div className="bg-white rounded-2xl max-w-sm sm:max-w-lg w-full p-4 sm:p-8 relative animate-fadeIn shadow-2xl max-h-[90vh] overflow-y-auto">
             {/* Kapat Butonu */}
             <button
               onClick={() => setShowCampaignModal(false)}
@@ -1409,11 +1409,11 @@ export default function Home() {
             </button>
 
             {/* İkon ve Başlık */}
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mb-4">
-                <GiftIcon className="w-8 h-8 text-white" />
+            <div className="text-center mb-4 sm:mb-6">
+              <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full mb-3 sm:mb-4">
+                <GiftIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              <h2 className="text-xl sm:text-3xl font-bold text-gray-900 mb-2">
                 🎉 Yıl Sonu Kampanyası!
               </h2>
               <div className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
@@ -1423,49 +1423,49 @@ export default function Home() {
             </div>
 
             {/* Kampanya Detayları */}
-            <div className="space-y-4 mb-6">
-              <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">1</span>
+            <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-3 sm:p-4">
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold text-xs sm:text-sm">1</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">
+                    <h3 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">
                       🎁 2025 Yılı Boyunca TAMAMEN ÜCRETSİZ!
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-gray-600 text-xs sm:text-sm">
                       31 Aralık 2025'e kadar tüm özellikler ücretsiz. Hiçbir gizli ücret yok!
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">2</span>
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 sm:p-4">
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 bg-gray-400 rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold text-xs sm:text-sm">2</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">
+                    <h3 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">
                       📅 2026'dan İtibaren Ücretli Olacak
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-gray-600 text-xs sm:text-sm">
                       1 Ocak 2026'dan itibaren aylık abonelik sistemi başlayacak.
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">3</span>
+              <div className="bg-green-50 border border-green-200 rounded-xl p-3 sm:p-4">
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 bg-green-500 rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold text-xs sm:text-sm">3</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">
+                    <h3 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base">
                       ✨ Yeni Üyeler İçin 1 Ay Deneme
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-gray-600 text-xs sm:text-sm">
                       2026'da kayıt olan yeni işletmeler ilk ayı ücretsiz deneyebilecek.
                     </p>
                   </div>
@@ -1474,25 +1474,25 @@ export default function Home() {
             </div>
 
             {/* Alt Kısım */}
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white text-center">
-              <p className="text-sm mb-2">Fırsatı Kaçırmayın!</p>
-              <p className="font-semibold">
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-3 sm:p-4 text-white text-center">
+              <p className="text-xs sm:text-sm mb-2">Fırsatı Kaçırmayın!</p>
+              <p className="font-semibold text-sm sm:text-base">
                 Şimdi kayıt olun, 2025 boyunca ücretsiz kullanın! 🚀
               </p>
             </div>
 
             {/* CTA Butonları */}
-            <div className="flex gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4 sm:mt-6">
               <Link
                 href="/business"
-                className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 rounded-xl font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 text-center shadow-lg hover:shadow-xl"
+                className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-2.5 sm:py-3 rounded-xl font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 text-center shadow-lg hover:shadow-xl text-sm sm:text-base"
                 onClick={() => setShowCampaignModal(false)}
               >
                 İşletme Kaydı Oluştur
               </Link>
               <button
                 onClick={() => setShowCampaignModal(false)}
-                className="flex-1 bg-slate-100 text-slate-700 py-3 rounded-xl font-semibold hover:bg-slate-200 transition-colors"
+                className="flex-1 bg-slate-100 text-slate-700 py-2.5 sm:py-3 rounded-xl font-semibold hover:bg-slate-200 transition-colors text-sm sm:text-base"
               >
                 Şimdi Değil
               </button>
