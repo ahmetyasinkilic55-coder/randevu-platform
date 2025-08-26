@@ -117,6 +117,8 @@ export default function BusinessSiteClient({
   console.log('🔧 [BusinessSiteClient] BusinessData:', {
     id: businessData.id,
     name: businessData.name,
+    profilePhotoUrl: businessData.profilePhotoUrl,
+    coverPhotoUrl: businessData.coverPhotoUrl,
     servicesCount: businessData.services?.length || 0,
     staffCount: businessData.staff?.length || 0,
     galleryCount: businessData.gallery?.length || 0,

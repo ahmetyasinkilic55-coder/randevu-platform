@@ -236,7 +236,7 @@ export default function SettingsPage() {
               İşletmeniz nasıl hizmet veriyor?
             </label>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
               {[
                 {
                   type: 'APPOINTMENT',
@@ -307,7 +307,7 @@ export default function SettingsPage() {
                 Proje Bazlı Hizmet Ayarları
               </h4>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div>
                   <label className={`block text-sm font-medium mb-2 transition-colors ${
                     isDarkMode ? 'text-gray-300' : 'text-gray-700'
@@ -498,72 +498,117 @@ export default function SettingsPage() {
           </h4>
           
           <div className="relative">
-            <div className="h-48 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl overflow-hidden relative">
+            <div className={`h-32 sm:h-48 rounded-2xl overflow-hidden relative border-2 border-dashed transition-colors ${
+              businessData.coverPhotoUrl 
+                ? 'border-transparent' 
+                : isDarkMode 
+                  ? 'border-gray-600 bg-gray-700/50' 
+                  : 'border-gray-300 bg-gray-50'
+            }`}>
               {businessData.coverPhotoUrl ? (
-                <CloudinaryImage
-                  publicId={businessData.coverPhotoUrl.includes('cloudinary') 
-                    ? businessData.coverPhotoUrl.split('/').pop()?.split('.')[0] || ''
-                    : businessData.coverPhotoUrl
-                  }
-                  alt="Kapak Fotoğrafı"
-                  className="w-full h-full object-cover"
-                  transformation={{
-                    width: 1200,
-                    height: 400,
-                    crop: 'fill',
-                    quality: 'auto'
-                  }}
-                />
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <Camera className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm opacity-75">Kapak fotoğrafı yükleyin</p>
-                  </div>
-                </div>
-              )}
-              
-              {/* Upload/Delete Buttons */}
-              <div className="absolute top-4 right-4">
-                <div className="flex gap-2">
-                  <label className="cursor-pointer p-3 rounded-lg transition-colors bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white">
-                    <Camera className="w-5 h-5" />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={async (e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          const file = e.target.files[0]
-                          const result = await uploadImage(file, {
-                            folder: 'business-covers',
-                            tags: `business_${businessData.id},cover`
-                          })
-                          if (result) {
-                            handleCoverPhotoUpload(result)
-                          }
-                        }
-                      }}
-                    />
-                  </label>
+                <>
+                  <CloudinaryImage
+                    publicId={businessData.coverPhotoUrl.includes('cloudinary') 
+                      ? businessData.coverPhotoUrl.split('/').pop()?.split('.')[0] || ''
+                      : businessData.coverPhotoUrl
+                    }
+                    alt="Kapak Fotoğrafı"
+                    className="w-full h-full object-cover"
+                    transformation={{
+                      width: 1200,
+                      height: 400,
+                      crop: 'fill',
+                      gravity: 'center',
+                      quality: 'auto',
+                      format: 'auto'
+                    }}
+                  />
                   
-                  {businessData.coverPhotoUrl && (
-                    <button
-                      onClick={handleCoverPhotoDelete}
-                      className="p-3 bg-red-500/80 hover:bg-red-600/80 backdrop-blur-sm text-white rounded-lg transition-colors"
-                      title="Kapak fotoğrafını sil"
-                    >
-                      <TrashIcon className="w-5 h-5" />
-                    </button>
-                  )}
-                </div>
-              </div>
+                  {/* Upload/Delete Buttons - Sadece fotoğraf varsa göster */}
+                  <div className="absolute top-2 sm:top-4 right-2 sm:right-4">
+                    <div className="flex gap-2">
+                      <label className="cursor-pointer p-2 sm:p-3 rounded-lg transition-colors bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white">
+                        <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              const file = e.target.files[0]
+                              const result = await uploadImage(file, {
+                                folder: 'business-covers',
+                                tags: `business_${businessData.id},cover`
+                              })
+                              if (result) {
+                                handleCoverPhotoUpload(result)
+                              }
+                            }
+                          }}
+                        />
+                      </label>
+                      
+                      <button
+                        onClick={handleCoverPhotoDelete}
+                        className="p-2 sm:p-3 bg-red-500/80 hover:bg-red-600/80 backdrop-blur-sm text-white rounded-lg transition-colors"
+                        title="Kapak fotoğrafını sil"
+                      >
+                        <TrashIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Upload Alanı - Fotoğraf yoksa göster */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <label className="cursor-pointer flex flex-col items-center space-y-2 text-center">
+                      <div className={`p-4 rounded-full transition-colors ${
+                        isDarkMode ? 'bg-gray-600' : 'bg-gray-200'
+                      }`}>
+                        <Camera className={`w-8 h-8 sm:w-12 sm:h-12 transition-colors ${
+                          isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`} />
+                      </div>
+                      <div>
+                        <p className={`text-sm font-medium transition-colors ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                        }`}>
+                          Kapak fotoğrafı yükleyin
+                        </p>
+                        <p className={`text-xs mt-1 transition-colors ${
+                          isDarkMode ? 'text-gray-500' : 'text-gray-500'
+                        }`}>
+                          Tıklayın veya sürükleyin
+                        </p>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            const file = e.target.files[0]
+                            const result = await uploadImage(file, {
+                              folder: 'business-covers',
+                              tags: `business_${businessData.id},cover`
+                            })
+                            if (result) {
+                              handleCoverPhotoUpload(result)
+                            }
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                </>
+              )}
             </div>
             
-            <p className={`text-sm mt-2 transition-colors ${
+            <p className={`text-xs sm:text-sm mt-2 transition-colors ${
               isDarkMode ? 'text-gray-400' : 'text-gray-500'
             }`}>
-              Önerilen boyut: 1200x400 px. Maksimum dosya boyutu: 10MB. Cloudinary otomatik optimize eder.
+              Önerilen boyut: 1200x400 px. Maksimum dosya boyutu: 10MB. JPG, PNG, WEBP desteklenir.
             </p>
           </div>
         </div>
@@ -576,10 +621,10 @@ export default function SettingsPage() {
             Profil Fotoğrafı
           </h4>
           
-          <div className="flex items-start space-x-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
             {/* Profil Fotoğrafı Container */}
-            <div className="relative">
-              <div className="w-32 h-32 rounded-full border-4 border-gray-200 overflow-hidden bg-gray-100">
+            <div className="relative mx-auto sm:mx-0">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-gray-200 overflow-hidden bg-gray-100">
                 {businessData.profilePhotoUrl ? (
                   <CloudinaryImage
                     publicId={businessData.profilePhotoUrl.includes('cloudinary') 
@@ -598,15 +643,15 @@ export default function SettingsPage() {
                   />
                 ) : (
                   <div className="w-full h-full bg-purple-100 flex items-center justify-center">
-                    <UserIcon className="w-16 h-16 text-purple-600" />
+                    <UserIcon className="w-12 h-12 sm:w-16 sm:h-16 text-purple-600" />
                   </div>
                 )}
               </div>
               
               {/* Upload Button */}
-              <div className="absolute -bottom-2 -right-2">
-                <label className="cursor-pointer w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-lg bg-purple-600 hover:bg-purple-700 hover:shadow-xl text-white">
-                  <Camera className="w-5 h-5" />
+              <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2">
+                <label className="cursor-pointer w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all shadow-lg bg-purple-600 hover:bg-purple-700 hover:shadow-xl text-white">
+                  <Camera className="w-4 h-4 sm:w-5 sm:h-5" />
                   <input
                     type="file"
                     accept="image/*"
@@ -629,8 +674,8 @@ export default function SettingsPage() {
             </div>
             
             {/* Profil Bilgileri ve Silme Butonu */}
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-2">
+            <div className="flex-1 text-center sm:text-left">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
                 <h5 className={`text-lg font-semibold transition-colors ${
                   isDarkMode ? 'text-white' : 'text-gray-900'
                 }`}>
@@ -640,7 +685,7 @@ export default function SettingsPage() {
                 {businessData.profilePhotoUrl && (
                   <button
                     onClick={handleProfilePhotoDelete}
-                    className="flex items-center space-x-2 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors text-sm font-medium"
+                    className="mx-auto sm:mx-0 flex items-center space-x-2 px-3 py-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors text-sm font-medium"
                     title="Profil fotoğrafını sil"
                   >
                     <TrashIcon className="w-4 h-4" />
@@ -1042,7 +1087,7 @@ export default function SettingsPage() {
         </h4>
       
         {workingHours.map((daySchedule, index) => (
-          <div key={index} className={`flex items-center justify-between p-4 border rounded-lg transition-colors ${
+          <div key={index} className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border rounded-lg transition-colors ${
             isDarkMode ? 'border-gray-600 bg-gray-700/50' : 'border-gray-200 bg-gray-50'
           }`}>
             <div className="flex items-center space-x-4">
@@ -1054,9 +1099,9 @@ export default function SettingsPage() {
                   newWorkingHours[index].isOpen = e.target.checked
                   setWorkingHours(newWorkingHours)
                 }}
-                className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 flex-shrink-0"
               />
-              <span className={`font-medium w-24 transition-colors ${
+              <span className={`font-medium w-20 sm:w-24 transition-colors ${
                 isDarkMode ? 'text-white' : 'text-gray-900'
               }`}>
                 {dayNames[daySchedule.dayOfWeek]}
@@ -1064,7 +1109,7 @@ export default function SettingsPage() {
             </div>
             
             {daySchedule.isOpen ? (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 sm:space-x-3">
                 <input
                   type="time"
                   value={daySchedule.openTime}
@@ -1073,13 +1118,13 @@ export default function SettingsPage() {
                     newWorkingHours[index].openTime = e.target.value
                     setWorkingHours(newWorkingHours)
                   }}
-                  className={`px-3 py-2 border rounded-lg transition-colors ${
+                  className={`px-2 sm:px-3 py-2 border rounded-lg transition-colors text-sm sm:text-base ${
                     isDarkMode 
                       ? 'bg-gray-700 border-gray-600 text-white'
                       : 'bg-white border-gray-300 text-gray-900'
                   }`}
                 />
-                <span className={`transition-colors ${
+                <span className={`transition-colors px-1 ${
                   isDarkMode ? 'text-gray-400' : 'text-gray-500'
                 }`}>
                   -
@@ -1092,7 +1137,7 @@ export default function SettingsPage() {
                     newWorkingHours[index].closeTime = e.target.value
                     setWorkingHours(newWorkingHours)
                   }}
-                  className={`px-3 py-2 border rounded-lg transition-colors ${
+                  className={`px-2 sm:px-3 py-2 border rounded-lg transition-colors text-sm sm:text-base ${
                     isDarkMode 
                       ? 'bg-gray-700 border-gray-600 text-white'
                       : 'bg-white border-gray-300 text-gray-900'
@@ -1100,7 +1145,7 @@ export default function SettingsPage() {
                 />
               </div>
             ) : (
-              <span className={`transition-colors ${
+              <span className={`transition-colors text-right sm:text-left ${
                 isDarkMode ? 'text-gray-400' : 'text-gray-500'
               }`}>
                 Kapalı
@@ -1118,7 +1163,7 @@ export default function SettingsPage() {
           Randevu Sistem Ayarları
         </h4>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <label className={`block text-sm font-medium mb-2 transition-colors ${
               isDarkMode ? 'text-gray-300' : 'text-gray-700'
@@ -1212,8 +1257,8 @@ export default function SettingsPage() {
             </select>
           </div>
           
-          <div className="md:col-span-2">
-            <div className="flex items-center space-x-4">
+          <div className="lg:col-span-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <label className="flex items-center cursor-pointer">
                 <input
                   type="checkbox"
@@ -1267,53 +1312,65 @@ export default function SettingsPage() {
     </div>
   )
 
-  const NotificationSettings = () => (
-    <div className="space-y-6">
-      <h3 className={`text-lg font-semibold transition-colors ${
-        isDarkMode ? 'text-white' : 'text-gray-900'
-      }`}>
-        Bildirim Ayarları
-      </h3>
-
-      {[
-        { key: 'newAppointment', title: 'Yeni Randevu', description: 'Yeni randevu alındığında bildirim gönder' },
-        { key: 'appointmentCancellation', title: 'Randevu İptali', description: 'Randevu iptal edildiğinde bildirim gönder' },
-        { key: 'dailySummary', title: 'Günlük Özet', description: 'Günlük randevu özeti gönder' },
-        { key: 'weeklyReport', title: 'Haftalık Rapor', description: 'Haftalık performans raporu gönder' },
-        { key: 'monthlyAnalysis', title: 'Aylık Analiz', description: 'Aylık detaylı analiz raporu gönder' },
-        { key: 'marketingTips', title: 'Pazarlama İpuçları', description: 'İşletmenizi büyütmek için ipuçları' }
-      ].map((setting) => (
-        <div key={setting.key} className={`flex items-center justify-between p-4 border rounded-lg transition-colors ${
-          isDarkMode ? 'border-gray-600' : 'border-gray-200'
-        }`}>
-          <div>
-            <h4 className={`font-medium transition-colors ${
-              isDarkMode ? 'text-white' : 'text-gray-900'
-            }`}>
-              {setting.title}
-            </h4>
-            <p className={`text-sm transition-colors ${
-              isDarkMode ? 'text-gray-400' : 'text-gray-500'
-            }`}>
-              {setting.description}
-            </p>
-          </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={notifications[setting.key as keyof NotificationSettings]}
-              onChange={(e) => setNotifications({
-                ...notifications,
-                [setting.key]: e.target.checked
-              })}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600"></div>
-          </label>
+  const NotificationSettings = () => {
+    // Notifications state'inin tanımlı olduğundan emin ol
+    if (!notifications) {
+      return (
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Bildirim ayarları yükleniyor...</p>
         </div>
-      ))}
-    </div>
-  )
+      )
+    }
+    
+    return (
+      <div className="space-y-6">
+        <h3 className={`text-lg font-semibold transition-colors ${
+          isDarkMode ? 'text-white' : 'text-gray-900'
+        }`}>
+          Bildirim Ayarları
+        </h3>
+
+        {[
+          { key: 'newAppointment', title: 'Yeni Randevu', description: 'Yeni randevu alındığında bildirim gönder' },
+          { key: 'appointmentCancellation', title: 'Randevu İptali', description: 'Randevu iptal edildiğinde bildirim gönder' },
+          { key: 'dailySummary', title: 'Günlük Özet', description: 'Günlük randevu özeti gönder' },
+          { key: 'weeklyReport', title: 'Haftalık Rapor', description: 'Haftalık performans raporu gönder' },
+          { key: 'monthlyAnalysis', title: 'Aylık Analiz', description: 'Aylık detaylı analiz raporu gönder' },
+          { key: 'marketingTips', title: 'Pazarlama İpuçları', description: 'İşletmenizi büyütmek için ipuçları' }
+        ].map((setting) => (
+          <div key={setting.key} className={`flex items-center justify-between p-4 border rounded-lg transition-colors ${
+            isDarkMode ? 'border-gray-600' : 'border-gray-200'
+          }`}>
+            <div>
+              <h4 className={`font-medium transition-colors ${
+                isDarkMode ? 'text-white' : 'text-gray-900'
+              }`}>
+                {setting.title}
+              </h4>
+              <p className={`text-sm transition-colors ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-500'
+              }`}>
+                {setting.description}
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={notifications[setting.key as keyof NotificationSettings] || false}
+                onChange={(e) => setNotifications({
+                  ...notifications,
+                  [setting.key]: e.target.checked
+                })}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600"></div>
+            </label>
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   const PaymentSettings = () => (
     <div className="space-y-6">
@@ -1634,16 +1691,16 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 lg:space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         <div>
-          <h1 className={`text-3xl font-bold transition-colors ${
+          <h1 className={`text-2xl lg:text-3xl font-bold transition-colors ${
             isDarkMode ? 'text-white' : 'text-gray-900'
           }`}>
             Ayarlar
           </h1>
-          <p className={`text-lg mt-2 transition-colors ${
+          <p className={`text-base lg:text-lg mt-2 transition-colors ${
             isDarkMode ? 'text-gray-400' : 'text-gray-600'
           }`}>
             İşletmenizi ve hesabınızı yönetin
@@ -1666,9 +1723,31 @@ export default function SettingsPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Sidebar */}
-        <div className={`lg:col-span-1 space-y-2`}>
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 lg:gap-8">
+        {/* Mobile Tabs */}
+        <div className="xl:hidden">
+          <div className="flex overflow-x-auto gap-2 p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-purple-600 text-white'
+                    : isDarkMode
+                      ? 'text-gray-300 hover:bg-gray-700'
+                      : 'text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                <span className="hidden sm:inline">{tab.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop Sidebar */}
+        <div className={`hidden xl:block xl:col-span-1 space-y-2`}>
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -1688,8 +1767,8 @@ export default function SettingsPage() {
         </div>
 
         {/* Main Content */}
-        <div className="lg:col-span-3">
-          <div className={`rounded-xl p-8 shadow-sm border transition-colors ${
+        <div className="xl:col-span-3">
+          <div className={`rounded-xl p-4 lg:p-8 shadow-sm border transition-colors ${
             isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
           }`}>
             {loading ? (
@@ -1702,11 +1781,11 @@ export default function SettingsPage() {
                 
                 {/* Save Button - Don't show for security tab as it has its own buttons */}
                 {activeTab !== 'security' && activeTab !== 'payments' && (
-                  <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                  <div className="mt-6 lg:mt-8 pt-4 lg:pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
                     <button
                       onClick={handleSave}
                       disabled={loading}
-                      className="bg-purple-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
+                      className="w-full sm:w-auto bg-purple-600 text-white px-6 lg:px-8 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
                     >
                       {loading ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
                     </button>

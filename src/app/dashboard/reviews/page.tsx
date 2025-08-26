@@ -291,74 +291,150 @@ export default function ReviewsPage() {
                 <div className="p-8">
                   
                   {/* Header */}
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-4 mb-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-full flex items-center justify-center shadow-sm">
+                  <div className="mb-6">
+                    {/* Mobile Layout */}
+                    <div className="block lg:hidden">
+                      {/* Customer Info */}
+                      <div className="flex items-start gap-3 mb-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-full flex items-center justify-center shadow-sm flex-shrink-0">
                           <User className="w-6 h-6 text-indigo-600" />
                         </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
                             <span className="font-semibold text-gray-900 text-lg">{review.customerName}</span>
-                            <Badge className={`text-sm font-medium ${getRatingColor(review.rating)} px-2 py-1`}>
+                            <Badge className={`text-xs font-medium ${getRatingColor(review.rating)} px-2 py-1 whitespace-nowrap`}>
                               {review.rating}/5
                             </Badge>
                           </div>
-                          <div className="flex items-center gap-2">
-                            {renderStars(review.rating, 'md')}
+                          <div className="mb-3">
+                            {renderStars(review.rating, 'sm')}
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4 text-gray-600 bg-gray-50 rounded-lg p-3">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-indigo-500" />
-                          <span className="font-medium">{format(new Date(review.createdAt), 'dd MMMM yyyy', { locale: tr })}</span>
+                      {/* Service Info */}
+                      <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                            <span className="font-medium text-sm">{format(new Date(review.createdAt), 'dd MMMM yyyy', { locale: tr })}</span>
+                          </div>
+                          <div className="text-sm">
+                            <span className="font-medium text-indigo-600">{review.appointment.service.name}</span>
+                            {review.appointment.staff && (
+                              <span className="text-gray-700 ml-2">• {review.appointment.staff.name}</span>
+                            )}
+                          </div>
                         </div>
-                        <span className="text-gray-300">•</span>
-                        <span className="font-medium text-indigo-600">{review.appointment.service.name}</span>
-                        {review.appointment.staff && (
-                          <>
-                            <span className="text-gray-300">•</span>
-                            <span className="text-gray-700">{review.appointment.staff.name}</span>
-                          </>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleVisibilityToggle(review.id, !review.isVisible)}
+                          className={`text-xs ${review.isVisible 
+                            ? "text-green-600 hover:text-green-800 hover:bg-green-50 border border-green-200"
+                            : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 border border-gray-200"
+                          }`}
+                        >
+                          {review.isVisible ? (
+                            <>
+                              <Eye className="w-3 h-3 mr-1" />
+                              Görünür
+                            </>
+                          ) : (
+                            <>
+                              <EyeOff className="w-3 h-3 mr-1" />
+                              Gizli
+                            </>
+                          )}
+                        </Button>
+
+                        {!review.ownerReply && (
+                          <Badge className="bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 border-orange-200 px-2 py-1 text-xs">
+                            Yanıt Bekliyor
+                          </Badge>
+                        )}
+                        {review.ownerReply && (
+                          <Badge className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200 px-2 py-1 text-xs">
+                            Yanıtlandı
+                          </Badge>
                         )}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleVisibilityToggle(review.id, !review.isVisible)}
-                        className={review.isVisible 
-                          ? "text-green-600 hover:text-green-800 hover:bg-green-50 border border-green-200"
-                          : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 border border-gray-200"
-                        }
-                      >
-                        {review.isVisible ? (
-                          <>
-                            <Eye className="w-4 h-4 mr-2" />
-                            Görünür
-                          </>
-                        ) : (
-                          <>
-                            <EyeOff className="w-4 h-4 mr-2" />
-                            Gizli
-                          </>
-                        )}
-                      </Button>
+                    {/* Desktop Layout */}
+                    <div className="hidden lg:flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-4 mb-3">
+                          <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-full flex items-center justify-center shadow-sm">
+                            <User className="w-6 h-6 text-indigo-600" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="font-semibold text-gray-900 text-lg">{review.customerName}</span>
+                              <Badge className={`text-sm font-medium ${getRatingColor(review.rating)} px-2 py-1`}>
+                                {review.rating}/5
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {renderStars(review.rating, 'md')}
+                            </div>
+                          </div>
+                        </div>
 
-                      {!review.ownerReply && (
-                        <Badge className="bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 border-orange-200 px-3 py-1">
-                          Yanıt Bekliyor
-                        </Badge>
-                      )}
-                      {review.ownerReply && (
-                        <Badge className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200 px-3 py-1">
-                          Yanıtlandı
-                        </Badge>
-                      )}
+                        <div className="flex items-center gap-4 text-gray-600 bg-gray-50 rounded-lg p-3">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-indigo-500" />
+                            <span className="font-medium">{format(new Date(review.createdAt), 'dd MMMM yyyy', { locale: tr })}</span>
+                          </div>
+                          <span className="text-gray-300">•</span>
+                          <span className="font-medium text-indigo-600">{review.appointment.service.name}</span>
+                          {review.appointment.staff && (
+                            <>
+                              <span className="text-gray-300">•</span>
+                              <span className="text-gray-700">{review.appointment.staff.name}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleVisibilityToggle(review.id, !review.isVisible)}
+                          className={review.isVisible 
+                            ? "text-green-600 hover:text-green-800 hover:bg-green-50 border border-green-200"
+                            : "text-gray-500 hover:text-gray-700 hover:bg-gray-50 border border-gray-200"
+                          }
+                        >
+                          {review.isVisible ? (
+                            <>
+                              <Eye className="w-4 h-4 mr-2" />
+                              Görünür
+                            </>
+                          ) : (
+                            <>
+                              <EyeOff className="w-4 h-4 mr-2" />
+                              Gizli
+                            </>
+                          )}
+                        </Button>
+
+                        {!review.ownerReply && (
+                          <Badge className="bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 border-orange-200 px-3 py-1">
+                            Yanıt Bekliyor
+                          </Badge>
+                        )}
+                        {review.ownerReply && (
+                          <Badge className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 border-green-200 px-3 py-1">
+                            Yanıtlandı
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -451,44 +527,45 @@ export default function ReviewsPage() {
         {/* Stats Summary */}
         {reviews.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-            <div className="bg-gradient-to-r from-gray-800 to-gray-900 p-6">
-              <h3 className="text-2xl font-semibold text-white mb-2 flex items-center gap-3">
-                <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                  <MessageCircle className="w-5 h-5" />
+            <div className="bg-gradient-to-r from-gray-800 to-gray-900 p-4 lg:p-6">
+              <h3 className="text-xl lg:text-2xl font-semibold text-white mb-2 flex items-center gap-3">
+                <div className="w-6 h-6 lg:w-8 lg:h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                  <MessageCircle className="w-4 h-4 lg:w-5 lg:h-5" />
                 </div>
-                Değerlendirme İstatistikleri
+                <span className="hidden sm:inline">Değerlendirme İstatistikleri</span>
+                <span className="sm:hidden">İstatistikler</span>
               </h3>
-              <p className="text-gray-300">Müşteri yorumlarınızın genel durumu</p>
+              <p className="text-gray-300 text-sm lg:text-base">Müşteri yorumlarınızın genel durumu</p>
             </div>
-            <div className="p-6">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl border border-blue-200">
-                  <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <MessageCircle className="w-6 h-6 text-white" />
+            <div className="p-4 lg:p-6">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
+                <div className="text-center p-4 lg:p-6 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl border border-blue-200">
+                  <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-2 lg:mb-3">
+                    <MessageCircle className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
                   </div>
-                  <div className="text-3xl font-bold text-blue-600 mb-1">{reviews.length}</div>
-                  <div className="text-sm text-blue-700 font-medium">Toplam Değerlendirme</div>
+                  <div className="text-2xl lg:text-3xl font-bold text-blue-600 mb-1">{reviews.length}</div>
+                  <div className="text-xs lg:text-sm text-blue-700 font-medium">Toplam Değerlendirme</div>
                 </div>
-                <div className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl border border-green-200">
-                  <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Reply className="w-6 h-6 text-white" />
+                <div className="text-center p-4 lg:p-6 bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl border border-green-200">
+                  <div className="w-10 h-10 lg:w-12 lg:h-12 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-2 lg:mb-3">
+                    <Reply className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
                   </div>
-                  <div className="text-3xl font-bold text-green-600 mb-1">{reviews.filter(r => r.ownerReply).length}</div>
-                  <div className="text-sm text-green-700 font-medium">Yanıtlanan</div>
+                  <div className="text-2xl lg:text-3xl font-bold text-green-600 mb-1">{reviews.filter(r => r.ownerReply).length}</div>
+                  <div className="text-xs lg:text-sm text-green-700 font-medium">Yanıtlanan</div>
                 </div>
-                <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-red-100 rounded-xl border border-orange-200">
-                  <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <MessageCircle className="w-6 h-6 text-white" />
+                <div className="text-center p-4 lg:p-6 bg-gradient-to-br from-orange-50 to-red-100 rounded-xl border border-orange-200">
+                  <div className="w-10 h-10 lg:w-12 lg:h-12 bg-orange-600 rounded-full flex items-center justify-center mx-auto mb-2 lg:mb-3">
+                    <MessageCircle className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
                   </div>
-                  <div className="text-3xl font-bold text-orange-600 mb-1">{reviews.filter(r => !r.ownerReply).length}</div>
-                  <div className="text-sm text-orange-700 font-medium">Yanıt Bekleyen</div>
+                  <div className="text-2xl lg:text-3xl font-bold text-orange-600 mb-1">{reviews.filter(r => !r.ownerReply).length}</div>
+                  <div className="text-xs lg:text-sm text-orange-700 font-medium">Yanıt Bekleyen</div>
                 </div>
-                <div className="text-center p-6 bg-gradient-to-br from-yellow-50 to-amber-100 rounded-xl border border-yellow-200">
-                  <div className="w-12 h-12 bg-yellow-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Star className="w-6 h-6 text-white fill-current" />
+                <div className="text-center p-4 lg:p-6 bg-gradient-to-br from-yellow-50 to-amber-100 rounded-xl border border-yellow-200">
+                  <div className="w-10 h-10 lg:w-12 lg:h-12 bg-yellow-600 rounded-full flex items-center justify-center mx-auto mb-2 lg:mb-3">
+                    <Star className="w-5 h-5 lg:w-6 lg:h-6 text-white fill-current" />
                   </div>
-                  <div className="text-3xl font-bold text-yellow-600 mb-1">{averageRating}</div>
-                  <div className="text-sm text-yellow-700 font-medium">Ortalama Puan</div>
+                  <div className="text-2xl lg:text-3xl font-bold text-yellow-600 mb-1">{averageRating}</div>
+                  <div className="text-xs lg:text-sm text-yellow-700 font-medium">Ortalama Puan</div>
                 </div>
               </div>
             </div>

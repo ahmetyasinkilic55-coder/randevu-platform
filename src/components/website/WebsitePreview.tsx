@@ -143,6 +143,9 @@ export default function WebsitePreview({
   const [touchStartY, setTouchStartY] = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(false)
   
+  // Mobile menu state
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  
   // Check if mobile on mount
   React.useEffect(() => {
     const checkMobile = () => {
@@ -237,20 +240,24 @@ export default function WebsitePreview({
     <div className={`${deviceClasses[device as keyof typeof deviceClasses]} bg-black overflow-y-auto min-h-screen`}>
       
       {/* Ultra Modern Hero Section with Cover & Profile Photos */}
-      <div className="relative min-h-[100vh] overflow-hidden">
+      <div className="relative min-h-screen overflow-hidden flex items-center justify-center">
         
         {/* Dynamic Cover Photo or Gradient Background */}
         <div className="absolute inset-0">
           {(customizations.coverPhoto || businessData?.coverPhotoUrl) ? (
             <>
-              {/* Cover Photo */}
-              <div className="absolute inset-0">
-                <CloudinaryImage
-                  src={customizations.coverPhoto || businessData?.coverPhotoUrl}
-                  alt="Cover"
-                  className="w-full h-full"
-                  style={{ objectFit: 'cover', minHeight: '100vh' }}
-                />
+              {/* Cover Photo as Background - Mobile Responsive Fix */}
+              <div 
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: `url("https://res.cloudinary.com/ddapurgju/image/upload/w_1920,h_1080,c_fill,g_auto,q_auto/${customizations.coverPhoto || businessData?.coverPhotoUrl}")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  width: '100%',
+                  height: '100%'
+                }}
+              >
                 {/* Dark overlay for readability */}
                 <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70"></div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40"></div>
@@ -279,7 +286,7 @@ export default function WebsitePreview({
         </div>
         
         {/* Hero Content Container */}
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-8 py-20">
+        <div className="relative z-10 w-full px-8 py-20">
           
           {/* Floating Navigation Bar */}
           <div className="absolute top-8 left-8 right-8 flex justify-between items-center z-30">
@@ -352,7 +359,10 @@ export default function WebsitePreview({
             
             {/* Mobile Menu Button */}
             <div className="lg:hidden flex items-center gap-2">
-              <button className="relative w-12 h-12 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl flex items-center justify-center hover:bg-white/20 transition-all">
+              <button 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="relative w-12 h-12 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl flex items-center justify-center hover:bg-white/20 transition-all"
+              >
                 <div className="space-y-1.5">
                   <div className="w-6 h-0.5 bg-white drop-shadow"></div>
                   <div className="w-6 h-0.5 bg-white drop-shadow"></div>
@@ -361,9 +371,126 @@ export default function WebsitePreview({
               </button>
             </div>
           </div>
+          
+          {/* Mobile Menu Overlay */}
+          {mobileMenuOpen && (
+            <div className="lg:hidden fixed inset-0 z-50 bg-black/30 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}>
+              <div 
+                className="absolute top-20 right-4 w-64 bg-white/95 backdrop-blur-xl shadow-2xl rounded-2xl transform transition-transform duration-300 border border-white/20"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-4">
+                  {/* Mobile Menu Header */}
+                  <div className="flex items-center justify-between border-b border-gray-200 pb-3 mb-4">
+                    <div className="flex items-center gap-2">
+                      {(customizations.profilePhoto || businessData?.profilePhotoUrl) ? (
+                        <CloudinaryImage
+                          publicId={(customizations.profilePhoto || businessData?.profilePhotoUrl) || ''}
+                          alt={businessData?.name || 'Logo'}
+                          className="w-8 h-8 rounded-lg object-cover"
+                          transformation={{
+                            width: 64,
+                            height: 64,
+                            crop: 'fill',
+                            quality: 'auto'
+                          }}
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-sm">
+                          {sectorTemplates[businessData?.sector as keyof typeof sectorTemplates]?.icon || '🏢'}
+                        </div>
+                      )}
+                      <div>
+                        <h3 className="font-bold text-gray-900 text-sm">{businessData?.name}</h3>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <X className="w-4 h-4 text-gray-600" />
+                    </button>
+                  </div>
+                  
+                  {/* Mobile Menu Items - Compact */}
+                  <nav className="space-y-1">
+                    {customizations.showServices && (
+                      <a 
+                        href="#services" 
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors text-sm"
+                      >
+                        <Sparkles className="w-4 h-4 text-blue-600" />
+                        <span className="font-medium text-gray-900">Hizmetler</span>
+                      </a>
+                    )}
+                    
+                    {customizations.showTeam && (
+                      <a 
+                        href="#team" 
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors text-sm"
+                      >
+                        <Users className="w-4 h-4 text-green-600" />
+                        <span className="font-medium text-gray-900">Ekibimiz</span>
+                      </a>
+                    )}
+                    
+                    {customizations.showGallery && (
+                      <a 
+                        href="#gallery" 
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors text-sm"
+                      >
+                        <Camera className="w-4 h-4 text-purple-600" />
+                        <span className="font-medium text-gray-900">Galeri</span>
+                      </a>
+                    )}
+                    
+                    {customizations.showReviews && (
+                      <a 
+                        href="#reviews" 
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors text-sm"
+                      >
+                        <Star className="w-4 h-4 text-yellow-600" />
+                        <span className="font-medium text-gray-900">Yorumlar</span>
+                      </a>
+                    )}
+                    
+                    {customizations.showContact && (
+                      <a 
+                        href="#contact" 
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors text-sm"
+                      >
+                        <Phone className="w-4 h-4 text-red-600" />
+                        <span className="font-medium text-gray-900">İletişim</span>
+                      </a>
+                    )}
+                  </nav>
+                  
+                  {/* Mobile CTA Button - Compact */}
+                  <div className="pt-3 mt-4 border-t border-gray-200">
+                    <button 
+                      onClick={() => {
+                        handleCTAClick()
+                        setMobileMenuOpen(false)
+                      }}
+                      className="w-full text-white py-2.5 px-4 rounded-lg font-semibold text-sm shadow-lg transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
+                      style={{ background: colors.gradient }}
+                    >
+                      <Calendar className="w-4 h-4" />
+                      <span>{customizations.buttonText || 'Randevu Al'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         
           {/* Main Hero Content */}
-          <div className="max-w-6xl mx-auto text-center space-y-8">
+          <div className="max-w-6xl mx-auto text-center space-y-8 flex flex-col items-center justify-center min-h-[80vh]">
             
             {/* Profile Photo Showcase - Large version for hero */}
             {(customizations.profilePhoto || businessData?.profilePhotoUrl) && (
@@ -458,8 +585,9 @@ export default function WebsitePreview({
               </div>
             </div>
             
-            {/* Glassmorphism Stats Cards */}
-            <div className="flex flex-wrap justify-center gap-4">
+            {/* Rating Card & CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              {/* Rating Card */}
               <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl px-6 py-4">
                 <div className="flex items-center gap-3">
                   <div className="flex">
@@ -474,29 +602,7 @@ export default function WebsitePreview({
                 </div>
               </div>
               
-              <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <Users className="w-8 h-8 text-purple-400" />
-                  <div className="text-left">
-                    <p className="text-white font-bold text-lg">{businessData?.totalAppointments || 1500}+</p>
-                    <p className="text-white/60 text-xs">Mutlu müşteri</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <Award className="w-8 h-8 text-green-400" />
-                  <div className="text-left">
-                    <p className="text-white font-bold text-lg">Sertifikalı</p>
-                    <p className="text-white/60 text-xs">Profesyonel hizmet</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Modern CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              {/* CTA Button */}
               <button 
                 onClick={handleCTAClick}
                 className="group relative overflow-hidden"
@@ -513,11 +619,6 @@ export default function WebsitePreview({
                   <span>{customizations.buttonText || 'Randevu Al'}</span>
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </div>
-              </button>
-              
-              <button className="group bg-white/10 backdrop-blur-xl border border-white/20 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-white/20 transition-all duration-300 flex items-center gap-3">
-                <Play className="w-6 h-6" />
-                <span>Tanıtım Videosu</span>
               </button>
             </div>
             
@@ -1064,14 +1165,7 @@ export default function WebsitePreview({
                         {businessData?.reviewCount || 127}
                       </div>
                       <p className="text-sm text-gray-600">Toplam Yorum</p>
-                    </div>
-                    <div className="w-px h-12 bg-gray-200"></div>
-                    <div className="text-center">
-                      <div className="text-3xl font-black text-green-600">
-                        %{((businessData?.reviewCount || 120) / (businessData?.reviewCount || 127) * 100).toFixed(0)}
-                      </div>
-                      <p className="text-sm text-gray-600">Memnuniyet</p>
-                    </div>
+                    </div>                    
                   </div>
                 </div>
               </>

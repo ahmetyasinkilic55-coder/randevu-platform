@@ -292,7 +292,8 @@ export default function StaffLeavePage() {
           </h2>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full">
             <thead className={`transition-colors ${
               isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
@@ -433,6 +434,144 @@ export default function StaffLeavePage() {
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Card View */}
+        <div className="lg:hidden">
+          {leaves.length === 0 ? (
+            <div className="text-center py-12">
+              <UserIcon className={`w-12 h-12 mx-auto mb-4 transition-colors ${
+                isDarkMode ? 'text-gray-600' : 'text-gray-400'
+              }`} />
+              <p className={`text-lg transition-colors ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                Henüz izin kaydı bulunmuyor
+              </p>
+              <button
+                onClick={() => handleOpenModal()}
+                className="mt-4 text-purple-600 hover:text-purple-700 font-medium"
+              >
+                İlk izni ekleyin
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4 p-4">
+              {leaves.map((leave) => (
+                <div
+                  key={leave.id}
+                  className={`rounded-lg border p-4 transition-colors ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'
+                  }`}
+                >
+                  {/* Staff Info */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                        <UserIcon className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <h3 className={`font-semibold transition-colors ${
+                          isDarkMode ? 'text-white' : 'text-gray-900'
+                        }`}>
+                          {leave.staffName}
+                        </h3>
+                        <p className={`text-sm transition-colors ${
+                          isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
+                          {getLeaveTypeText(leave.type)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleOpenModal(leave)}
+                        className="text-purple-600 hover:text-purple-700 p-1"
+                      >
+                        <PencilIcon className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setDeletingLeave(leave)
+                          setShowDeleteModal(true)
+                        }}
+                        className="text-red-600 hover:text-red-700 p-1"
+                      >
+                        <TrashIcon className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Date Info */}
+                  <div className="grid grid-cols-2 gap-4 mb-3">
+                    <div>
+                      <p className={`text-xs font-medium mb-1 transition-colors ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        Tarih
+                      </p>
+                      <p className={`text-sm transition-colors ${
+                        isDarkMode ? 'text-gray-300' : 'text-gray-900'
+                      }`}>
+                        {leave.startDate === leave.endDate 
+                          ? formatDate(leave.startDate)
+                          : `${formatDate(leave.startDate)} - ${formatDate(leave.endDate)}`
+                        }
+                      </p>
+                    </div>
+                    {leave.type === 'PARTIAL' && (
+                      <div>
+                        <p className={`text-xs font-medium mb-1 transition-colors ${
+                          isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
+                          Saat
+                        </p>
+                        <p className={`text-sm transition-colors ${
+                          isDarkMode ? 'text-gray-300' : 'text-gray-900'
+                        }`}>
+                          {leave.startTime} - {leave.endTime}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Reason */}
+                  <div className="mb-3">
+                    <p className={`text-xs font-medium mb-1 transition-colors ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                    }`}>
+                      Sebep
+                    </p>
+                    <p className={`text-sm transition-colors ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-900'
+                    }`}>
+                      {leave.reason}
+                    </p>
+                  </div>
+
+                  {/* Status */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className={`text-xs font-medium mb-1 transition-colors ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        Durum
+                      </p>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(leave.status)}`}>
+                        {leave.status === 'APPROVED' ? 'Onaylandı' : 
+                         leave.status === 'PENDING' ? 'Beklemede' : 'Reddedildi'}
+                      </span>
+                    </div>
+                    <div className={`text-xs transition-colors ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                    }`}>
+                      {formatDate(leave.createdAt)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Leave Modal */}
@@ -443,7 +582,7 @@ export default function StaffLeavePage() {
               <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={handleCloseModal}></div>
             </div>
 
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full mx-4 max-w-[calc(100vw-2rem)]">
               <form onSubmit={handleSubmit}>
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <div className="flex items-center justify-between mb-6">
@@ -497,7 +636,7 @@ export default function StaffLeavePage() {
                     </div>
 
                     {/* Date Range */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Başlangıç Tarihi
@@ -526,7 +665,7 @@ export default function StaffLeavePage() {
 
                     {/* Time Range - Only for PARTIAL type */}
                     {formData.type === 'PARTIAL' && (
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Başlangıç Saati
@@ -583,7 +722,7 @@ export default function StaffLeavePage() {
                   </div>
                 </div>
 
-                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <div className="bg-gray-50 px-4 py-3 sm:px-6 flex flex-col sm:flex-row-reverse gap-3 sm:gap-0">
                   <button
                     type="submit"
                     disabled={isSubmitting}
@@ -594,7 +733,7 @@ export default function StaffLeavePage() {
                   <button
                     type="button"
                     onClick={handleCloseModal}
-                    className="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    className="w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm"
                   >
                     İptal
                   </button>
@@ -613,7 +752,7 @@ export default function StaffLeavePage() {
               <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={() => setShowDeleteModal(false)}></div>
             </div>
 
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full mx-4 max-w-[calc(100vw-2rem)]">
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="sm:flex sm:items-start">
                   <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
@@ -632,7 +771,7 @@ export default function StaffLeavePage() {
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 flex flex-col sm:flex-row-reverse gap-3 sm:gap-0">
                 <button
                   onClick={handleDelete}
                   disabled={isSubmitting}
@@ -642,7 +781,7 @@ export default function StaffLeavePage() {
                 </button>
                 <button
                   onClick={() => setShowDeleteModal(false)}
-                  className="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm"
                 >
                   İptal
                 </button>

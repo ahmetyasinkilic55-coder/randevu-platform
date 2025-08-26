@@ -225,25 +225,25 @@ export default function GalleryManagement() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Galeri Yönetimi</h1>
-            <p className="text-sm sm:text-base text-gray-900">
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Galeri Yönetimi</h1>
+            <p className="text-sm lg:text-base text-gray-900">
               {businessData?.name} işletmeniz için galeri fotoğraflarını yönetin
             </p>
           </div>
           
           {/* Upload Button - Cloudinary */}
-          <div className="flex gap-3">
+          <div className="w-full lg:w-auto">
             <CloudinaryUpload
               onUpload={handleCloudinaryUpload}
               folder="business-gallery"
               tags={`business_${businessData?.id || 'unknown'},gallery`}
               maxFiles={10}
-              className="cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl"
+              className="w-full cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 lg:px-6 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
             >
               {cloudinaryUploading ? (
                 <>
@@ -262,81 +262,81 @@ export default function GalleryManagement() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
           <div className="flex items-center">
-            <div className="w-8 h-8 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <ImageIcon className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600" />
+            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <ImageIcon className="w-5 h-5 lg:w-6 lg:h-6 text-blue-600" />
             </div>
-            <div className="ml-2 sm:ml-4">
-              <p className="text-lg sm:text-2xl font-bold text-gray-900">{businessData?.gallery.length || 0}</p>
-              <p className="text-xs sm:text-sm text-gray-900">Toplam Fotoğraf</p>
+            <div className="ml-3 lg:ml-4 min-w-0 flex-1">
+              <p className="text-xl lg:text-2xl font-bold text-gray-900">{businessData?.gallery.length || 0}</p>
+              <p className="text-xs lg:text-sm text-gray-900 truncate">Toplam Fotoğraf</p>
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
           <div className="flex items-center">
-            <div className="w-8 h-8 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <Check className="w-4 h-4 sm:w-6 sm:h-6 text-green-600" />
+            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Check className="w-5 h-5 lg:w-6 lg:h-6 text-green-600" />
             </div>
-            <div className="ml-2 sm:ml-4">
-              <p className="text-lg sm:text-2xl font-bold text-gray-900">
+            <div className="ml-3 lg:ml-4 min-w-0 flex-1">
+              <p className="text-xl lg:text-2xl font-bold text-gray-900">
                 {businessData?.gallery.filter(p => p.isActive).length || 0}
               </p>
-              <p className="text-xs sm:text-sm text-gray-900">Aktif Fotoğraf</p>
+              <p className="text-xs lg:text-sm text-gray-900 truncate">Aktif Fotoğraf</p>
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
           <div className="flex items-center">
-            <div className="w-8 h-8 sm:w-12 sm:h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <X className="w-4 h-4 sm:w-6 sm:h-6 text-orange-600" />
+            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <X className="w-5 h-5 lg:w-6 lg:h-6 text-orange-600" />
             </div>
-            <div className="ml-2 sm:ml-4">
-              <p className="text-lg sm:text-2xl font-bold text-gray-900">
+            <div className="ml-3 lg:ml-4 min-w-0 flex-1">
+              <p className="text-xl lg:text-2xl font-bold text-gray-900">
                 {businessData?.gallery.filter(p => !p.isActive).length || 0}
               </p>
-              <p className="text-xs sm:text-sm text-gray-900">Gizli Fotoğraf</p>
+              <p className="text-xs lg:text-sm text-gray-900 truncate">Gizli Fotoğraf</p>
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
           <div className="flex items-center">
-            <div className="w-8 h-8 sm:w-12 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Camera className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600" />
+            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Camera className="w-5 h-5 lg:w-6 lg:h-6 text-purple-600" />
             </div>
-            <div className="ml-2 sm:ml-4">
-              <p className="text-lg sm:text-2xl font-bold text-gray-900">
+            <div className="ml-3 lg:ml-4 min-w-0 flex-1">
+              <p className="text-xl lg:text-2xl font-bold text-gray-900">
                 {Math.round((businessData?.gallery.filter(p => p.isActive).length || 0) / Math.max(businessData?.gallery.length || 1, 1) * 100)}%
               </p>
-              <p className="text-xs sm:text-sm text-gray-900">Görünürlük</p>
+              <p className="text-xs lg:text-sm text-gray-900 truncate">Görünürlük</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters and Search */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <div className="relative w-full sm:w-64">
-              <Search className="w-4 h-4 sm:w-5 sm:h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
+        <div className="space-y-4">
+          <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
+            <div className="relative flex-1 lg:max-w-xs">
+              <Search className="w-4 h-4 lg:w-5 lg:h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Fotoğraf ara..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 sm:pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent w-full text-sm sm:text-base text-gray-900 placeholder-gray-500"
+                className="pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent w-full text-sm lg:text-base text-gray-900 placeholder-gray-500"
               />
             </div>
             
             <select
               value={filterActive}
               onChange={(e) => setFilterActive(e.target.value as 'all' | 'active' | 'inactive')}
-              className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent w-full sm:w-auto text-sm sm:text-base text-gray-900"
+              className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent w-full lg:w-auto text-sm lg:text-base text-gray-900"
             >
               <option value="all">Tüm Fotoğraflar</option>
               <option value="active">Aktif Olanlar</option>
@@ -348,19 +348,19 @@ export default function GalleryManagement() {
             <div className="flex gap-2">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${
+                className={`p-2 lg:p-3 rounded-lg transition-colors ${
                   viewMode === 'grid' ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                 }`}
               >
-                <Grid3x3 className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Grid3x3 className="w-4 h-4 lg:w-5 lg:h-5" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-colors ${
+                className={`p-2 lg:p-3 rounded-lg transition-colors ${
                   viewMode === 'list' ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                 }`}
               >
-                <List className="w-4 h-4 sm:w-5 sm:h-5" />
+                <List className="w-4 h-4 lg:w-5 lg:h-5" />
               </button>
             </div>
           </div>
@@ -368,7 +368,7 @@ export default function GalleryManagement() {
       </div>
 
       {/* Gallery Content */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
         {/* Drag & Drop Upload Zone - Show when no photos or as header */}
         <div className="mb-6">
           <CloudinaryUpload
@@ -381,14 +381,14 @@ export default function GalleryManagement() {
         </div>
         
         {filteredPhotos.length === 0 ? (
-          <div className="text-center py-8 sm:py-12">
-            <div className="w-16 h-16 sm:w-24 sm:h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ImageIcon className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400" />
+          <div className="text-center py-8 lg:py-12">
+            <div className="w-20 h-20 lg:w-24 lg:h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ImageIcon className="w-10 h-10 lg:w-12 lg:h-12 text-gray-400" />
             </div>
-            <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg lg:text-xl font-medium text-gray-900 mb-2">
               {businessData?.gallery.length === 0 ? 'Henüz fotoğraf yok' : 'Arama sonucu bulunamadı'}
             </h3>
-            <p className="text-sm sm:text-base text-gray-900 mb-6">
+            <p className="text-sm lg:text-base text-gray-900 mb-6">
               {businessData?.gallery.length === 0 
                 ? 'Galerinize ilk fotoğrafları ekleyerek başlayın'
                 : 'Farklı arama terimleri veya filtreler deneyin'
@@ -400,22 +400,21 @@ export default function GalleryManagement() {
                 folder="business-gallery"
                 tags={`business_${businessData?.id || 'unknown'},gallery`}
                 maxFiles={10}
-                className="cursor-pointer bg-purple-600 text-white px-4 sm:px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors inline-flex items-center gap-2 text-sm sm:text-base"
+                className="cursor-pointer bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors inline-flex items-center gap-2 text-sm lg:text-base"
               >
-                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="hidden sm:inline">İlk Fotoğrafı Ekle</span>
-                <span className="sm:hidden">Fotoğraf Ekle</span>
+                <Plus className="w-4 h-4 lg:w-5 lg:h-5" />
+                <span>İlk Fotoğrafı Ekle</span>
               </CloudinaryUpload>
             )}
           </div>
         ) : (
-          <div className={viewMode === 'grid' ? 'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6' : 'space-y-4'}>
+          <div className={viewMode === 'grid' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-6' : 'space-y-4'}>
             {filteredPhotos.map((photo) => (
               <motion.div
                 key={photo.id}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className={viewMode === 'grid' ? 'group' : 'flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 border border-gray-200 rounded-lg'}
+                className={viewMode === 'grid' ? 'group' : 'flex items-center space-x-3 lg:space-x-4 p-3 lg:p-4 border border-gray-200 rounded-lg'}
               >
                 {viewMode === 'grid' ? (
                   <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
@@ -442,29 +441,29 @@ export default function GalleryManagement() {
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
                       <button
                         onClick={() => window.open(photo.imageUrl, '_blank')}
-                        className="bg-white/20 backdrop-blur-sm text-white p-2 rounded-lg hover:bg-white/30 transition-colors"
+                        className="bg-white/20 backdrop-blur-sm text-white p-2 lg:p-3 rounded-lg hover:bg-white/30 transition-colors"
                         title="Görüntüle"
                       >
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-4 h-4 lg:w-5 lg:h-5" />
                       </button>
                       <button
                         onClick={() => handlePhotoDelete(photo.id, photo.publicId || photo.imageUrl)}
-                        className="bg-red-500/80 backdrop-blur-sm text-white p-2 rounded-lg hover:bg-red-600/80 transition-colors"
+                        className="bg-red-500/80 backdrop-blur-sm text-white p-2 lg:p-3 rounded-lg hover:bg-red-600/80 transition-colors"
                         title="Sil"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4 lg:w-5 lg:h-5" />
                       </button>
                     </div>
                     
                     {photo.title && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                        <p className="text-white text-sm font-medium truncate">{photo.title}</p>
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 lg:p-3">
+                        <p className="text-white text-xs lg:text-sm font-medium truncate">{photo.title}</p>
                       </div>
                     )}
                   </div>
                 ) : (
                   <>
-                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                    <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                       <CloudinaryImage
                         publicId={photo.publicId || photo.imageUrl}
                         alt={photo.title || 'Galeri fotoğrafı'}
@@ -480,8 +479,8 @@ export default function GalleryManagement() {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-gray-900 truncate">{photo.title || 'Başlıksız'}</h3>
-                      <p className="text-sm text-gray-900 truncate">{photo.description || 'Açıklama yok'}</p>
+                      <h3 className="font-medium text-gray-900 truncate text-sm lg:text-base">{photo.title || 'Başlıksız'}</h3>
+                      <p className="text-xs lg:text-sm text-gray-900 truncate">{photo.description || 'Açıklama yok'}</p>
                       <p className="text-xs text-gray-900 mt-1">
                         {new Date(photo.createdAt).toLocaleDateString('tr-TR')}
                         {photo.isActive ? (
@@ -497,7 +496,7 @@ export default function GalleryManagement() {
                         className="p-2 text-red-400 hover:text-red-600 transition-colors"
                         title="Sil"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4 lg:w-5 lg:h-5" />
                       </button>
                     </div>
                   </>

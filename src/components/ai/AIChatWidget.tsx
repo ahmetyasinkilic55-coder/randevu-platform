@@ -95,7 +95,9 @@ const AIChatWidget: React.FC<AIChatWidgetProps> = ({ businessData }) => {
   const primaryRgb = hexToRgb(primaryColor)
   const secondaryRgb = hexToRgb(secondaryColor)
   
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(true) // İlk açılışta açık olsun
+  const [isMinimized, setIsMinimized] = useState(false) // Minimize durumu
+  const [isVisible, setIsVisible] = useState(true) // Tamamen gizleme durumu
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -847,128 +849,99 @@ const AIChatWidget: React.FC<AIChatWidgetProps> = ({ businessData }) => {
 
   return (
     <>
-      {/* Floating AI Assistant Card - Main Option */}
-      <div className="fixed bottom-6 right-6 z-50">
-        {/* Animated AI Assistant Card */}
-        {!isOpen && (
-          <div className="relative">
-            {/* Main Card */}
-            <div 
+      {/* AI Assistant Widget - Conditional Rendering */}
+      {isVisible && (
+        <div className="fixed bottom-6 right-6 z-50">
+          {/* Minimized Chat Button */}
+          {!isOpen && (
+            <button
               onClick={() => setIsOpen(true)}
-              className="text-white p-4 md:p-6 rounded-2xl shadow-2xl cursor-pointer transform hover:scale-105 transition-all duration-300 border border-white/20 backdrop-blur-sm min-w-[240px] md:min-w-[280px] group"
+              className="text-white p-4 md:p-5 rounded-full shadow-2xl cursor-pointer transform hover:scale-105 transition-all duration-300 border-2 border-white/20 backdrop-blur-sm group relative overflow-hidden"
               style={{
-                background: `linear-gradient(135deg, ${primaryColor}dd, ${secondaryColor}dd, ${primaryColor}aa)`,
-                boxShadow: `0 25px 50px -12px ${primaryColor}40`
+                background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+                boxShadow: `0 20px 40px -12px ${primaryColor}60`
               }}
             >
               {/* Animated Background */}
-              <div 
-                className="absolute inset-0 rounded-2xl animate-pulse"
-                style={{
-                  background: `linear-gradient(45deg, ${primaryColor}30, ${secondaryColor}30)`
-                }}
-              ></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-white/5 animate-pulse"></div>
               
-              {/* Content */}
+              {/* Bot Icon with Animation */}
               <div className="relative">
-                {/* Header */}
-                <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
-                  <div className="relative">
-                    <div className="w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                      <Bot className="w-5 h-5 md:w-6 md:h-6 text-white animate-bounce" />
-                    </div>
-                    {/* Pulse Effect */}
-                    <div className="absolute inset-0 w-10 h-10 md:w-12 md:h-12 bg-white/30 rounded-full animate-ping"></div>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-base md:text-lg">AI Asistan</h3>
-                    <p className="text-white/80 text-xs md:text-sm">Canlı Destek</p>
-                  </div>
-                  <div className="ml-auto">
-                    <div className="w-2.5 h-2.5 md:w-3 md:h-3 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
-                  </div>
-                </div>
-                
-                {/* Message Preview */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-2.5 md:p-3 mb-3 md:mb-4">
-                  <p className="text-xs md:text-sm text-white/90">👋 {businessData.name} için size nasıl yardımcı olabilirim?</p>
-                </div>
-                
-                {/* Quick Actions */}
-                <div className="flex gap-1.5 md:gap-2 flex-wrap">
-                  <div className="bg-white/20 rounded-lg px-2 md:px-3 py-1 md:py-1.5">
-                    <span className="text-xs text-white/80">📅 Randevu</span>
-                  </div>
-                  <div className="bg-white/20 rounded-lg px-2 md:px-3 py-1 md:py-1.5">
-                    <span className="text-xs text-white/80">💎 Fiyat</span>
-                  </div>
-                  <div className="bg-white/20 rounded-lg px-2 md:px-3 py-1 md:py-1.5">
-                    <span className="text-xs text-white/80">📍 Adres</span>
-                  </div>
-                </div>
-                
-                {/* Hover Effect */}
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full group-hover:animate-bounce flex items-center justify-center">
-                  <Sparkles className="w-2 h-2 text-yellow-800" />
+                <MessageCircle className="w-6 h-6 md:w-7 md:h-7 group-hover:rotate-12 transition-transform" />
+                {/* Notification Badge */}
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white flex items-center justify-center">
+                  <span className="text-xs text-white font-bold">!</span>
                 </div>
               </div>
-            </div>
-            
-            {/* Floating Elements */}
-            <div 
-              className="absolute -top-1.5 md:-top-2 -left-1.5 md:-left-2 w-4 h-4 md:w-6 md:h-6 rounded-full animate-float opacity-70"
-              style={{
-                background: `linear-gradient(45deg, ${primaryColor}, ${secondaryColor})`
-              }}
-            ></div>
-            <div 
-              className="absolute -bottom-0.5 md:-bottom-1 -right-2 md:-right-3 w-3 h-3 md:w-4 md:h-4 rounded-full animate-float-delayed opacity-60"
-              style={{
-                background: `linear-gradient(45deg, ${secondaryColor}, ${primaryColor})`
-              }}
-            ></div>
-          </div>
-        )}
-      </div>
+              
+              {/* Floating Effect */}
+              <div className="absolute -top-1 -left-1 w-3 h-3 bg-white/40 rounded-full animate-ping"></div>
+              <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-white/60 rounded-full animate-bounce"></div>
+            </button>
+          )}
 
-      {/* Chat Window */}
-      {isOpen && (
-        <div className="fixed bottom-6 right-6 bg-white rounded-3xl shadow-2xl w-80 md:w-96 h-[500px] md:h-[600px] flex flex-col overflow-hidden border border-gray-100 z-50">
-          {/* Header */}
-          <div 
-            className="text-white p-4 md:p-6 relative"
-            style={{
-              background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`
-            }}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 md:gap-4">
-                <div className="relative">
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                    <HeadphonesIcon className="w-5 h-5 md:w-6 md:h-6" />
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 md:w-4 md:h-4 bg-green-400 rounded-full border-2 border-white"></div>
-                </div>
-                <div>
-                  <h3 className="font-bold text-base md:text-lg">Randevu Asistanı</h3>
-                  <p className="text-xs md:text-sm opacity-90 flex items-center gap-2">
-                    <Sparkles className="w-3 h-3" />
-                    {businessData.name} • Online
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="text-white/80 hover:text-white hover:bg-white/10 rounded-full p-2 transition-all"
+          {/* Full Chat Window */}
+          {isOpen && (
+            <div className={`bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-gray-100 transition-all duration-500 transform ${
+              isMinimized ? 'w-80 md:w-96 h-16' : 'w-80 md:w-96 h-[500px] md:h-[600px]'
+            }`}>
+              {/* Header - Always Visible */}
+              <div 
+                className="text-white p-4 md:p-4 relative cursor-pointer"
+                style={{
+                  background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`
+                }}
+                onClick={() => isMinimized && setIsMinimized(false)}
               >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                        <HeadphonesIcon className="w-4 h-4 md:w-5 md:h-5" />
+                      </div>
+                      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-sm md:text-base">AI Asistan</h3>
+                      <p className="text-xs opacity-90 flex items-center gap-1">
+                        <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse inline-block"></span>
+                        {businessData.name} • Aktif
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    {/* Minimize Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setIsMinimized(!isMinimized)
+                      }}
+                      className="text-white/70 hover:text-white hover:bg-white/10 rounded-full p-1.5 transition-all"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                      </svg>
+                    </button>
+                    
+                    {/* Hide Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setIsVisible(false)
+                      }}
+                      className="text-white/70 hover:text-white hover:bg-white/10 rounded-full p-1.5 transition-all"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
-            {messages.map((message) => (
+              {/* Messages - Hidden when minimized */}
+              {!isMinimized && (
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+                  {messages.map((message) => (
               <div
                 key={message.id}
                 className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
@@ -1162,8 +1135,10 @@ const AIChatWidget: React.FC<AIChatWidgetProps> = ({ businessData }) => {
             
             <div ref={messagesEndRef} />
           </div>
+        )}
 
-          {/* Input */}
+        {/* Input - Hidden when minimized */}
+        {!isMinimized && (
           <div className="p-4 md:p-6 border-t border-gray-200 bg-white">
             <div className="flex gap-2 md:gap-3">
               <input
@@ -1200,8 +1175,11 @@ const AIChatWidget: React.FC<AIChatWidgetProps> = ({ businessData }) => {
               🔒 Güvenli şifreleme ile korunmaktadır
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
+    )}
+  </div>
+)}
     </>
   )
 }
