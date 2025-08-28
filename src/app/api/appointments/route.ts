@@ -14,7 +14,7 @@ const createAppointmentSchema = z.object({
   notes: z.string().optional(),
   totalPrice: z.number().optional(),
   duration: z.number().optional(),
-  // Dashboard'dan oluşturulan randevular için
+  // Guest user'lar ve dashboard'dan oluşturulan randevular için
   customerName: z.string().optional(),
   customerPhone: z.string().optional(),
   customerEmail: z.string().optional()
@@ -150,15 +150,19 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Giriş yapmanız gerekiyor' },
-        { status: 401 }
-      )
-    }
-
     const body = await request.json()
+    
+    // Guest user için gerekli alanları kontrol et
+    if (!session?.user) {
+      // Giriş yapmamış kullanıcılar için isim ve telefon zorunlu
+      if (!body.customerName || !body.customerPhone) {
+        return NextResponse.json(
+          { error: 'Ad soyad ve telefon numarası gerekli' },
+          { status: 400 }
+        )
+      }
+    }
+    
     const validatedData = createAppointmentSchema.parse(body)
 
     // Seçilen hizmeti kontrol et
@@ -227,9 +231,9 @@ export async function POST(request: NextRequest) {
         serviceId: validatedData.serviceId,
         staffId: validatedData.staffId,
         date: appointmentDate,
-        customerName: validatedData.customerName || session.user.name || 'Müşteri',
-        customerPhone: validatedData.customerPhone || session.user.phone || '',
-        customerEmail: validatedData.customerEmail || session.user.email || '',
+        customerName: validatedData.customerName || session?.user?.name || 'Müşteri',
+        customerPhone: validatedData.customerPhone || session?.user?.phone || '',
+        customerEmail: validatedData.customerEmail || session?.user?.email || '',
         notes: validatedData.notes,
         status: 'PENDING'
       },

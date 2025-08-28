@@ -22,11 +22,13 @@ import {
   ChatBubbleLeftRightIcon,
   Bars3Icon,
   XMarkIcon,
-  ClockIcon
+  ClockIcon,
+  PencilSquareIcon
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { toast } from 'react-hot-toast'
+import { BusinessProvider } from '@/contexts/BusinessContext'
 
 export default function DashboardLayout({
   children,
@@ -144,7 +146,7 @@ export default function DashboardLayout({
     { key: 'staff', icon: UserGroupIcon, label: 'Personel', href: '/dashboard/staff', badge: null },
     { key: 'staff-leave', icon: ClockIcon, label: 'İzin Yönetimi', href: '/dashboard/staff-leave', badge: null },
     { key: 'reviews', icon: ChatBubbleLeftRightIcon, label: 'Değerlendirmeler', href: '/dashboard/reviews', badge: null },
-    { key: 'customer-notes', icon: DocumentTextIcon, label: 'Müşteri Notları', href: '/dashboard/customer-notes', badge: null },
+    { key: 'blog', icon: PencilSquareIcon, label: 'Blog Yönetimi', href: '/dashboard/blog', badge: null },
     { key: 'gallery', icon: PhotoIcon, label: 'Galeri Yönetimi', href: '/dashboard/gallery', badge: null },
     { key: 'website', icon: CodeBracketIcon, label: 'Web Sitesi', href: '/dashboard/website', badge: null },
     { key: 'advertising', icon: MegaphoneIcon, label: 'Reklam Desteği', href: '/dashboard/advertising', badge: null },
@@ -153,7 +155,8 @@ export default function DashboardLayout({
   ]
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <BusinessProvider>
+      <div className={`min-h-screen transition-colors duration-300 ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Header */}
       <header className={`shadow-sm border-b transition-colors duration-300 ${
         isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
@@ -377,6 +380,7 @@ export default function DashboardLayout({
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </BusinessProvider>
   )
 }

@@ -7,7 +7,7 @@ import {
   CheckCircle, ArrowRight, Loader2, ExternalLink, Copy, Save, 
   Camera, Upload, Trash2, Plus, Check,
   Edit3, Layout, Image as ImageIcon,
-  Zap, Star, Users, MapPin, Sparkles, X, Share2
+  Zap, Star, Users, MapPin, Sparkles, X, Share2, BookOpen
 } from 'lucide-react'
 import { CloudinaryImage } from '@/components/cloudinary'
 
@@ -61,6 +61,7 @@ interface WebsiteConfig {
   showServices: boolean
   showTeam: boolean
   showGallery: boolean
+  showBlog: boolean
   showReviews: boolean
   showMap: boolean
   showContact: boolean
@@ -133,6 +134,7 @@ export default function WebsiteManager() {
   const [showServices, setShowServices] = useState(true)
   const [showTeam, setShowTeam] = useState(true)
   const [showGallery, setShowGallery] = useState(true)
+  const [showBlog, setShowBlog] = useState(false)
   const [showReviews, setShowReviews] = useState(true)
   const [showContact, setShowContact] = useState(true)
   
@@ -141,7 +143,7 @@ export default function WebsiteManager() {
     if (status === 'authenticated' && session?.user) {
       loadBusinessData()
     } else if (status === 'unauthenticated') {
-      window.location.href = '/auth/signin'
+      window.location.href = '/'
     }
   }, [session, status])
 
@@ -214,6 +216,7 @@ export default function WebsiteManager() {
         showServices,
         showTeam,
         showGallery,
+        showBlog,
         showReviews,
         showContact: showContact,
         profilePhoto: businessData.profilePhotoUrl || null,
@@ -233,7 +236,7 @@ export default function WebsiteManager() {
         
         // Show success message
         const slug = result.websiteConfig?.urlSlug || businessData.name.toLowerCase().replace(/\s+/g, '-')
-        const siteUrl = `http://localhost:3000/${slug}`
+        const siteUrl = `${window.location.origin}/${slug}`
         
         const openSite = confirm('✅ Değişiklikler başarıyla kaydedildi!\n\nCanlı sitenizi görüntülemek ister misiniz?')
         if (openSite) {
@@ -269,6 +272,7 @@ export default function WebsiteManager() {
         showServices: true,
         showTeam: true,
         showGallery: true,
+        showBlog: false,
         showReviews: true,
         showContact: true,
         isPublished: false
@@ -335,6 +339,7 @@ export default function WebsiteManager() {
           setShowServices(config.showServices !== false)
           setShowTeam(config.showTeam !== false)
           setShowGallery(config.showGallery !== false)
+          setShowBlog(config.showBlog || false)
           setShowReviews(config.showReviews !== false)
           setShowContact(config.showContact !== false)
         } else {
@@ -400,7 +405,7 @@ export default function WebsiteManager() {
   }
 
   const websiteUrl = businessData.websiteConfig?.urlSlug 
-    ? `http://localhost:3000/${businessData.websiteConfig.urlSlug}`
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/${businessData.websiteConfig.urlSlug}`
     : null
 
   return (
@@ -1496,6 +1501,14 @@ export default function WebsiteManager() {
                           setValue: setShowGallery
                         },
                         { 
+                          key: 'showBlog', 
+                          label: 'Blog Yazıları', 
+                          description: 'Blog yazılarınızı paylaşın ve uzman görüşlerinizi aktarın', 
+                          icon: BookOpen,
+                          value: showBlog,
+                          setValue: setShowBlog
+                        },
+                        { 
                           key: 'showReviews', 
                           label: 'Müşteri Yorumları', 
                           description: 'Müşteri değerlendirmelerini ve puanlarını gösterin', 
@@ -1614,6 +1627,7 @@ export default function WebsiteManager() {
                           { key: 'showServices', label: 'Hizmetler', value: showServices },
                           { key: 'showTeam', label: 'Ekibimiz', value: showTeam },
                           { key: 'showGallery', label: 'Galeri', value: showGallery },
+                          { key: 'showBlog', label: 'Blog', value: showBlog },
                           { key: 'showReviews', label: 'Yorumlar', value: showReviews },
                           { key: 'showContact', label: 'İletişim', value: showContact }
                         ].map((section) => (
@@ -1651,7 +1665,7 @@ export default function WebsiteManager() {
                             Bölüm değişiklikleri anlık olarak uygulanır
                           </p>
                           <p className="text-xs text-slate-400">
-                            Aktif: {[showServices, showTeam, showGallery, showReviews, showContact].filter(Boolean).length}/5 bölüm
+                            Aktif: {[showServices, showTeam, showGallery, showBlog, showReviews, showContact].filter(Boolean).length}/6 bölüm
                           </p>
                         </div>
                         

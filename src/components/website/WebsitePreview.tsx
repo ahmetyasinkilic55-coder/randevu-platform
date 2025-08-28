@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { 
   Star, MapPin, Phone, Mail, Clock, Calendar, MessageCircle, ExternalLink,
   Camera, Eye, ArrowRight, Plus, Check, Award, Heart, Sparkles, Users, Play,
-  ChevronLeft, ChevronRight, X
+  ChevronLeft, ChevronRight, X, BookOpen, FileText
 } from 'lucide-react'
 import AppointmentModal from '../AppointmentModal'
 import ProjectInquiryModal from '../modals/ProjectInquiryModal'
@@ -79,6 +80,7 @@ interface BusinessData {
     showServices: boolean
     showTeam: boolean
     showGallery: boolean
+    showBlog: boolean
     showReviews: boolean
     showMap: boolean
     showContact: boolean
@@ -115,6 +117,7 @@ interface WebsitePreviewProps {
     showServices?: boolean
     showTeam?: boolean
     showGallery?: boolean
+    showBlog?: boolean
     showReviews?: boolean
     showMap?: boolean
     showContact?: boolean
@@ -123,13 +126,15 @@ interface WebsitePreviewProps {
   }
   isModal?: boolean
   device?: string
+  businessSlug?: string
 }
 
 export default function WebsitePreview({ 
   businessData, 
   customizations, 
   isModal = false, 
-  device = 'desktop' 
+  device = 'desktop',
+  businessSlug
 }: WebsitePreviewProps) {
   // States for different modals
   const [appointmentModalOpen, setAppointmentModalOpen] = useState(false)
@@ -146,6 +151,10 @@ export default function WebsitePreview({
   // Mobile menu state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   
+  // Blog posts state
+  const [blogPosts, setBlogPosts] = useState<any[]>([])
+  const [blogLoading, setBlogLoading] = useState(true)
+  
   // Check if mobile on mount
   React.useEffect(() => {
     const checkMobile = () => {
@@ -156,6 +165,28 @@ export default function WebsitePreview({
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+  
+  // Fetch blog posts for this business
+  useEffect(() => {
+    const fetchBlogPosts = async () => {
+      try {
+        setBlogLoading(true)
+        const response = await fetch(`/api/blog/business/${businessData.id}`)
+        if (response.ok) {
+          const posts = await response.json()
+          setBlogPosts(posts)
+        }
+      } catch (error) {
+        console.error('Blog yazıları yüklenirken hata:', error)
+      } finally {
+        setBlogLoading(false)
+      }
+    }
+    
+    if (businessData?.id) {
+      fetchBlogPosts()
+    }
+  }, [businessData?.id])
   
   // Gallery navigation functions
   const nextImage = () => {
@@ -334,6 +365,9 @@ export default function WebsitePreview({
               {customizations.showGallery && (
                 <a href="#gallery" className="text-white/90 hover:text-white transition-colors font-semibold [text-shadow:_1px_1px_2px_rgba(0,0,0,0.8)]">Galeri</a>
               )}
+              {blogPosts.length > 0 && customizations.showBlog && (
+                <a href="#blog" className="text-white/90 hover:text-white transition-colors font-semibold [text-shadow:_1px_1px_2px_rgba(0,0,0,0.8)]">Blog</a>
+              )}
               {customizations.showReviews && (
                 <a href="#reviews" className="text-white/90 hover:text-white transition-colors font-semibold [text-shadow:_1px_1px_2px_rgba(0,0,0,0.8)]">Yorumlar</a>
               )}
@@ -447,6 +481,17 @@ export default function WebsitePreview({
                       </a>
                     )}
                     
+                    {blogPosts.length > 0 && customizations.showBlog && (
+                      <a 
+                        href="#blog" 
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors text-sm"
+                      >
+                        <BookOpen className="w-4 h-4 text-orange-600" />
+                        <span className="font-medium text-gray-900">Blog</span>
+                      </a>
+                    )}
+                    
                     {customizations.showReviews && (
                       <a 
                         href="#reviews" 
@@ -525,7 +570,7 @@ export default function WebsitePreview({
             {/* Animated Badge */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full px-5 py-2 shadow-xl">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-sm shadow-green-400/50"></div>
-              <span className="text-white font-medium [text-shadow:_1px_1px_2px_rgba(0,0,0,0.8)]">Şu an açık • Hemen randevu alabilirsiniz</span>
+              <span className="text-white font-medium [text-shadow:_1px_1px_2px_rgba(0,0,0,0.8)]"> Hemen randevu alabilirsiniz</span>
             </div>
             
             {/* Main Title with Gradient Animation */}
@@ -570,7 +615,7 @@ export default function WebsitePreview({
               <div className="flex flex-wrap items-center justify-center gap-6 text-white/70 text-sm">
                 <div className="flex items-center gap-2">
                   <Award className="w-4 h-4 text-green-400" />
-                  <span className="[text-shadow:_1px_1px_2px_rgba(0,0,0,0.8)]">Lisanslı & Sertifikalı</span>
+                  <span className="[text-shadow:_1px_1px_2px_rgba(0,0,0,0.8)]">Lisanslı & Güvenilir</span>
                 </div>
                 <div className="w-1 h-1 bg-white/50 rounded-full"></div>
                 <div className="flex items-center gap-2">
@@ -1182,6 +1227,159 @@ export default function WebsitePreview({
         </div>
       )}
 
+      {/* Modern Blog Section */}
+      {blogPosts.length > 0 && customizations.showBlog && (
+        <div id="blog" className="py-32 px-8 bg-gray-50 relative overflow-hidden">
+          {/* Animated Background */}
+          <div className="absolute inset-0">
+            <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-blue-100/30 to-purple-100/30 rounded-full blur-3xl -translate-x-1/3 -translate-y-1/3 animate-pulse"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-green-100/30 to-yellow-100/30 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 animate-pulse" style={{ animationDelay: '1s' }}></div>
+          </div>
+          
+          <div className="container mx-auto max-w-7xl relative">
+            {/* Section Header */}
+            <div className="mb-20">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+                <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">Blog Yazıları</span>
+                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+              </div>
+              <h2 className="text-5xl md:text-6xl font-black text-center mb-6">
+                <span className="bg-gradient-to-r from-gray-900 to-gray-900 bg-clip-text text-transparent" style={{
+                  backgroundImage: `linear-gradient(to right, #1f2937, ${colors.primary}, #1f2937)`
+                }}>
+                  Son Yazılarımız
+                </span>
+              </h2>
+              <p className="text-xl text-gray-600 text-center max-w-3xl mx-auto">
+                En güncel bilgiler ve uzman görüşleri ile sizleri bilgilendiriyoruz
+              </p>
+            </div>
+            
+            {/* Blog Posts Grid */}
+            {blogLoading ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {[...Array(3)].map((_, index) => (
+                  <div key={index} className="bg-white rounded-3xl overflow-hidden shadow-lg">
+                    <div className="h-64 bg-gray-200 animate-pulse"></div>
+                    <div className="p-8">
+                      <div className="h-4 bg-gray-200 rounded animate-pulse mb-4"></div>
+                      <div className="h-6 bg-gray-200 rounded animate-pulse mb-3"></div>
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {blogPosts.map((post, index) => (
+                  <Link 
+                    key={post.id}
+                    href={`/${businessSlug}/${post.slug}`}
+                    className="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+                  >
+                    {/* Cover Image */}
+                    <div className="relative h-64 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                      {post.featuredImage ? (
+                        <CloudinaryImage
+                          src={post.featuredImage}
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          transformation={{
+                            width: 500,
+                            height: 300,
+                            crop: 'fill',
+                            quality: 'auto:good'
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center" style={{ background: colors.gradient }}>
+                          <div className="text-center text-white">
+                            <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                            <p className="text-sm font-medium opacity-75">{businessData.name}</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      
+                      {/* Date Badge */}
+                      <div className="absolute top-4 left-4">
+                        <div className="bg-white/90 backdrop-blur-sm border border-white/20 rounded-xl px-3 py-1.5 text-xs font-semibold text-gray-700">
+                          {new Date(post.createdAt).toLocaleDateString('tr-TR', { 
+                            day: 'numeric', 
+                            month: 'short',
+                            year: 'numeric'
+                          })}
+                        </div>
+                      </div>
+                      
+                      {/* Views Badge */}
+                      <div className="absolute top-4 right-4">
+                        <div className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl px-3 py-1.5 text-xs font-semibold text-white flex items-center gap-1">
+                          <Eye className="w-3 h-3" />
+                          <span>{post.views || 0}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Content */}
+                    <div className="p-8">
+                      {/* Author */}
+                      <div className="flex items-center gap-2 mb-4">
+                        <div 
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                          style={{ background: colors.gradient }}
+                        >
+                          {post.authorUser?.name?.charAt(0) || businessData.name.charAt(0)}
+                        </div>
+                        <span className="text-sm text-gray-600">{post.authorUser?.name || businessData.name}</span>
+                      </div>
+                      
+                      {/* Title */}
+                      <h3 className="text-xl font-black text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                        {post.title}
+                      </h3>
+                      
+                      {/* Excerpt */}
+                      <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-6">
+                        {post.excerpt}
+                      </p>
+                      
+                      {/* Read More */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1 text-sm text-gray-500">
+                          <Clock className="w-4 h-4" />
+                          <span>5 dk okuma</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: colors.primary }}>
+                          <span>Devamını Oku</span>
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+            
+            {/* View All Posts Button */}
+            {blogPosts.length > 0 && (
+              <div className="text-center mt-16">
+                <button
+                  className="inline-flex items-center gap-3 bg-white border-2 border-gray-200 hover:border-gray-300 px-8 py-4 rounded-2xl font-bold text-gray-700 hover:text-gray-900 shadow-lg hover:shadow-xl transition-all duration-300 group"
+                >
+                  <BookOpen className="w-5 h-5" />
+                  <span>Tüm Blog Yazılarını Gör</span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
       {/* Ultra Modern Contact Section */}
       {customizations.showContact && (
         <div id="contact" className="py-32 px-8 bg-white relative overflow-hidden">
@@ -1610,7 +1808,20 @@ export default function WebsitePreview({
           name: businessData.name,
           phone: businessData.phone,
           services: businessData.services || [],
-          staff: businessData.staff || []
+          staff: businessData.staff || [],
+          appointmentSettings: businessData.appointmentSettings,
+          workingHours: businessData.workingHours ? businessData.workingHours.map(wh => ({
+            // JavaScript Date.getDay() formatına uygun dönüşüm: 0=Pazar, 1=Pazartesi, 2=Salı, 3=Çarşamba, 4=Perşembe, 5=Cuma, 6=Cumartesi
+            dayOfWeek: ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'].indexOf(wh.dayOfWeek),
+            isOpen: !wh.isClosed,
+            openTime: wh.openTime,
+            closeTime: wh.closeTime
+          })) : undefined
+        }}
+        customizations={{
+          primaryColor: customizations.primaryColor,
+          secondaryColor: customizations.secondaryColor,
+          gradientColors: customizations.gradientColors
         }}
       />
       
@@ -1663,7 +1874,8 @@ export default function WebsitePreview({
         ...businessData,
         workingHours: businessData.workingHours.map(wh => ({
           ...wh,
-          dayOfWeek: ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'].indexOf(wh.dayOfWeek),
+          // JavaScript Date.getDay() formatına uygun dönüşüm: 0=Pazar, 1=Pazartesi, 2=Salı, 3=Çarşamba, 4=Perşembe, 5=Cuma, 6=Cumartesi
+          dayOfWeek: ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'].indexOf(wh.dayOfWeek),
           isOpen: !wh.isClosed
         }))
       }} />

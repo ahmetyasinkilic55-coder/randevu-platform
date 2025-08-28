@@ -68,6 +68,7 @@ interface BusinessData {
     showServices: boolean
     showTeam?: boolean
     showGallery: boolean
+    showBlog: boolean
     showReviews: boolean
     showMap: boolean
     showContact: boolean
@@ -109,9 +110,11 @@ interface BusinessData {
 }
 
 export default function BusinessSiteClient({ 
-  businessData 
+  businessData,
+  businessSlug
 }: { 
-  businessData: BusinessData 
+  businessData: BusinessData
+  businessSlug: string
 }) {
   // Debug: Log businessData to see what we have
   console.log('🔧 [BusinessSiteClient] BusinessData:', {
@@ -187,6 +190,7 @@ export default function BusinessSiteClient({
       showServices: businessData.websiteConfig.showServices,
       showTeam: businessData.websiteConfig.showTeam || false,
       showGallery: businessData.websiteConfig.showGallery,
+      showBlog: businessData.websiteConfig.showBlog || false,
       showReviews: businessData.websiteConfig.showReviews,
       showMap: businessData.websiteConfig.showMap,
       showContact: businessData.websiteConfig.showContact
@@ -206,6 +210,7 @@ export default function BusinessSiteClient({
     showServices: businessData.websiteConfig.showServices,
     showTeam: businessData.websiteConfig.showTeam,
     showGallery: businessData.websiteConfig.showGallery,
+    showBlog: businessData.websiteConfig.showBlog || false,
     showReviews: businessData.websiteConfig.showReviews,
     showMap: businessData.websiteConfig.showMap,
     showContact: businessData.websiteConfig.showContact,
@@ -222,6 +227,7 @@ export default function BusinessSiteClient({
     showServices: true,
     showTeam: true,
     showGallery: true,
+    showBlog: false, // Default olarak blog kapalı
     showReviews: true,
     showMap: true,
     showContact: true,
@@ -235,6 +241,7 @@ export default function BusinessSiteClient({
       customizations={customizations}
       isModal={false}
       device="desktop"
+      businessSlug={businessSlug}
     />
   )
 }

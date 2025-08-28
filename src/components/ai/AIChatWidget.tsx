@@ -695,6 +695,17 @@ const AIChatWidget: React.FC<AIChatWidgetProps> = ({ businessData }) => {
   const createAppointment = async () => {
     setIsTyping(true)
     
+    // Guest kullanıcı için gerekli bilgilerin kontrolü
+    if (!customerName.trim() || !customerPhone.trim()) {
+      addMessage(
+        '❌ Lütfen adınızı ve telefon numaranızı doğru bir şekilde girin.',
+        false,
+        [{ text: '📞 Telefon ile Ara', action: 'call' }]
+      )
+      setIsTyping(false)
+      return
+    }
+    
     try {
       // API çağrısı yapacağız
       const response = await fetch('/api/appointments', {
@@ -706,8 +717,9 @@ const AIChatWidget: React.FC<AIChatWidgetProps> = ({ businessData }) => {
           businessId: businessData.id,
           serviceId: selectedService?.id,
           staffId: selectedStaff?.id,
-          customerName,
-          customerPhone,
+          customerName: customerName.trim(),
+          customerPhone: customerPhone.trim(),
+          customerEmail: '', // AI Chat'te email toplamadığımız için boş
           appointmentDate: selectedDate,
           appointmentTime: selectedTime,
           notes: appointmentNotes,
@@ -727,8 +739,10 @@ const AIChatWidget: React.FC<AIChatWidgetProps> = ({ businessData }) => {
           ]
         )
       } else {
+        const errorData = await response.json().catch(() => ({ error: 'Bilinmeyen hata' }))
+        console.error('Appointment creation failed:', errorData)
         addMessage(
-          '❌ Randevu oluşturulurken bir hata oluştu. Lütfen telefon ile iletişime geçin.',
+          `❌ ${errorData.error || 'Randevu oluşturulurken bir hata oluştu.'}\n\nLütfen telefon ile iletişime geçin.`,
           false,
           [{ text: '📞 Telefon ile Ara', action: 'call' }]
         )

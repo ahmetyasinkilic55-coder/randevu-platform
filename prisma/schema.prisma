@@ -37,6 +37,7 @@ model User {
   sessions   Session[]
   favorites  Favorite[]
   notificationSettings NotificationSettings?
+  blogPosts  BlogPost[]
 
   @@map("users")
 }
@@ -69,6 +70,46 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
+}
+
+model BlogPost {
+  id            String   @id @default(cuid())
+  title         String
+  slug          String   @unique
+  content       String   @db.Text
+  excerpt       String
+  featuredImage String?
+  
+  // Categorization
+  category      String
+  tags          String[] @default([])
+  
+  // Publishing
+  isPublished   Boolean   @default(false)
+  publishDate   DateTime?
+  
+  // Metadata
+  author        String
+  readTime      String    @default("1 dk")
+  views         Int       @default(0)
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String?
+  
+  // Relations
+  authorId      String?
+  authorUser    User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  
+  // Business relation (blog posts can be business-specific)
+  businessId    String?
+  business      Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("blog_posts")
 }
 
 model Category {
@@ -184,6 +225,7 @@ model Business {
   settings           BusinessSettings?
   projectRequests    ProjectRequest[]
   consultationRequests ConsultationRequest[]
+  blogPosts          BlogPost[]
   
   @@map("businesses")
 }
@@ -451,6 +493,7 @@ model WebsiteConfig {
   showServices Boolean @default(true)
   showTeam     Boolean @default(true)
   showGallery  Boolean @default(true)
+  showBlog     Boolean @default(false)
   showReviews  Boolean @default(true)
   showMap      Boolean @default(true)
   showContact  Boolean @default(true)

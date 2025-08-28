@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { X, Calendar, Clock, User, Scissors, Loader2, CheckCircle, ChevronLeft, ChevronRight, Star } from 'lucide-react'
+import { X, Calendar, Clock, User, Scissors, Loader2, CheckCircle, ChevronLeft, ChevronRight, Star, Phone, Mail, UserCheck, ArrowRight } from 'lucide-react'
 
 interface Service {
   id: string
@@ -61,14 +61,27 @@ interface AppointmentModalProps {
   isOpen: boolean
   onClose: () => void
   business: Business
+  customizations?: {
+    primaryColor?: string
+    secondaryColor?: string
+    gradientColors?: string
+  }
 }
 
 export default function AppointmentModal({ 
   isOpen, 
   onClose, 
-  business
+  business,
+  customizations
 }: AppointmentModalProps) {
   const { data: session } = useSession()
+  
+  // Tema renklerini al veya varsayılan değerleri kullan
+  const themeColors = {
+    primary: customizations?.primaryColor || '#2563eb',
+    secondary: customizations?.secondaryColor || '#1d4ed8',
+    gradient: customizations?.gradientColors || 'linear-gradient(135deg, #2563eb, #1d4ed8)'
+  }
   
   // Debug: Check if we received the business data correctly
   console.log('🔧 [AppointmentModal] Business data:', {
@@ -97,6 +110,11 @@ export default function AppointmentModal({
   const [notes, setNotes] = useState('')
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [calendarDates, setCalendarDates] = useState<Date[]>([])
+  
+  // Guest user information states
+  const [guestName, setGuestName] = useState('')
+  const [guestPhone, setGuestPhone] = useState('')
+  const [guestEmail, setGuestEmail] = useState('')
 
   // Utility functions for appointment settings and staff availability
   const isStaffAvailable = (staff: Staff, date: Date, time?: string) => {
@@ -168,6 +186,11 @@ export default function AppointmentModal({
       setNotes('')
       setSuccess(false)
       setCurrentMonth(new Date())
+      
+      // Guest user bilgilerini sıfırla
+      setGuestName('')
+      setGuestPhone('')
+      setGuestEmail('')
     }
   }, [isOpen])
 
@@ -247,9 +270,19 @@ export default function AppointmentModal({
   }
 
   const handleBookAppointment = async () => {
+    // Eğer kullanıcı giriş yapmamışsa, kullanıcı bilgilerini kontrol et
     if (!session?.user) {
-      window.location.href = '/auth/signin?callbackUrl=' + encodeURIComponent(window.location.href)
-      return
+      if (!guestName.trim() || !guestPhone.trim()) {
+        alert('Lütfen adınızı ve telefon numaranızı girin')
+        return
+      }
+      
+      // Telefon numara formatını kontrol et
+      const phoneRegex = /^[+]?[0-9\s-()]{10,}$/
+      if (!phoneRegex.test(guestPhone.trim())) {
+        alert('Lütfen geçerli bir telefon numarası girin')
+        return
+      }
     }
 
     console.log('Creating appointment with data:', {
@@ -268,9 +301,9 @@ export default function AppointmentModal({
         staffId: selectedStaff!.id,
         appointmentDate: selectedDate, // YYYY-MM-DD format
         appointmentTime: selectedTime, // HH:MM format
-        customerName: session.user.name || 'İsimsiz Müşteri',
-        customerPhone: session.user.phone || '',
-        customerEmail: session.user.email || '',
+        customerName: session?.user ? (session.user.name || 'İsimsiz Müşteri') : guestName.trim(),
+        customerPhone: session?.user ? (session.user.phone || guestPhone.trim()) : guestPhone.trim(),
+        customerEmail: session?.user ? (session.user.email || '') : (guestEmail.trim() || ''),
         totalPrice: selectedService!.price,
         duration: selectedService!.duration,
         notes: notes || ''
@@ -285,10 +318,11 @@ export default function AppointmentModal({
       })
 
       if (response.ok) {
-        const result = await response.json()
-        console.log('Appointment created successfully:', result)
-        setSuccess(true)
-        setStep(5)
+      const result = await response.json()
+      console.log('Appointment created successfully:', result)
+      setSuccess(true)
+      // Giriş yapmış kullanıcılar için step 5, giriş yapmamış için step 6
+        setStep(session?.user ? 5 : 6)
       } else {
         const error = await response.json()
         console.error('Appointment creation failed:', error)
@@ -365,7 +399,10 @@ export default function AppointmentModal({
       <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[95vh] overflow-hidden shadow-2xl">
         
         {/* Elegant Header */}
-        <div className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 p-8 text-white">
+        <div 
+          className="relative p-8 text-white"
+          style={{ background: themeColors.gradient }}
+        >
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
           
@@ -400,14 +437,17 @@ export default function AppointmentModal({
               { num: 1, label: 'Hizmet', icon: Scissors },
               { num: 2, label: 'Uzman', icon: User },
               { num: 3, label: 'Tarih', icon: Calendar },
-              { num: 4, label: 'Saat', icon: Clock }
-            ].map(({ num, label, icon: Icon }) => (
+              { num: 4, label: session?.user ? 'Saat' : 'Bilgiler', icon: session?.user ? Clock : UserCheck },
+              ...((!session?.user) ? [{ num: 5, label: 'Saat', icon: Clock }] : [])
+            ].map(({ num, label, icon: Icon }, index) => (
               <div key={num} className="flex items-center">
                 <div className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
                   step >= num 
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-110' 
+                    ? 'text-white shadow-lg transform scale-110' 
                     : 'bg-white border-2 border-gray-200 text-gray-400'
-                }`}>
+                }`}
+                  style={step >= num ? { background: themeColors.gradient } : {}}
+                >
                   <Icon className="w-5 h-5" />
                   {step > num && (
                     <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
@@ -420,10 +460,13 @@ export default function AppointmentModal({
                     step >= num ? 'text-gray-900' : 'text-gray-500'
                   }`}>{label}</p>
                 </div>
-                {num < 4 && (
-                  <div className={`hidden sm:block w-16 h-1 mx-4 rounded-full transition-all duration-300 ${
-                    step > num ? 'bg-gradient-to-r from-blue-500 to-purple-600' : 'bg-gray-200'
-                  }`} />
+                {index < ((!session?.user) ? 4 : 3) && (
+                  <div 
+                    className={`hidden sm:block w-16 h-1 mx-4 rounded-full transition-all duration-300 ${
+                      step > num ? '' : 'bg-gray-200'
+                    }`}
+                    style={step > num ? { background: themeColors.gradient } : {}}
+                  />
                 )}
               </div>
             ))}
@@ -437,7 +480,12 @@ export default function AppointmentModal({
           {step === 1 && (
             <div className="space-y-6">
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Hangi hizmeti alacaksınız?</h3>
+                <h3 
+                  className="text-2xl font-bold mb-2"
+                  style={{ color: themeColors.primary }}
+                >
+                  Hangi hizmeti alacaksınız?
+                </h3>
                 <p className="text-gray-600">Size en uygun hizmeti seçin</p>
               </div>
               
@@ -451,18 +499,33 @@ export default function AppointmentModal({
                     }}
                     className={`group p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
                       selectedService?.id === service.id
-                        ? 'border-blue-500 bg-gradient-to-r from-blue-50 to-purple-50 shadow-lg'
+                        ? 'border-blue-500 shadow-lg'
                         : 'border-gray-200 hover:border-blue-300 bg-white'
                     }`}
+                    style={selectedService?.id === service.id ? { 
+                      borderColor: themeColors.primary, 
+                      background: `linear-gradient(to right, ${themeColors.primary}10, ${themeColors.secondary}10)` 
+                    } : {}}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-3">
-                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                          <div 
+                            className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg"
+                            style={{ background: themeColors.gradient }}
+                          >
                             {service.name.charAt(0)}
                           </div>
                           <div>
-                            <h4 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                            <h4 
+                              className="text-xl font-bold text-gray-900 transition-colors"
+                              onMouseEnter={(e) => {
+                                (e.target as HTMLElement).style.color = themeColors.primary
+                              }}
+                              onMouseLeave={(e) => {
+                                (e.target as HTMLElement).style.color = '#111827' // text-gray-900
+                              }}
+                            >
                               {service.name}
                             </h4>
                             <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
@@ -494,7 +557,12 @@ export default function AppointmentModal({
           {step === 2 && (
             <div className="space-y-6">
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Uzmanınızı seçin</h3>
+                <h3 
+                  className="text-2xl font-bold mb-2"
+                  style={{ color: themeColors.primary }}
+                >
+                  Uzmanınızı seçin
+                </h3>
                 <p className="text-gray-600">Deneyimli uzmanlarımızdan birini seçin</p>
               </div>
               
@@ -540,7 +608,15 @@ export default function AppointmentModal({
                         </div>
                         
                         <div className="flex-1">
-                          <h4 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                          <h4 
+                            className="text-xl font-bold text-gray-900 transition-colors"
+                            onMouseEnter={(e) => {
+                              (e.target as HTMLElement).style.color = themeColors.primary
+                            }}
+                            onMouseLeave={(e) => {
+                              (e.target as HTMLElement).style.color = '#111827' // text-gray-900
+                            }}
+                          >
                             {member.name}
                           </h4>
                           {member.specialty && (
@@ -593,7 +669,12 @@ export default function AppointmentModal({
           {step === 3 && (
             <div className="space-y-6">
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Uygun tarihinizi seçin</h3>
+                <h3 
+                  className="text-2xl font-bold mb-2"
+                  style={{ color: themeColors.primary }}
+                >
+                  Uygun tarihinizi seçin
+                </h3>
                 <p className="text-gray-600">Müsait olan tarihlerden birini seçin</p>
               </div>
 
@@ -625,15 +706,32 @@ export default function AppointmentModal({
                           
                           setCurrentMonth(new Date(shortcutDate.getFullYear(), shortcutDate.getMonth()))
                           setSelectedDate(dateString)
-                          setStep(4)
+                          // Giriş yapmış kullanıcılar saat seçimine (4), giriş yapmamış bilgi alma (4) adımına git
+                        setStep(session?.user ? 4 : 4) // Her iki durumda da 4'e git ama anlamları farklı
+                        }
+                      }}
+                      onMouseEnter={(e) => {
+                        if (isShortcutSelectable) {
+                          (e.target as HTMLElement).style.backgroundColor = `${themeColors.primary}30`
+                          ;(e.target as HTMLElement).style.transform = 'scale(1.05)'
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isShortcutSelectable) {
+                          (e.target as HTMLElement).style.backgroundColor = `${themeColors.primary}10`
+                          ;(e.target as HTMLElement).style.transform = 'scale(1)'
                         }
                       }}
                       disabled={!isShortcutSelectable}
                       className={`p-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                         isShortcutSelectable
-                          ? 'text-blue-600 bg-blue-50 hover:bg-blue-100 hover:scale-105'
+                          ? 'hover:scale-105'
                           : 'text-gray-400 bg-gray-50 cursor-not-allowed opacity-50'
                       }`}
+                      style={isShortcutSelectable ? {
+                        color: themeColors.primary,
+                        backgroundColor: `${themeColors.primary}10`
+                      } : {}}
                     >
                       <div>{shortcut.label}</div>
                       <div className="text-xs text-gray-500 mt-1">
@@ -651,58 +749,39 @@ export default function AppointmentModal({
 
               {/* Calendar Header - Geliştirilmiş Navigation */}
               <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => {
-                      const prevMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
-                      const today = new Date()
-                      // Sadece bugünkü aydan öncesine gitmeyi engelle
-                      if (prevMonth.getFullYear() > today.getFullYear() || 
-                          (prevMonth.getFullYear() === today.getFullYear() && prevMonth.getMonth() >= today.getMonth())) {
-                        setCurrentMonth(prevMonth)
-                      }
-                    }}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
-                    disabled={(() => {
-                      const prevMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
-                      const today = new Date()
-                      return prevMonth.getFullYear() < today.getFullYear() || 
-                             (prevMonth.getFullYear() === today.getFullYear() && prevMonth.getMonth() < today.getMonth())
-                    })()}
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  
-                  {/* Yıl geri git */}
-                  <button
-                    onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear() - 1, currentMonth.getMonth()))}
-                    className="px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-                    disabled={currentMonth.getFullYear() <= new Date().getFullYear()}
-                  >
-                    -1 Yıl
-                  </button>
-                </div>
+                <button
+                  onClick={() => {
+                    const prevMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
+                    const today = new Date()
+                    // Sadece bugünkü aydan öncesine gitmeyi engelle
+                    if (prevMonth.getFullYear() > today.getFullYear() || 
+                        (prevMonth.getFullYear() === today.getFullYear() && prevMonth.getMonth() >= today.getMonth())) {
+                      setCurrentMonth(prevMonth)
+                    }
+                  }}
+                  className="p-3 hover:bg-gray-100 rounded-xl transition-colors disabled:opacity-50 flex items-center space-x-2 text-gray-700"
+                  disabled={(() => {
+                    const prevMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1)
+                    const today = new Date()
+                    return prevMonth.getFullYear() < today.getFullYear() || 
+                           (prevMonth.getFullYear() === today.getFullYear() && prevMonth.getMonth() < today.getMonth())
+                  })()}
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                  <span className="text-sm font-medium text-gray-700">Önceki Ay</span>
+                </button>
                 
                 <h4 className="text-xl font-bold text-gray-900">
                   {formatMonthYear(currentMonth)}
                 </h4>
                 
-                <div className="flex items-center space-x-2">
-                  {/* Yıl ileri git */}
-                  <button
-                    onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear() + 1, currentMonth.getMonth()))}
-                    className="px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    +1 Yıl
-                  </button>
-                  
-                  <button
-                    onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </div>
+                <button
+                  onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
+                  className="p-3 hover:bg-gray-100 rounded-xl transition-colors flex items-center space-x-2 text-gray-700"
+                >
+                  <span className="text-sm font-medium text-gray-700">Sonraki Ay</span>
+                  <ChevronRight className="w-5 h-5" />
+                </button>
               </div>
 
               {/* Calendar Grid - 6 hafta (42 gün) */}
@@ -734,25 +813,51 @@ export default function AppointmentModal({
                           const day = String(date.getDate()).padStart(2, '0')
                           const dateString = `${year}-${month}-${day}`
                           setSelectedDate(dateString)
+                          // Giriş yapmış kullanıcılar saat seçimine (4), giriş yapmamış bilgi alma (4) adımına git
                           setStep(4)
+                        }
+                      }}
+                      onMouseEnter={(e) => {
+                        if (isSelectable && !isSelected) {
+                          (e.target as HTMLElement).style.backgroundColor = `${themeColors.primary}20`
+                          ;(e.target as HTMLElement).style.color = themeColors.primary
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isSelectable && !isSelected) {
+                          if (isToday) {
+                            (e.target as HTMLElement).style.backgroundColor = `${themeColors.primary}20`
+                            ;(e.target as HTMLElement).style.color = themeColors.primary
+                          } else {
+                            (e.target as HTMLElement).style.backgroundColor = 'transparent'
+                            ;(e.target as HTMLElement).style.color = isCurrentMonth ? '#111827' : '#9ca3af' // text-gray-900 : text-gray-400
+                          }
                         }
                       }}
                       disabled={!isSelectable}
                       className={`aspect-square p-2 rounded-xl text-sm font-medium transition-all duration-200 relative ${
                         isSelected
-                          ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105'
+                          ? 'text-white shadow-lg transform scale-105'
                           : isSelectable
-                          ? 'hover:bg-blue-50 hover:text-blue-600 text-gray-900'
+                          ? 'text-gray-900 hover:text-gray-700'
                           : 'text-gray-300 cursor-not-allowed'
                       } ${
                         !isCurrentMonth && isSelectable ? 'text-gray-400' : ''
                       } ${
-                        isToday && !isSelected ? 'bg-blue-100 text-blue-600 font-bold' : ''
+                        isToday && !isSelected ? 'font-bold' : ''
                       }`}
+                      style={isSelected ? { background: themeColors.gradient } : 
+                        isToday && !isSelected ? {
+                          backgroundColor: `${themeColors.primary}20`,
+                          color: themeColors.primary
+                        } : {}}
                     >
                       {date.getDate()}
                       {isToday && !isSelected && (
-                        <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-blue-500 rounded-full"></div>
+                        <div 
+                          className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full"
+                          style={{ backgroundColor: themeColors.primary }}
+                        ></div>
                       )}
                     </button>
                   )
@@ -771,11 +876,145 @@ export default function AppointmentModal({
             </div>
           )}
 
-          {/* Step 4: Premium Time Selection */}
-          {step === 4 && (
+          {/* Step 4: Guest Information (if not logged in) */}
+          {step === 4 && !session?.user && (
             <div className="space-y-6">
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Müsait saatinizi seçin</h3>
+                <h3 
+                  className="text-2xl font-bold mb-2"
+                  style={{ color: themeColors.primary }}
+                >
+                  İletişim Bilgileriniz
+                </h3>
+                <p className="text-gray-600">Randevu onayı için iletişim bilgilerinizi girin</p>
+              </div>
+
+              <div 
+                className="rounded-2xl p-6 mb-6"
+                style={{ background: `linear-gradient(to right, ${themeColors.primary}10, ${themeColors.secondary}10)` }}
+              >
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Ad Soyad <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={guestName}
+                      onChange={(e) => setGuestName(e.target.value)}
+                      placeholder="Adınızı ve soyadınızı girin"
+                      className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:border-transparent text-gray-900 placeholder-gray-500 bg-white"
+                      style={{ 
+                        outlineColor: themeColors.primary + '80'
+                      } as React.CSSProperties}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Telefon Numarası <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      value={guestPhone}
+                      onChange={(e) => setGuestPhone(e.target.value)}
+                      placeholder="0532 123 45 67"
+                      className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:border-transparent text-gray-900 placeholder-gray-500 bg-white"
+                      style={{ 
+                        outlineColor: themeColors.primary + '80'
+                      } as React.CSSProperties}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      E-posta (Opsiyonel)
+                    </label>
+                    <input
+                      type="email"
+                      value={guestEmail}
+                      onChange={(e) => setGuestEmail(e.target.value)}
+                      placeholder="ornek@email.com"
+                      className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:border-transparent text-gray-900 placeholder-gray-500 bg-white"
+                      style={{ 
+                        outlineColor: themeColors.primary + '80'
+                      } as React.CSSProperties}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Elegant Summary for guest users */}
+              <div className="bg-white border-2 border-blue-100 rounded-2xl p-6 mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-xl font-bold text-gray-900">Randevu Özeti</h4>
+                  <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Hizmet</p>
+                      <p className="font-semibold text-gray-900">{selectedService?.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Uzman</p>
+                      <p className="font-semibold text-gray-900">{selectedStaff?.name}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Tarih & Saat</p>
+                      <p className="font-semibold text-gray-900">
+                        {selectedDate && new Date(selectedDate + 'T12:00:00').toLocaleDateString('tr-TR', { 
+                          day: 'numeric', 
+                          month: 'long'
+                        })} - {selectedTime}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Süre & Ücret</p>
+                      <p className="font-semibold text-gray-900">{selectedService?.duration} dk - {selectedService?.price}₺</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-4">
+                <button
+                  onClick={() => setStep(3)} // Bilgi adımından tarih seçimine dön
+                  className="flex items-center space-x-2 px-6 py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors rounded-xl hover:bg-gray-100"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span>Geri Dön</span>
+                </button>
+                
+                <button
+                  onClick={() => setStep(5)} // Bilgi alındıktan sonra saat seçimine git
+                  disabled={!guestName.trim() || !guestPhone.trim()}
+                  className="group text-white py-4 px-8 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-3"
+                  style={{ background: themeColors.gradient }}
+                >
+                  <ArrowRight className="w-6 h-6" />
+                  <span>Devam Et</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Time Selection Step - Step 4 for logged-in users, Step 5 for guest users */}
+          {((step === 4 && session?.user) || (step === 5 && !session?.user)) && (
+            <div className="space-y-6">
+              <div className="text-center mb-8">
+                <h3 
+                  className="text-2xl font-bold mb-2"
+                  style={{ color: themeColors.primary }}
+                >
+                  Müsait saatinizi seçin
+                </h3>
                 <p className="text-gray-600">
                   {new Date(selectedDate + 'T12:00:00').toLocaleDateString('tr-TR', { 
                     weekday: 'long', 
@@ -801,13 +1040,31 @@ export default function AppointmentModal({
                           key={slot.time}
                           onClick={() => setSelectedTime(slot.time)}
                           disabled={!slot.available}
+                          onMouseEnter={(e) => {
+                            if (slot.available && selectedTime !== slot.time) {
+                              (e.target as HTMLElement).style.borderColor = themeColors.primary
+                              ;(e.target as HTMLElement).style.backgroundColor = `${themeColors.primary}20`
+                              ;(e.target as HTMLElement).style.color = themeColors.primary
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (slot.available && selectedTime !== slot.time) {
+                              (e.target as HTMLElement).style.borderColor = '#e5e7eb' // border-gray-200
+                              ;(e.target as HTMLElement).style.backgroundColor = 'white'
+                              ;(e.target as HTMLElement).style.color = '#111827' // text-gray-900
+                            }
+                          }}
                           className={`group p-4 rounded-xl border-2 font-semibold transition-all duration-200 ${
                             selectedTime === slot.time
-                              ? 'border-blue-500 bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105'
+                              ? 'text-white shadow-lg transform scale-105'
                               : slot.available
-                              ? 'border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-900 hover:text-blue-600'
+                              ? 'border-gray-200 text-gray-900'
                               : 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed opacity-50'
                           }`}
+                          style={selectedTime === slot.time ? {
+                            borderColor: themeColors.primary,
+                            background: themeColors.gradient
+                          } : {}}
                         >
                           <div className="text-center">
                             <div className="text-lg font-bold">{slot.time}</div>
@@ -838,7 +1095,10 @@ export default function AppointmentModal({
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
                         placeholder="Özel isteklerinizi, tercihlerinizi veya notlarınızı buraya yazabilirsiniz..."
-                        className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-gray-900 placeholder-gray-500 bg-white"
+                        className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:border-transparent resize-none text-gray-900 placeholder-gray-500 bg-white"
+                        style={{ 
+                          outlineColor: themeColors.primary + '80'
+                        } as React.CSSProperties}
                         rows={3}
                       />
                     </div>
@@ -888,7 +1148,10 @@ export default function AppointmentModal({
                   {/* Action Buttons */}
                   <div className="flex items-center justify-between pt-4">
                     <button
-                      onClick={() => setStep(3)}
+                      onClick={() => {
+                        // Giriş yapmış kullanıcılar için step 3'e (tarih), giriş yapmamış için step 4'e (bilgi) git
+                        setStep(session?.user ? 3 : 4)
+                      }}
                       className="flex items-center space-x-2 px-6 py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors rounded-xl hover:bg-gray-100"
                     >
                       <ChevronLeft className="w-4 h-4" />
@@ -899,7 +1162,8 @@ export default function AppointmentModal({
                       <button
                         onClick={handleBookAppointment}
                         disabled={bookingLoading}
-                        className="group bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white py-4 px-8 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-3"
+                        className="group text-white py-4 px-8 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-3"
+                        style={{ background: themeColors.gradient }}
                       >
                         {bookingLoading ? (
                           <>
@@ -920,8 +1184,8 @@ export default function AppointmentModal({
             </div>
           )}
 
-          {/* Step 5: Success Celebration */}
-          {step === 5 && success && (
+          {/* Success Celebration - Final Step */}
+          {((step === 5 && success && session?.user) || (step === 6 && success && !session?.user)) && (
             <div className="text-center py-12">
               <div className="relative mb-8">
                 <div className="w-24 h-24 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
@@ -946,7 +1210,8 @@ export default function AppointmentModal({
               
               <button
                 onClick={onClose}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-12 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                className="text-white py-4 px-12 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+                style={{ background: themeColors.gradient }}
               >
                 Mükemmel! 🚀
               </button>

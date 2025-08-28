@@ -17,9 +17,18 @@ interface PageProps {
 
 async function getBusinessBySlug(slug: string) {
   try {
-    console.log('🔍 [businessSlug] Looking for slug:', slug)
-    console.log('🕐 [businessSlug] Request time:', new Date().toISOString())
+    // Service worker ve diğer sistem dosyalarını filtrele
+    const systemFiles = [
+      'sw.js', 'service-worker.js', 'manifest.json', 
+      'robots.txt', 'sitemap.xml', 'favicon.ico',
+      '_next', 'api', 'auth', 'admin', 'dashboard'
+    ]
     
+    if (systemFiles.some(file => slug.startsWith(file))) {
+      console.log(`ℹ️ [businessSlug] Skipping system file request: ${slug}`)
+      return null
+    }
+   
     // WebsiteConfig'den slug ile işletmeyi bul - geliştirme aşamasında isPublished kontrolünü kaldırdık
     const websiteConfig = await prisma.websiteConfig.findUnique({
       where: {
@@ -196,6 +205,7 @@ async function getBusinessBySlug(slug: string) {
         showServices: websiteConfig.showServices,
         showTeam: websiteConfig.showTeam,
         showGallery: websiteConfig.showGallery,
+        showBlog: websiteConfig.showBlog,
         showReviews: websiteConfig.showReviews,
         showMap: websiteConfig.showMap,
         showContact: websiteConfig.showContact
@@ -251,11 +261,23 @@ export async function generateMetadata({ params }: PageProps) {
 
 export default async function BusinessPage({ params }: PageProps) {
   const { businessSlug } = await params
+  
+  // Service worker ve sistem dosyaları için erken return
+  const systemFiles = [
+    'sw.js', 'service-worker.js', 'manifest.json', 
+    'robots.txt', 'sitemap.xml', 'favicon.ico'
+  ]
+  
+  if (systemFiles.includes(businessSlug)) {
+    // Bu dosyalar için Next.js'in varsayılan handler'ına bırak
+    notFound()
+  }
+  
   const businessData = await getBusinessBySlug(businessSlug)
 
   if (!businessData) {
     notFound()
   }
 
-  return <BusinessSiteClient businessData={businessData} />
+  return <BusinessSiteClient businessData={businessData} businessSlug={businessSlug} />
 }
