@@ -38,6 +38,10 @@ model User {
   favorites  Favorite[]
   notificationSettings NotificationSettings?
   blogPosts  BlogPost[]
+  
+  // Raffle relations
+  raffleParticipations RaffleParticipation[]
+  wonRaffles          Raffle[]
 
   @@map("users")
 }
@@ -771,4 +775,77 @@ model Favorite {
   
   @@unique([userId, businessId])
   @@map("favorites")
+}
+
+// Raffle Models
+model Prize {
+  id          String @id @default(cuid())
+  title       String
+  description String
+  value       Int    // Prize value in Turkish Lira
+  image       String // Prize image URL
+  sponsor     String?
+  category    String
+  
+  // Relations
+  raffles     Raffle[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("prizes")
+}
+
+model Raffle {
+  id              String  @id @default(cuid())
+  month           Int     // 1-12
+  year            Int
+  
+  // Prize relation
+  prizeId         String
+  prize           Prize   @relation(fields: [prizeId], references: [id])
+  
+  // Raffle details
+  drawDate        DateTime
+  isActive        Boolean @default(true)
+  winnerAnnounced Boolean @default(false)
+  
+  // Winner (optional)
+  winnerId        String?
+  winner          User?   @relation(fields: [winnerId], references: [id])
+  
+  // Relations
+  participations  RaffleParticipation[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([month, year])
+  @@map("raffles")
+}
+
+model RaffleParticipation {
+  id            String   @id @default(cuid())
+  
+  // User relation
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Raffle relation
+  raffleId      String
+  raffle        Raffle   @relation(fields: [raffleId], references: [id], onDelete: Cascade)
+  
+  // Participation details
+  month         Int      // 1-12
+  year          Int
+  rightsUsed    Int      // Number of raffle rights used
+  participatedAt DateTime @default(now())
+  
+  // Result
+  won           Boolean  @default(false)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@map("raffle_participations")
 }

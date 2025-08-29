@@ -2,9 +2,24 @@
 
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { User, Lock, Bell, Smartphone, Mail, Eye, EyeOff, Check, X, Calendar, MapPin } from 'lucide-react'
+import { toast } from 'react-hot-toast'
+import {
+  UserIcon,
+  LockClosedIcon,
+  BellIcon,
+  DevicePhoneMobileIcon,
+  EnvelopeIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  CalendarDaysIcon,
+  MapPinIcon,
+  Cog6ToothIcon,
+  ChevronDownIcon
+} from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
-import MainHeader from '@/components/MainHeader'
+import Link from 'next/link'
 
 interface UserProfile {
   name: string
@@ -110,12 +125,17 @@ export default function SettingsPage() {
       if (response.ok) {
         await update() // Refresh session
         setMessage({ type: 'success', text: 'Profil bilgileri başarıyla güncellendi!' })
+        toast.success('Profil bilgileri başarıyla güncellendi!')
       } else {
         const data = await response.json()
-        setMessage({ type: 'error', text: data.error || 'Bir hata oluştu' })
+        const errorMessage = data.error || 'Bir hata oluştu'
+        setMessage({ type: 'error', text: errorMessage })
+        toast.error(errorMessage)
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Bir hata oluştu' })
+      const errorMessage = 'Profil güncellenirken bir hata oluştu'
+      setMessage({ type: 'error', text: errorMessage })
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -151,12 +171,17 @@ export default function SettingsPage() {
       if (response.ok) {
         setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
         setMessage({ type: 'success', text: 'Şifre başarıyla güncellendi!' })
+        toast.success('Şifre başarıyla güncellendi!')
       } else {
         const data = await response.json()
-        setMessage({ type: 'error', text: data.error || 'Bir hata oluştu' })
+        const errorMessage = data.error || 'Bir hata oluştu'
+        setMessage({ type: 'error', text: errorMessage })
+        toast.error(errorMessage)
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Bir hata oluştu' })
+      const errorMessage = 'Şifre güncellenirken bir hata oluştu'
+      setMessage({ type: 'error', text: errorMessage })
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -184,34 +209,103 @@ export default function SettingsPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header Skeleton */}
+        <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 shadow-lg border-b border-slate-700 sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16 sm:h-18">
+              <div className="flex items-center space-x-3 sm:space-x-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-lg sm:text-xl">R</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-lg sm:text-xl font-bold text-white">RandeVur</span>
+                  <span className="text-xs text-slate-400 hidden md:block">Dijital Randevu Sistemi</span>
+                </div>
+              </div>
+              <div className="animate-pulse bg-slate-700 h-10 w-32 rounded-lg"></div>
+            </div>
+          </div>
+        </header>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div className="animate-pulse space-y-6 sm:space-y-8">
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 sm:p-8">
+              <div className="h-8 bg-slate-200 rounded w-1/4 mb-4"></div>
+              <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+            </div>
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 sm:p-8 h-96"></div>
+          </div>
+        </div>
       </div>
     )
   }
 
   const tabs = [
-    { id: 'profile', name: 'Profil Bilgileri', icon: User },
-    { id: 'password', name: 'Şifre Değiştir', icon: Lock },
-    { id: 'notifications', name: 'Bildirimler', icon: Bell }
+    { id: 'profile', name: 'Profil Bilgileri', icon: UserIcon },
+    { id: 'password', name: 'Şifre Değiştir', icon: LockClosedIcon },
+    { id: 'notifications', name: 'Bildirimler', icon: BellIcon }
   ]
 
   return (
-    <>
-      <MainHeader />
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header - Ana sayfa ile uyumlu */}
+      <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 shadow-lg border-b border-slate-700 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-18">
+            {/* Left side - Logo */}
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                  <span className="text-white font-bold text-lg sm:text-xl">R</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-lg sm:text-xl font-bold text-white group-hover:text-emerald-300 transition-colors">RandeVur</span>
+                  <span className="text-xs text-slate-400 hidden md:block">Dijital Randevu Sistemi</span>
+                </div>
+              </Link>
+            </div>
+
+            {/* Right side - User Menu */}
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              {session && (
+                <div className="flex items-center space-x-1 sm:space-x-2 bg-slate-700 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 border border-slate-600">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center">
+                    <UserIcon className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+                  </div>
+                  <span className="text-xs sm:text-sm font-medium text-white hidden sm:block">
+                    {session.user?.name || 'Kullanıcı'}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Ayarlar</h1>
-          <p className="text-gray-600">Hesap bilgilerinizi ve tercihlerinizi yönetin.</p>
+        {/* Enhanced Header - Ana sayfa tasarımıyla uyumlu */}
+        <div className="relative overflow-hidden bg-white rounded-2xl shadow-lg border border-slate-200 mb-6 sm:mb-8">
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-50 to-teal-50 opacity-50"></div>
+          <div className="relative p-6 sm:p-8">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
+                <Cog6ToothIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
+                  Ayarlar
+                </h1>
+                <p className="text-slate-600 text-sm sm:text-base">Hesap bilgilerinizi ve tercihlerinizi yönetin</p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
           
-          {/* Tabs */}
-          <div className="border-b border-gray-200">
+          {/* Tabs - Ana sayfa stiliyle uyumlu */}
+          <div className="border-b border-slate-200">
             <nav className="flex">
               {tabs.map((tab) => {
                 const Icon = tab.icon
@@ -219,32 +313,41 @@ export default function SettingsPage() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center space-x-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                    className={`flex items-center space-x-2 px-4 sm:px-6 py-3 sm:py-4 text-sm font-medium border-b-2 transition-all duration-200 ${
                       activeTab === tab.id
-                        ? 'border-blue-500 text-blue-600 bg-blue-50'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        ? 'border-emerald-500 text-emerald-700 bg-emerald-50'
+                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 hover:bg-slate-50'
                     }`}
                   >
-                    <Icon className="w-5 h-5" />
-                    <span>{tab.name}</span>
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">{tab.name}</span>
+                    <span className="sm:hidden">
+                      {tab.id === 'profile' ? 'Profil' :
+                       tab.id === 'password' ? 'Şifre' :
+                       'Bildirim'}
+                    </span>
                   </button>
                 )
               })}
             </nav>
           </div>
 
-          {/* Content */}
-          <div className="p-6">
+          {/* Content - Ana sayfa card içeriği stiliyle uyumlu */}
+          <div className="p-4 sm:p-6">
             
-            {/* Messages */}
+            {/* Messages - Ana sayfa toast stiliyle uyumlu */}
             {message.text && (
-              <div className={`mb-6 p-4 rounded-lg flex items-center space-x-2 ${
+              <div className={`mb-6 p-4 rounded-xl flex items-center space-x-3 shadow-sm ${
                 message.type === 'success' 
-                  ? 'bg-green-50 text-green-800 border border-green-200' 
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' 
                   : 'bg-red-50 text-red-800 border border-red-200'
               }`}>
-                {message.type === 'success' ? <Check className="w-5 h-5" /> : <X className="w-5 h-5" />}
-                <span>{message.text}</span>
+                {message.type === 'success' ? (
+                  <CheckCircleIcon className="w-5 h-5 flex-shrink-0" />
+                ) : (
+                  <XCircleIcon className="w-5 h-5 flex-shrink-0" />
+                )}
+                <span className="font-medium">{message.text}</span>
               </div>
             )}
 
@@ -262,12 +365,12 @@ export default function SettingsPage() {
                       required
                       value={profile.name}
                       onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-slate-900 bg-white shadow-sm hover:border-slate-400 transition-colors"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
                       E-posta *
                     </label>
                     <input
@@ -275,60 +378,63 @@ export default function SettingsPage() {
                       required
                       value={profile.email}
                       onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-slate-900 bg-white shadow-sm hover:border-slate-400 transition-colors"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
                       Telefon
                     </label>
                     <input
                       type="tel"
                       value={profile.phone}
                       onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-slate-900 bg-white shadow-sm hover:border-slate-400 transition-colors"
                       placeholder="05XX XXX XX XX"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
                       Doğum Tarihi
                     </label>
                     <input
                       type="date"
                       value={profile.birthDate}
                       onChange={(e) => setProfile({ ...profile, birthDate: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-slate-900 bg-white shadow-sm hover:border-slate-400 transition-colors"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
                       Cinsiyet
                     </label>
-                    <select
-                      value={profile.gender || ''}
-                      onChange={(e) => setProfile({ ...profile, gender: e.target.value as any })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
-                    >
-                      <option value="">Seçiniz</option>
-                      <option value="MALE">Erkek</option>
-                      <option value="FEMALE">Kadın</option>
-                      <option value="OTHER">Diğer</option>
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={profile.gender || ''}
+                        onChange={(e) => setProfile({ ...profile, gender: e.target.value as any })}
+                        className="appearance-none w-full px-4 py-3 pr-10 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-slate-900 bg-white shadow-sm hover:border-slate-400 transition-colors"
+                      >
+                        <option value="">Seçiniz</option>
+                        <option value="MALE">Erkek</option>
+                        <option value="FEMALE">Kadın</option>
+                        <option value="OTHER">Diğer</option>
+                      </select>
+                      <ChevronDownIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+                    </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
                       Şehir
                     </label>
                     <input
                       type="text"
                       value={profile.city}
                       onChange={(e) => setProfile({ ...profile, city: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-slate-900 bg-white shadow-sm hover:border-slate-400 transition-colors"
                       placeholder="Şehir adı"
                     />
                   </div>
@@ -338,7 +444,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
                   >
                     {loading ? 'Güncelleniyor...' : 'Kaydet'}
                   </button>
@@ -346,12 +452,12 @@ export default function SettingsPage() {
               </form>
             )}
 
-            {/* Password Tab */}
+            {/* Password Tab - Ana sayfa input stiliyle uyumlu */}
             {activeTab === 'password' && (
               <form onSubmit={handlePasswordUpdate} className="space-y-6 max-w-md">
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Mevcut Şifre *
                   </label>
                   <div className="relative">
@@ -360,20 +466,20 @@ export default function SettingsPage() {
                       required
                       value={passwordData.currentPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                      className="w-full px-4 py-3 pr-12 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-slate-900 bg-white shadow-sm hover:border-slate-400 transition-colors"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                     >
-                      {showPasswords.current ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showPasswords.current ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Yeni Şifre *
                   </label>
                   <div className="relative">
@@ -382,21 +488,21 @@ export default function SettingsPage() {
                       required
                       value={passwordData.newPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                      className="w-full px-4 py-3 pr-12 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-slate-900 bg-white shadow-sm hover:border-slate-400 transition-colors"
                       minLength={6}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                     >
-                      {showPasswords.new ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showPasswords.new ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
                     Yeni Şifre Tekrar *
                   </label>
                   <div className="relative">
@@ -405,15 +511,15 @@ export default function SettingsPage() {
                       required
                       value={passwordData.confirmPassword}
                       onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                      className="w-full px-4 py-3 pr-12 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-slate-900 bg-white shadow-sm hover:border-slate-400 transition-colors"
                       minLength={6}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                     >
-                      {showPasswords.confirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showPasswords.confirm ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
@@ -422,7 +528,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
                   >
                     {loading ? 'Güncelleniyor...' : 'Şifreyi Değiştir'}
                   </button>
@@ -430,96 +536,104 @@ export default function SettingsPage() {
               </form>
             )}
 
-            {/* Notifications Tab */}
+            {/* Notifications Tab - Ana sayfa card stiliyle uyumlu */}
             {activeTab === 'notifications' && (
               <div className="space-y-6">
                 
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Bildirim Tercihleri</h3>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-4">Bildirim Tercihleri</h3>
                   <div className="space-y-4">
                     
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-sm">
                       <div className="flex items-center space-x-3">
-                        <Mail className="w-5 h-5 text-gray-400" />
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <EnvelopeIcon className="w-5 h-5 text-blue-600" />
+                        </div>
                         <div>
-                          <p className="font-medium text-gray-900">E-posta Bildirimleri</p>
-                          <p className="text-sm text-gray-600">Randevu ve güncellemeler hakkında e-posta alın</p>
+                          <p className="font-medium text-slate-900">E-posta Bildirimleri</p>
+                          <p className="text-sm text-slate-600">Randevu ve güncellemeler hakkında e-posta alın</p>
                         </div>
                       </div>
                       <button
                         onClick={() => handleNotificationUpdate('emailNotifications')}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                          notifications.emailNotifications ? 'bg-blue-600' : 'bg-gray-200'
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
+                          notifications.emailNotifications ? 'bg-emerald-600' : 'bg-slate-200'
                         }`}
                       >
                         <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 shadow-sm ${
                             notifications.emailNotifications ? 'translate-x-6' : 'translate-x-1'
                           }`}
                         />
                       </button>
                     </div>
 
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-sm">
                       <div className="flex items-center space-x-3">
-                        <Smartphone className="w-5 h-5 text-gray-400" />
+                        <div className="p-2 bg-green-100 rounded-lg">
+                          <DevicePhoneMobileIcon className="w-5 h-5 text-green-600" />
+                        </div>
                         <div>
-                          <p className="font-medium text-gray-900">SMS Bildirimleri</p>
-                          <p className="text-sm text-gray-600">Önemli güncellemeler için SMS alın</p>
+                          <p className="font-medium text-slate-900">SMS Bildirimleri</p>
+                          <p className="text-sm text-slate-600">Önemli güncellemeler için SMS alın</p>
                         </div>
                       </div>
                       <button
                         onClick={() => handleNotificationUpdate('smsNotifications')}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                          notifications.smsNotifications ? 'bg-blue-600' : 'bg-gray-200'
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
+                          notifications.smsNotifications ? 'bg-emerald-600' : 'bg-slate-200'
                         }`}
                       >
                         <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 shadow-sm ${
                             notifications.smsNotifications ? 'translate-x-6' : 'translate-x-1'
                           }`}
                         />
                       </button>
                     </div>
 
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-sm">
                       <div className="flex items-center space-x-3">
-                        <Calendar className="w-5 h-5 text-gray-400" />
+                        <div className="p-2 bg-purple-100 rounded-lg">
+                          <CalendarDaysIcon className="w-5 h-5 text-purple-600" />
+                        </div>
                         <div>
-                          <p className="font-medium text-gray-900">Randevu Hatırlatmaları</p>
-                          <p className="text-sm text-gray-600">Yaklaşan randevularınız için hatırlatma alın</p>
+                          <p className="font-medium text-slate-900">Randevu Hatırlatmaları</p>
+                          <p className="text-sm text-slate-600">Yaklaşan randevularınız için hatırlatma alın</p>
                         </div>
                       </div>
                       <button
                         onClick={() => handleNotificationUpdate('appointmentReminders')}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                          notifications.appointmentReminders ? 'bg-blue-600' : 'bg-gray-200'
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
+                          notifications.appointmentReminders ? 'bg-emerald-600' : 'bg-slate-200'
                         }`}
                       >
                         <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 shadow-sm ${
                             notifications.appointmentReminders ? 'translate-x-6' : 'translate-x-1'
                           }`}
                         />
                       </button>
                     </div>
 
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-sm">
                       <div className="flex items-center space-x-3">
-                        <Bell className="w-5 h-5 text-gray-400" />
+                        <div className="p-2 bg-amber-100 rounded-lg">
+                          <BellIcon className="w-5 h-5 text-amber-600" />
+                        </div>
                         <div>
-                          <p className="font-medium text-gray-900">Promosyon Mesajları</p>
-                          <p className="text-sm text-gray-600">Özel fırsatlar ve kampanyalar hakkında bilgi alın</p>
+                          <p className="font-medium text-slate-900">Promosyon Mesajları</p>
+                          <p className="text-sm text-slate-600">Özel fırsatlar ve kampanyalar hakkında bilgi alın</p>
                         </div>
                       </div>
                       <button
                         onClick={() => handleNotificationUpdate('promotionalMessages')}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                          notifications.promotionalMessages ? 'bg-blue-600' : 'bg-gray-200'
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
+                          notifications.promotionalMessages ? 'bg-emerald-600' : 'bg-slate-200'
                         }`}
                       >
                         <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 shadow-sm ${
                             notifications.promotionalMessages ? 'translate-x-6' : 'translate-x-1'
                           }`}
                         />
@@ -531,8 +645,7 @@ export default function SettingsPage() {
             )}
           </div>
         </div>
-        </div>
       </div>
-    </>
+    </div>
   )
 }

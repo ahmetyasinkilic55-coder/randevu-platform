@@ -803,6 +803,15 @@ export default function Home() {
                         </Link>
                         
                         <Link
+                          href="/raffle"
+                          className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
+                          <GiftIcon className="w-4 h-4" />
+                          <span>Çekiliş Hakları</span>
+                        </Link>
+                        
+                        <Link
                           href="/settings"
                           className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                           onClick={() => setIsDropdownOpen(false)}

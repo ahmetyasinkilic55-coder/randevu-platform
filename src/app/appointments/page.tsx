@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
+import { toast } from 'react-hot-toast'
 import { 
   CalendarDaysIcon, 
   ClockIcon, 
@@ -23,12 +24,14 @@ import {
   CameraIcon,
   PlusIcon,
   ArrowRightIcon,
-  SparklesIcon
+  SparklesIcon,
+  Bars3Icon,
+  ChevronDownIcon
 } from '@heroicons/react/24/outline'
-import { StarIcon as StarSolid } from '@heroicons/react/24/solid'
+import { StarIcon as StarSolid, HeartIcon as HeartSolid } from '@heroicons/react/24/solid'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import MainHeader from '@/components/MainHeader'
+import { CloudinaryImage } from '@/components/cloudinary'
 
 interface Appointment {
   id: string
@@ -441,19 +444,34 @@ export default function AppointmentsPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-        <MainHeader />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="animate-pulse space-y-8">
-            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="bg-white p-6 rounded-2xl h-32"></div>
-              ))}
+      <div className="min-h-screen bg-gray-50">
+        {/* Header Skeleton */}
+        <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 shadow-lg border-b border-slate-700 sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16 sm:h-18">
+              <div className="flex items-center space-x-3 sm:space-x-4">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-lg sm:text-xl">R</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-lg sm:text-xl font-bold text-white">RandeVur</span>
+                  <span className="text-xs text-slate-400 hidden md:block">Dijital Randevu Sistemi</span>
+                </div>
+              </div>
+              <div className="animate-pulse bg-slate-700 h-10 w-32 rounded-lg"></div>
             </div>
-            <div className="space-y-4">
+          </div>
+        </header>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div className="animate-pulse space-y-6 sm:space-y-8">
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 sm:p-8">
+              <div className="h-8 bg-slate-200 rounded w-1/4 mb-4"></div>
+              <div className="h-4 bg-slate-200 rounded w-1/2"></div>
+            </div>
+            <div className="space-y-4 sm:space-y-6">
               {[1, 2, 3].map(i => (
-                <div key={i} className="bg-white p-8 rounded-2xl h-48"></div>
+                <div key={i} className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 sm:p-8 h-48"></div>
               ))}
             </div>
           </div>
@@ -463,59 +481,129 @@ export default function AppointmentsPage() {
   }
 
   return (
-    <>
-      <MainHeader />
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-          {/* Enhanced Header */}
-          <div className="relative overflow-hidden bg-white rounded-3xl shadow-xl border border-gray-100 mb-8">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 opacity-10"></div>
-            <div className="relative p-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center space-x-3 mb-2">
-                    <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl">
-                      <CalendarDaysIcon className="w-8 h-8 text-white" />
-                    </div>
-                    <div>
-                      <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                        Randevularım
-                      </h1>
-                      <p className="text-gray-600 text-lg">Tüm randevularınızı takip edin ve değerlendirin</p>
-                    </div>
-                  </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header - Ana sayfa ile uyumlu */}
+      <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 shadow-lg border-b border-slate-700 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-18">
+            {/* Left side - Logo */}
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                  <span className="text-white font-bold text-lg sm:text-xl">R</span>
                 </div>
-               
-              </div>
+                <div className="flex flex-col">
+                  <span className="text-lg sm:text-xl font-bold text-white group-hover:text-emerald-300 transition-colors">RandeVur</span>
+                  <span className="text-xs text-slate-400 hidden md:block">Dijital Randevu Sistemi</span>
+                </div>
+              </Link>
+            </div>
+
+            {/* Right side - User Menu */}
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              {session && (
+                <div className="flex items-center space-x-1 sm:space-x-2 bg-slate-700 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 border border-slate-600">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center">
+                    <UserIcon className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
+                  </div>
+                  <span className="text-xs sm:text-sm font-medium text-white hidden sm:block">
+                    {session.user?.name || 'Kullanıcı'}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
+        </div>
+      </header>
 
-          {/* Enhanced Filters */}
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
-            <div className="flex flex-col lg:flex-row gap-6">
-              <div className="flex-1">
-                <div className="relative">
-                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    placeholder="İşletme veya hizmet ara..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500"
-                  />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {/* Enhanced Header - Ana sayfa tasarımıyla uyumlu */}
+        <div className="relative overflow-hidden bg-white rounded-2xl shadow-lg border border-slate-200 mb-6 sm:mb-8">
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-50 to-teal-50 opacity-50"></div>
+          <div className="relative p-6 sm:p-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center space-x-3 sm:space-x-4 mb-2">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
+                    <CalendarDaysIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
+                      Randevularım
+                    </h1>
+                    <p className="text-slate-600 text-sm sm:text-base">Tüm randevularınızı takip edin ve değerlendirin</p>
+                  </div>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <FunnelIcon className="w-5 h-5 text-gray-400" />
-                  <span className="text-sm font-medium text-gray-700">Filtrele:</span>
+              {/* Stats Cards - Mobile optimized */}
+              <div className="hidden sm:flex items-center space-x-4">
+                <div className="bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-200">
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-emerald-700">{stats.total}</div>
+                    <div className="text-xs text-emerald-600">Toplam</div>
+                  </div>
                 </div>
+                <div className="bg-blue-50 px-4 py-2 rounded-xl border border-blue-200">
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-blue-700">{stats.completed}</div>
+                    <div className="text-xs text-blue-600">Tamamlandı</div>
+                  </div>
+                </div>
+                <div className="bg-yellow-50 px-4 py-2 rounded-xl border border-yellow-200">
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-yellow-700">{stats.reviewed}</div>
+                    <div className="text-xs text-yellow-600">Değerlendirildi</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Mobile Stats */}
+            <div className="sm:hidden grid grid-cols-3 gap-3 mt-4">
+              <div className="bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-200 text-center">
+                <div className="text-lg font-bold text-emerald-700">{stats.total}</div>
+                <div className="text-xs text-emerald-600">Toplam</div>
+              </div>
+              <div className="bg-blue-50 px-3 py-2 rounded-lg border border-blue-200 text-center">
+                <div className="text-lg font-bold text-blue-700">{stats.completed}</div>
+                <div className="text-xs text-blue-600">Tamam</div>
+              </div>
+              <div className="bg-yellow-50 px-3 py-2 rounded-lg border border-yellow-200 text-center">
+                <div className="text-lg font-bold text-yellow-700">{stats.reviewed}</div>
+                <div className="text-xs text-yellow-600">Yorum</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Enhanced Filters - Ana sayfa filtre tasarımıyla uyumlu */}
+        <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+            <div className="flex-1">
+              <div className="relative">
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="İşletme veya hizmet ara..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white text-slate-800 placeholder-slate-500 shadow-sm hover:border-slate-400 transition-colors"
+                />
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="flex items-center space-x-2">
+                <FunnelIcon className="w-5 h-5 text-slate-400" />
+                <span className="text-sm font-medium text-slate-700 hidden sm:inline">Filtrele:</span>
+              </div>
+              <div className="relative">
                 <select
                   value={filter}
                   onChange={(e) => setFilter(e.target.value as any)}
-                  className="border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white font-medium"
+                  className="appearance-none border border-slate-300 rounded-xl px-4 py-3 pr-10 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-slate-800 bg-white font-medium shadow-sm hover:border-slate-400 transition-colors min-w-[140px]"
                 >
                   <option value="all">Tümü ({appointments.length})</option>
                   <option value="upcoming">Yaklaşan ({appointments.filter(a => {
@@ -532,77 +620,80 @@ export default function AppointmentsPage() {
                   }).length})</option>
                   <option value="cancelled">İptal Edilenler ({stats.cancelled})</option>
                 </select>
+                <ChevronDownIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
               </div>
             </div>
-            
-            {/* Active Filters */}
-            {(filter !== 'all' || searchTerm) && (
-              <div className="flex items-center space-x-3 mt-4 pt-4 border-t border-gray-200">
-                <span className="text-sm text-gray-600">Aktif filtreler:</span>
-                {filter !== 'all' && (
-                  <span className="inline-flex items-center space-x-1 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm border border-blue-200">
-                    <span>{filter === 'upcoming' ? 'Yaklaşan' : filter === 'past' ? 'Geçmiş' : 'İptal Edilenler'}</span>
-                    <button onClick={() => setFilter('all')} className="text-blue-600 hover:text-blue-800 ml-1">×</button>
-                  </span>
-                )}
-                {searchTerm && (
-                  <span className="inline-flex items-center space-x-1 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm border border-green-200">
-                    <span>"{searchTerm}"</span>
-                    <button onClick={() => setSearchTerm('')} className="text-green-600 hover:text-green-800 ml-1">×</button>
-                  </span>
-                )}
-                <button
-                  onClick={() => {
-                    setFilter('all')
-                    setSearchTerm('')
-                  }}
-                  className="text-sm text-gray-500 hover:text-gray-700"
-                >
-                  Tümünü Temizle
-                </button>
-              </div>
-            )}
           </div>
-
-          {/* Appointments List */}
-          {error ? (
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
-              <div className="max-w-md mx-auto">
-                <div className="p-6 bg-red-50 rounded-2xl mb-6">
-                  <XCircleIcon className="w-16 h-16 text-red-500 mx-auto" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Bir Hata Oluştu</h3>
-                <p className="text-gray-600 mb-6">{error}</p>
-                <button
-                  onClick={fetchAppointments}
-                  className="inline-flex items-center space-x-2 px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium"
-                >
-                  <span>Tekrar Dene</span>
-                  <ArrowRightIcon className="w-4 h-4" />
-                </button>
-              </div>
+          
+          {/* Active Filters - Ana sayfa stiliyle uyumlu */}
+          {(filter !== 'all' || searchTerm) && (
+            <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-slate-200">
+              <span className="text-sm text-slate-500">Aktif filtreler:</span>
+              {filter !== 'all' && (
+                <span className="inline-flex items-center space-x-1 bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm border border-emerald-200">
+                  <span>{filter === 'upcoming' ? 'Yaklaşan' : filter === 'past' ? 'Geçmiş' : 'İptal Edilenler'}</span>
+                  <button onClick={() => setFilter('all')} className="text-emerald-600 hover:text-emerald-800 ml-1">×</button>
+                </span>
+              )}
+              {searchTerm && (
+                <span className="inline-flex items-center space-x-1 bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm border border-slate-200">
+                  <span>"{searchTerm}"</span>
+                  <button onClick={() => setSearchTerm('')} className="text-slate-600 hover:text-slate-800 ml-1">×</button>
+                </span>
+              )}
+              <button
+                onClick={() => {
+                  setFilter('all')
+                  setSearchTerm('')
+                }}
+                className="text-sm text-slate-500 hover:text-slate-700"
+              >
+                Tümünü Temizle
+              </button>
             </div>
-          ) : filteredAppointments.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
-              <div className="max-w-md mx-auto">
-                <div className="p-6 bg-gray-50 rounded-2xl mb-6">
-                  <CalendarDaysIcon className="w-16 h-16 text-gray-400 mx-auto" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  {appointments.length === 0 ? 'Henüz randevunuz yok' : 'Aradığınız kriterlere uygun randevu bulunamadı'}
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  {appointments.length === 0 
-                    ? 'İlk randevunuzu oluşturmak için işletmeleri keşfedin.'
-                    : 'Farklı filtreler deneyebilir veya arama teriminizi değiştirebilirsiniz.'
-                  }
-                </p>
+          )}
+        </div>
+
+        {/* Appointments List - Ana sayfa card tasarımıyla uyumlu */}
+        {error ? (
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8 sm:p-12 text-center">
+            <div className="max-w-md mx-auto">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                <XCircleIcon className="w-8 h-8 sm:w-10 sm:h-10 text-red-500" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-2 sm:mb-3">Bir Hata Oluştu</h3>
+              <p className="text-slate-600 mb-4 sm:mb-6 text-sm sm:text-base">{error}</p>
+              <button
+                onClick={fetchAppointments}
+                className="inline-flex items-center space-x-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-lg hover:shadow-xl font-medium text-sm sm:text-base"
+              >
+                <span>Tekrar Dene</span>
+                <ArrowRightIcon className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ) : filteredAppointments.length === 0 ? (
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8 sm:p-12 text-center">
+            <div className="max-w-md mx-auto">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                <CalendarDaysIcon className="w-8 h-8 sm:w-10 sm:h-10 text-slate-400" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-2 sm:mb-3">
+                {appointments.length === 0 ? 'Henüz randevunuz yok' : 'Aradığınız kriterlere uygun randevu bulunamadı'}
+              </h3>
+              <p className="text-slate-600 mb-4 sm:mb-6 text-sm sm:text-base px-4">
+                {appointments.length === 0 
+                  ? 'İlk randevunuzu oluşturmak için işletmeleri keşfedin.'
+                  : 'Farklı filtreler deneyebilir veya arama teriminizi değiştirebilirsiniz.'
+                }
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                 {appointments.length === 0 ? (
                   <Link
                     href="/"
-                    className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
+                    className="inline-flex items-center space-x-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium text-sm sm:text-base"
                   >
-                    <BuildingStorefrontIcon className="w-5 h-5" />
+                    <BuildingStorefrontIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                     <span>İşletmeleri Keşfet</span>
                   </Link>
                 ) : (
@@ -611,269 +702,277 @@ export default function AppointmentsPage() {
                       setFilter('all')
                       setSearchTerm('')
                     }}
-                    className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
+                    className="inline-flex items-center space-x-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-xl hover:from-slate-700 hover:to-slate-800 transition-all duration-200 shadow-lg hover:shadow-xl font-medium text-sm sm:text-base"
                   >
                     <span>Tüm Randevuları Göster</span>
                   </button>
                 )}
               </div>
             </div>
-          ) : (
-            <div className="space-y-6">
-              {filteredAppointments.map((appointment) => {
-                const statusConfig = getStatusConfig(appointment.status)
-                
-                return (
-                  <div key={appointment.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden">
-                    
-                    {/* Header - Responsive */}
-                    <div className="bg-gradient-to-r from-gray-50 to-blue-50 p-4 sm:p-6 border-b border-gray-100">
-                      <div className="flex flex-col sm:flex-row items-start justify-between space-y-3 sm:space-y-0">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-                            {appointment.business.profilePhotoUrl ? (
-                              <img 
-                                src={appointment.business.profilePhotoUrl} 
-                                alt={appointment.business.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.style.display = 'none';
-                                  target.nextElementSibling?.classList.remove('hidden');
-                                }}
-                              />
-                            ) : null}
-                            <BuildingStorefrontIcon className={`w-7 h-7 text-white ${
-                              appointment.business.profilePhotoUrl ? 'hidden' : ''
-                            }`} />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 truncate">
-                              {appointment.business.name}
-                            </h3>
-                            <p className="text-blue-600 font-semibold text-sm sm:text-base truncate">{appointment.service.name}</p>
-                            {appointment.business.category && (
-                              <p className="text-gray-500 text-xs sm:text-sm truncate">{appointment.business.category}</p>
-                            )}
-                          </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {filteredAppointments.map((appointment) => {
+              const statusConfig = getStatusConfig(appointment.status)
+              
+              return (
+                <div key={appointment.id} className="bg-white rounded-2xl shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300 overflow-hidden group">
+                  
+                  {/* Header - Ana sayfa card header tasarımıyla uyumlu */}
+                  <div className="bg-gradient-to-r from-slate-50 to-gray-50 p-4 sm:p-6 border-b border-slate-200">
+                    <div className="flex flex-col sm:flex-row items-start justify-between space-y-3 sm:space-y-0">
+                      <div className="flex items-center space-x-4">
+                        <div className="relative w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden shadow-lg">
+                          {appointment.business.profilePhotoUrl ? (
+                            <CloudinaryImage
+                              src={appointment.business.profilePhotoUrl}
+                              alt={appointment.business.name}
+                              className="w-full h-full object-cover"
+                              transformation={{
+                                width: 56,
+                                height: 56,
+                                crop: 'fill',
+                                gravity: 'auto',
+                                quality: 'auto',
+                                format: 'auto'
+                              }}
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                target.nextElementSibling?.classList.remove('hidden');
+                              }}
+                            />
+                          ) : null}
+                          <BuildingStorefrontIcon className={`w-6 h-6 sm:w-7 sm:h-7 text-white ${
+                            appointment.business.profilePhotoUrl ? 'hidden' : ''
+                          }`} />
                         </div>
-                        
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-                          <span className={`inline-flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium border ${statusConfig.color}`}>
-                            {statusConfig.icon}
-                            <span className="hidden sm:inline">{statusConfig.text}</span>
-                            <span className="sm:hidden">
-                              {statusConfig.text === 'Beklemede' ? 'Bekliyor' : 
-                               statusConfig.text === 'Onaylandı' ? 'Onaylı' :
-                               statusConfig.text === 'Tamamlandı' ? 'Tamam' :
-                               statusConfig.text === 'İptal Edildi' ? 'İptal' : statusConfig.text}
-                            </span>
-                          </span>
-                          
-                          {/* Review Status Badge */}
-                          {appointment.status === 'COMPLETED' && (
-                            <span className={`inline-flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium border ${
-                              appointment.review 
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                                : canReview(appointment) 
-                                  ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                                  : 'bg-gray-50 text-gray-600 border-gray-200'
-                            }`}>
-                              <StarIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-                              <span className="hidden sm:inline">
-                                {appointment.review 
-                                  ? 'Değerlendirildi' 
-                                  : canReview(appointment) 
-                                    ? 'Değerlendirilebilir'
-                                    : 'Süre Doldu'
-                                }
-                              </span>
-                              <span className="sm:hidden">
-                                {appointment.review 
-                                  ? 'Değerli' 
-                                  : canReview(appointment) 
-                                    ? 'Yorum'
-                                    : 'Süre'
-                                }
-                              </span>
-                            </span>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 truncate">
+                            {appointment.business.name}
+                          </h3>
+                          <p className="text-blue-600 font-semibold text-sm sm:text-base truncate">{appointment.service.name}</p>
+                          {appointment.business.category && (
+                            <p className="text-gray-500 text-xs sm:text-sm truncate">{appointment.business.category}</p>
                           )}
                         </div>
                       </div>
-                    </div>
-
-                    {/* Content - Responsive */}
-                    <div className="p-4 sm:p-6">
-                      {/* Details Grid - Responsive */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
-                        
-                        {/* Date & Time */}
-                        <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <CalendarDaysIcon className="w-5 h-5 text-blue-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-600">Tarih & Saat</p>
-                            <p className="font-semibold text-gray-900">
-                              {new Date(appointment.date).toLocaleDateString('tr-TR', {
-                                day: '2-digit',
-                                month: 'short',
-                                year: 'numeric'
-                              })}
-                            </p>
-                            <p className="text-blue-600 font-medium">{appointment.time}</p>
-                          </div>
-                        </div>
-
-                        {/* Duration & Price */}
-                        <div className="flex items-center space-x-3">
-                          <div className="p-2 bg-green-100 rounded-lg">
-                            <BanknotesIcon className="w-5 h-5 text-green-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-600">Süre & Ücret</p>
-                            <p className="font-semibold text-gray-900">{appointment.service.duration} dakika</p>
-                            <p className="text-green-600 font-bold">₺{appointment.service.price}</p>
-                          </div>
-                        </div>
-
-                        {/* Staff */}
-                        {appointment.staff && (
-                          <div className="flex items-center space-x-3">
-                            <div className="p-2 bg-purple-100 rounded-lg">
-                              <UserIcon className="w-5 h-5 text-purple-600" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-600">Uzman</p>
-                              <p className="font-semibold text-gray-900">{appointment.staff.name}</p>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Location - Google Maps */}
-                        {appointment.business.address && (
-                          <div className="flex items-center space-x-3">
-                            <div className="p-2 bg-red-100 rounded-lg">
-                              <MapPinIcon className="w-5 h-5 text-red-600" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-600">Konum</p>
-                              <button
-                                onClick={() => {
-                                  const encodedAddress = encodeURIComponent(appointment.business.address!)
-                                  window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank')
-                                }}
-                                className="text-blue-600 hover:text-blue-800 font-medium text-sm underline underline-offset-2 transition-colors"
-                              >
-                                Haritada Görüntüle
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Existing Review Display */}
-                      {appointment.review && (
-                        <div className="mb-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl border border-yellow-200">
-                          <div className="flex items-start justify-between mb-3">
-                            <h4 className="font-semibold text-yellow-800 flex items-center gap-2">
-                              <StarIcon className="w-5 h-5" />
-                              Değerlendirmeniz
-                            </h4>
-                            <div className="flex items-center space-x-2">
-                              {renderStars(appointment.review.rating)}
-                              <span className="text-sm font-bold text-yellow-700 bg-yellow-100 px-2 py-1 rounded-full">
-                                {appointment.review.rating}/5
-                              </span>
-                            </div>
-                          </div>
-                          <p className="text-yellow-800 leading-relaxed mb-3 italic">
-                            "{appointment.review.comment}"
-                          </p>
-                          <p className="text-xs text-yellow-600 flex items-center space-x-1">
-                            <ClockIcon className="w-3 h-3" />
-                            <span>
-                              {new Date(appointment.review.createdAt).toLocaleDateString('tr-TR', {
-                                day: '2-digit',
-                                month: 'long',
-                                year: 'numeric'
-                              })} tarihinde değerlendirildi
-                            </span>
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Notes */}
-                      {appointment.notes && (
-                        <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                          <div className="flex items-start space-x-3">
-                            <ChatBubbleLeftRightIcon className="w-5 h-5 text-gray-500 mt-0.5" />
-                            <div>
-                              <p className="text-sm font-medium text-gray-600 mb-2">Özel Notlar</p>
-                              <p className="text-gray-800 leading-relaxed">{appointment.notes}</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Actions - Responsive */}
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 border-t border-gray-100 space-y-4 sm:space-y-0">
-                        <div className="flex flex-wrap items-center gap-3">
-                          {appointment.business.phone && (
-                            <a
-                              href={`tel:${appointment.business.phone}`}
-                              className="flex items-center space-x-2 px-3 sm:px-4 py-2 text-green-600 bg-green-50 rounded-lg hover:bg-green-100 transition-colors border border-green-200 font-medium text-sm"
-                            >
-                              <PhoneIcon className="w-4 h-4" />
-                              <span className="hidden sm:inline">Ara</span>
-                              <span className="sm:hidden">Tel</span>
-                            </a>
-                          )}
-                          
-                          <Link
-                            href={`/${appointment.business.slug}`}
-                            className="flex items-center space-x-2 px-3 sm:px-4 py-2 text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors border border-blue-200 font-medium text-sm"
-                          >
-                            <BuildingStorefrontIcon className="w-4 h-4" />
-                            <span className="hidden sm:inline">İşletmeyi Görüntüle</span>
-                            <span className="sm:hidden">İşletme</span>
-                          </Link>
-
-                          {/* Review Action Button */}
-                          {canReview(appointment) && (
-                            <button
-                              onClick={() => handleReviewClick(appointment)}
-                              className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 shadow-md hover:shadow-lg font-medium text-sm"
-                            >
-                              <StarIcon className="w-4 h-4" />
-                              <span className="hidden sm:inline">Değerlendir</span>
-                              <span className="sm:hidden">Yorum</span>
-                            </button>
-                          )}
-                        </div>
-
-                        <div className="text-xs text-gray-500 flex items-center space-x-1">
-                          <ClockIcon className="w-3 h-3" />
-                          <span className="hidden sm:inline">
-                            Oluşturulma: {new Date(appointment.createdAt).toLocaleDateString('tr-TR')}
-                          </span>
+                      
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                        <span className={`inline-flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium border shadow-sm ${statusConfig.color}`}>
+                          {statusConfig.icon}
+                          <span className="hidden sm:inline">{statusConfig.text}</span>
                           <span className="sm:hidden">
-                            {new Date(appointment.createdAt).toLocaleDateString('tr-TR', {
-                              day: '2-digit',
-                              month: '2-digit'
-                            })}
+                            {statusConfig.text === 'Beklemede' ? 'Bekliyor' : 
+                             statusConfig.text === 'Onaylandı' ? 'Onaylı' :
+                             statusConfig.text === 'Tamamlandı' ? 'Tamam' :
+                             statusConfig.text === 'İptal Edildi' ? 'İptal' : statusConfig.text}
                           </span>
-                        </div>
+                        </span>
+                        
+                        {/* Review Status Badge */}
+                        {appointment.status === 'COMPLETED' && (
+                          <span className={`inline-flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium border ${
+                            appointment.review 
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                              : canReview(appointment) 
+                                ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                : 'bg-gray-50 text-gray-600 border-gray-200'
+                          }`}>
+                            <StarIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                            <span className="hidden sm:inline">
+                              {appointment.review 
+                                ? 'Değerlendirildi' 
+                                : canReview(appointment) 
+                                  ? 'Değerlendirilebilir'
+                                  : 'Süre Doldu'
+                              }
+                            </span>
+                            <span className="sm:hidden">
+                              {appointment.review 
+                                ? 'Değerli' 
+                                : canReview(appointment) 
+                                  ? 'Yorum'
+                                  : 'Süre'
+                              }
+                            </span>
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      </div>
 
+                  {/* Content - Responsive */}
+                  <div className="p-4 sm:p-6">
+                    {/* Details Grid - Ana sayfa grid sistemiyle uyumlu */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+                      
+                      {/* Date & Time */}
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-blue-50 rounded-lg border border-blue-200">
+                          <CalendarDaysIcon className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-slate-600">Tarih & Saat</p>
+                          <p className="font-semibold text-slate-900">
+                            {new Date(appointment.date).toLocaleDateString('tr-TR', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric'
+                            })}
+                          </p>
+                          <p className="text-blue-600 font-medium">{appointment.time}</p>
+                        </div>
+                      </div>
+
+                      {/* Duration & Price */}
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-green-50 rounded-lg border border-green-200">
+                          <BanknotesIcon className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-slate-600">Süre & Ücret</p>
+                          <p className="font-semibold text-slate-900">{appointment.service.duration} dakika</p>
+                          <p className="text-green-600 font-bold">₺{appointment.service.price}</p>
+                        </div>
+                      </div>
+
+                      {/* Staff */}
+                      {appointment.staff && (
+                        <div className="flex items-center space-x-3">
+                          <div className="p-2 bg-purple-50 rounded-lg border border-purple-200">
+                            <UserIcon className="w-5 h-5 text-purple-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-slate-600">Uzman</p>
+                            <p className="font-semibold text-slate-900">{appointment.staff.name}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Location - Google Maps */}
+                      {appointment.business.address && (
+                        <div className="flex items-center space-x-3">
+                          <div className="p-2 bg-red-50 rounded-lg border border-red-200">
+                            <MapPinIcon className="w-5 h-5 text-red-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-slate-600">Konum</p>
+                            <button
+                              onClick={() => {
+                                const encodedAddress = encodeURIComponent(appointment.business.address!)
+                                window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank')
+                              }}
+                              className="text-emerald-600 hover:text-emerald-800 font-medium text-sm underline underline-offset-2 transition-colors"
+                            >
+                              Haritada Görüntüle
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Existing Review Display - Ana sayfa highlight box tasarımıyla uyumlu */}
+                    {appointment.review && (
+                      <div className="mb-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl border border-yellow-200 shadow-sm">
+                        <div className="flex items-start justify-between mb-3">
+                          <h4 className="font-semibold text-yellow-800 flex items-center gap-2">
+                            <StarIcon className="w-5 h-5" />
+                            Değerlendirmeniz
+                          </h4>
+                          <div className="flex items-center space-x-2">
+                            {renderStars(appointment.review.rating)}
+                            <span className="text-sm font-bold text-yellow-700 bg-yellow-100 px-2 py-1 rounded-full border border-yellow-200">
+                              {appointment.review.rating}/5
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-yellow-800 leading-relaxed mb-3 italic">
+                          "{appointment.review.comment}"
+                        </p>
+                        <p className="text-xs text-yellow-600 flex items-center space-x-1">
+                          <ClockIcon className="w-3 h-3" />
+                          <span>
+                            {new Date(appointment.review.createdAt).toLocaleDateString('tr-TR', {
+                              day: '2-digit',
+                              month: 'long',
+                              year: 'numeric'
+                            })} tarihinde değerlendirildi
+                          </span>
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Notes - Ana sayfa info box tasarımıyla uyumlu */}
+                    {appointment.notes && (
+                      <div className="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-200 shadow-sm">
+                        <div className="flex items-start space-x-3">
+                          <ChatBubbleLeftRightIcon className="w-5 h-5 text-slate-500 mt-0.5" />
+                          <div>
+                            <p className="text-sm font-medium text-slate-600 mb-2">Özel Notlar</p>
+                            <p className="text-slate-800 leading-relaxed">{appointment.notes}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Actions - Ana sayfa button tasarımıyla uyumlu */}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 border-t border-slate-200 space-y-4 sm:space-y-0">
+                      <div className="flex flex-wrap items-center gap-3">
+                        {appointment.business.phone && (
+                          <a
+                            href={`tel:${appointment.business.phone}`}
+                            className="flex items-center space-x-2 px-3 sm:px-4 py-2 text-green-700 bg-green-50 rounded-xl hover:bg-green-100 transition-all duration-200 border border-green-200 font-medium text-sm shadow-sm hover:shadow-md"
+                          >
+                            <PhoneIcon className="w-4 h-4" />
+                            <span className="hidden sm:inline">Ara</span>
+                            <span className="sm:hidden">Tel</span>
+                          </a>
+                        )}
+                        
+                        <Link
+                          href={`/${appointment.business.slug}`}
+                          className="flex items-center space-x-2 px-3 sm:px-4 py-2 text-slate-700 bg-slate-100 rounded-xl hover:bg-slate-200 transition-all duration-200 border border-slate-200 font-medium text-sm shadow-sm hover:shadow-md"
+                        >
+                          <BuildingStorefrontIcon className="w-4 h-4" />
+                          <span className="hidden sm:inline">İşletmeyi Görüntüle</span>
+                          <span className="sm:hidden">İşletme</span>
+                        </Link>
+
+                        {/* Review Action Button */}
+                        {canReview(appointment) && (
+                          <button
+                            onClick={() => handleReviewClick(appointment)}
+                            className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium text-sm"
+                          >
+                            <StarIcon className="w-4 h-4" />
+                            <span className="hidden sm:inline">Değerlendir</span>
+                            <span className="sm:hidden">Yorum</span>
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="text-xs text-slate-500 flex items-center space-x-1">
+                        <ClockIcon className="w-3 h-3" />
+                        <span className="hidden sm:inline">
+                          Oluşturulma: {new Date(appointment.createdAt).toLocaleDateString('tr-TR')}
+                        </span>
+                        <span className="sm:hidden">
+                          {new Date(appointment.createdAt).toLocaleDateString('tr-TR', {
+                            day: '2-digit',
+                            month: '2-digit'
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+        
       {/* Review Modal */}
       {selectedAppointment && (
         <ReviewModal
@@ -886,6 +985,6 @@ export default function AppointmentsPage() {
           onReviewSubmitted={handleReviewSubmitted}
         />
       )}
-    </>
+    </div>
   )
 }
