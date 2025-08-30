@@ -765,7 +765,7 @@ export default function Home() {
                   <div className="relative" ref={dropdownRef}>
                     <button
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="flex items-center space-x-1 sm:space-x-2 bg-slate-700 hover:bg-slate-600 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 transition-all duration-200 border border-slate-600"
+                      className="flex items-center space-x-1 sm:space-x-2 bg-slate-700 hover:bg-slate-600 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 transition-all duration-200 border border-slate-600 whitespace-nowrap"
                     >
                       <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center">
                         <UserIcon className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
@@ -778,10 +778,10 @@ export default function Home() {
 
                     {/* User Dropdown Menu */}
                     {isDropdownOpen && (
-                      <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                      <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                         <div className="px-4 py-2 border-b border-gray-100">
-                          <p className="text-sm font-medium text-gray-900">{session.user?.name}</p>
-                          <p className="text-xs text-gray-500">{session.user?.email}</p>
+                          <p className="text-sm font-medium text-gray-900 truncate">{session.user?.name}</p>
+                          <p className="text-xs text-gray-500 truncate">{session.user?.email}</p>
                         </div>
                         
                         <Link
