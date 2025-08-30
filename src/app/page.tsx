@@ -733,33 +733,33 @@ export default function Home() {
       )}
 
       {/* Header */}
-      <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 shadow-lg border-b border-slate-700 sticky top-0 z-40">
+      <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 shadow-lg border-b border-slate-700 sticky top-0 z-40 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-18">
+          <div className="flex items-center justify-between h-16 sm:h-18 min-w-0">
             {/* Left side - Mobile Menu + Logo */}
-            <div className="flex items-center space-x-3 sm:space-x-4">
+            <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-shrink-0">
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setShowMobileSidebar(true)}
-                className="lg:hidden p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition-all duration-200"
+                className="lg:hidden p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition-all duration-200 flex-shrink-0"
               >
                 <Bars3Icon className="w-6 h-6" />
               </button>
 
               {/* Logo */}
-              <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+              <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group min-w-0">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 flex-shrink-0">
                   <span className="text-white font-bold text-lg sm:text-xl">R</span>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-lg sm:text-xl font-bold text-white group-hover:text-emerald-300 transition-colors">RandeVur</span>
-                  <span className="text-xs text-slate-400 hidden md:block">Dijital Randevu Sistemi</span>
+                <div className="flex flex-col min-w-0 overflow-hidden">
+                  <span className="text-lg sm:text-xl font-bold text-white group-hover:text-emerald-300 transition-colors whitespace-nowrap overflow-hidden text-ellipsis">RandeVur</span>
+                  <span className="text-xs text-slate-400 hidden lg:block whitespace-nowrap overflow-hidden text-ellipsis">Dijital Randevu Sistemi</span>
                 </div>
               </Link>
             </div>
 
             {/* Right side - User Menu */}
-            <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
               {session ? (
                 <>
                   <div className="relative" ref={dropdownRef}>
@@ -855,7 +855,7 @@ export default function Home() {
                       setShowAuthModal(true)
                       resetForm()
                     }}
-                    className="text-slate-300 hover:text-white font-medium text-sm transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-slate-700"
+                    className="text-slate-300 hover:text-white font-medium text-sm transition-colors duration-200 px-2 sm:px-3 py-2 rounded-lg hover:bg-slate-700 whitespace-nowrap"
                   >
                     <span className="hidden sm:inline">Giriş Yap</span>
                     <span className="sm:hidden">Giriş</span>
@@ -867,15 +867,15 @@ export default function Home() {
                       setShowAuthModal(true)
                       resetForm()
                     }}
-                    className="text-slate-300 hover:text-white font-medium text-sm transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-slate-700"
+                    className="text-slate-300 hover:text-white font-medium text-sm transition-colors duration-200 px-2 sm:px-3 py-2 rounded-lg hover:bg-slate-700 whitespace-nowrap"
                   >
                     <span className="hidden sm:inline">Kayıt Ol</span>
                     <span className="sm:hidden">Kayıt</span>
                   </button>
-                  <div className="w-px h-4 sm:h-6 bg-slate-600"></div>
+                  <div className="w-px h-4 sm:h-6 bg-slate-600 hidden xs:block"></div>
                   <Link
                     href="/business"
-                    className="px-3 sm:px-4 py-2 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 inline-block text-xs sm:text-sm bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 border border-emerald-400"
+                    className="px-2 sm:px-4 py-2 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 inline-block text-xs sm:text-sm bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 border border-emerald-400 whitespace-nowrap"
                   >
                     <span className="hidden sm:inline">İşletme Kaydı</span>
                     <span className="sm:hidden">İşletme</span>
