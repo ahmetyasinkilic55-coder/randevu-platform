@@ -5,9 +5,42 @@ import { authOptions } from '@/lib/auth'
 
 const prisma = new PrismaClient()
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: 'Yetkilendirme gerekli' },
+        { status: 401 }
+      )
+    }
+
+    // Kullanıcının işletmesini bul
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: {
+        businesses: {
+          select: { id: true },
+          take: 1
+        }
+      }
+    })
+
+    const businessId = user?.businesses[0]?.id
+    
+    if (!businessId) {
+      return NextResponse.json(
+        { error: 'İşletme bulunamadı' },
+        { status: 404 }
+      )
+    }
+
+    // Sadece bu işletmenin blog yazılarını getir
     const posts = await prisma.blogPost.findMany({
+      where: {
+        businessId: businessId
+      },
       orderBy: { createdAt: 'desc' },
       include: {
         authorUser: {

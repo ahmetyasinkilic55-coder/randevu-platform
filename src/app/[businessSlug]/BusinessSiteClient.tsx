@@ -1,7 +1,11 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import WebsitePreview from '@/components/website/WebsitePreview'
+import PremiumWebsitePreview from '@/components/website/PremiumWebsitePreview'
+import GlassmorphismWebsitePreview from '@/components/website/GlassMorpWebsitePreview'
+import IOSWebsitePreview from '@/components/website/IOSwebsitePreview'
+import { Eye, Crown, Sparkles, Zap, Smartphone } from 'lucide-react'
 
 interface BusinessData {
   id: string
@@ -116,6 +120,10 @@ export default function BusinessSiteClient({
   businessData: BusinessData
   businessSlug: string
 }) {
+  // State for template selection
+  const [selectedTemplate, setSelectedTemplate] = useState<'classic' | 'premium' | 'futuristic' | 'ios'>('classic')
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false)
+
   // Debug: Log businessData to see what we have
   console.log('🔧 [BusinessSiteClient] BusinessData:', {
     id: businessData.id,
@@ -236,12 +244,155 @@ export default function BusinessSiteClient({
   }
 
   return (
-    <WebsitePreview 
-      businessData={transformedBusinessData}
-      customizations={customizations}
-      isModal={false}
-      device="desktop"
-      businessSlug={businessSlug}
-    />
+    <div className="relative">
+      {/* Floating Template Selector */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <div className="flex flex-col items-end space-y-3">
+          {/* Template Options */}
+          {showTemplateSelector && (
+            <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 border border-white/20 shadow-2xl animate-fade-in-up">
+              <div className="space-y-3">
+                <button
+                  onClick={() => {
+                    setSelectedTemplate('classic')
+                    setShowTemplateSelector(false)
+                  }}
+                  className={`flex items-center space-x-3 w-full p-3 rounded-xl transition-all duration-300 ${
+                    selectedTemplate === 'classic' 
+                      ? 'bg-blue-500 text-white shadow-lg' 
+                      : 'bg-white/10 text-white hover:bg-white/20'
+                  }`}
+                >
+                  <Eye className="w-5 h-5" />
+                  <div className="text-left">
+                    <div className="font-semibold text-sm">Klasik Tasarım</div>
+                    <div className="text-xs opacity-80">Minimalist & Şık</div>
+                  </div>
+                </button>
+                
+                <button
+                  onClick={() => {
+                    setSelectedTemplate('premium')
+                    setShowTemplateSelector(false)
+                  }}
+                  className={`flex items-center space-x-3 w-full p-3 rounded-xl transition-all duration-300 ${
+                    selectedTemplate === 'premium' 
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' 
+                      : 'bg-white/10 text-white hover:bg-white/20'
+                  }`}
+                >
+                  <Crown className="w-5 h-5" />
+                  <div className="text-left">
+                    <div className="font-semibold text-sm">Premium Tasarım</div>
+                    <div className="text-xs opacity-80">Lüks & Etkileyici</div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setSelectedTemplate('futuristic')
+                    setShowTemplateSelector(false)
+                  }}
+                  className={`flex items-center space-x-3 w-full p-3 rounded-xl transition-all duration-300 ${
+                    selectedTemplate === 'futuristic' 
+                      ? 'bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white shadow-lg shadow-cyan-500/50' 
+                      : 'bg-white/10 text-white hover:bg-white/20'
+                  }`}
+                >
+                  <Zap className="w-5 h-5" />
+                  <div className="text-left">
+                    <div className="font-semibold text-sm">Futuristik Tasarım</div>
+                    <div className="text-xs opacity-80">Cyber & Holografik</div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setSelectedTemplate('ios')
+                    setShowTemplateSelector(false)
+                  }}
+                  className={`flex items-center space-x-3 w-full p-3 rounded-xl transition-all duration-300 ${
+                    selectedTemplate === 'ios' 
+                      ? 'bg-gradient-to-r from-blue-500 to-gray-500 text-white shadow-lg shadow-blue-500/30' 
+                      : 'bg-white/10 text-white hover:bg-white/20'
+                  }`}
+                >
+                  <Smartphone className="w-5 h-5" />
+                  <div className="text-left">
+                    <div className="font-semibold text-sm">iOS Minimal</div>
+                    <div className="text-xs opacity-80">Sade & Şık</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {/* Toggle Button */}
+          <button
+            onClick={() => setShowTemplateSelector(!showTemplateSelector)}
+            className="group bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 hover:from-purple-700 hover:via-pink-700 hover:to-red-700 text-white p-4 rounded-full shadow-2xl transition-all duration-300 transform hover:scale-105"
+          >
+            <div className="flex items-center space-x-2">
+              <Sparkles className="w-6 h-6" />
+              <span className="font-bold text-sm">Tasarım</span>
+            </div>
+            <div className="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+              YENİ
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Render Selected Template */}
+      {selectedTemplate === 'ios' ? (
+        <IOSWebsitePreview 
+          businessData={transformedBusinessData}
+          customizations={customizations}
+          isModal={false}
+          device="desktop"
+          businessSlug={businessSlug}
+        />
+      ) : selectedTemplate === 'futuristic' ? (
+        <GlassmorphismWebsitePreview 
+          businessData={transformedBusinessData}
+          customizations={customizations}
+          isModal={false}
+          device="desktop"
+          businessSlug={businessSlug}
+        />
+      ) : selectedTemplate === 'premium' ? (
+        <PremiumWebsitePreview 
+          businessData={transformedBusinessData}
+          customizations={customizations}
+          isModal={false}
+          device="desktop"
+          businessSlug={businessSlug}
+        />
+      ) : (
+        <WebsitePreview 
+          businessData={transformedBusinessData}
+          customizations={customizations}
+          isModal={false}
+          device="desktop"
+          businessSlug={businessSlug}
+        />
+      )}
+      
+      <style jsx>{`
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fade-in-up {
+          animation: fade-in-up 0.3s ease-out;
+        }
+      `}</style>
+    </div>
   )
 }

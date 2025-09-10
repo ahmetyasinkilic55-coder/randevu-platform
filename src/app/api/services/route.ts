@@ -10,7 +10,7 @@ const serviceSchema = z.object({
   duration: z.number().min(5, 'Süre en az 5 dakika olmalı'),
   description: z.string().optional(),
   category: z.string().min(1, 'Kategori seçmelisiniz'),
-  active: z.boolean().default(true),
+  isActive: z.boolean().default(true), // active yerine isActive
   businessId: z.string()
 })
 
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
         duration: validatedData.duration,
         description: validatedData.description || '',
         category: validatedData.category,
-        isActive: validatedData.active,
+        isActive: validatedData.isActive, // active yerine isActive
         businessId: validatedData.businessId
       }
     })

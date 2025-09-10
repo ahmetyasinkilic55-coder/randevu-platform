@@ -17,7 +17,7 @@ interface ServiceFormData {
   duration: number
   description: string
   category: string
-  active: boolean
+  isActive: boolean // active yerine isActive
 }
 
 const SERVICE_CATEGORIES = [
@@ -44,7 +44,7 @@ export default function ServicesPage() {
     duration: 30,
     description: '',
     category: 'Temel Hizmetler',
-    active: true
+    isActive: true // active yerine isActive
   })
 
   const filteredServices = services.filter(service => 
@@ -58,7 +58,7 @@ export default function ServicesPage() {
       duration: 30,
       description: '',
       category: 'Temel Hizmetler',
-      active: true
+      isActive: true // active yerine isActive
     })
   }
 
@@ -71,7 +71,7 @@ export default function ServicesPage() {
         duration: service.duration,
         description: service.description || '',
         category: service.category,
-        active: service.isActive
+        isActive: service.isActive // active yerine isActive
       })
     } else {
       setEditingService(null)
@@ -367,12 +367,12 @@ export default function ServicesPage() {
               <div className="flex items-center space-x-3">
                 <input
                   type="checkbox"
-                  id="active"
-                  checked={formData.active}
-                  onChange={(e) => setFormData(prev => ({ ...prev, active: e.target.checked }))}
+                  id="isActive"
+                  checked={formData.isActive}
+                  onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
                   className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                 />
-                <label htmlFor="active" className="text-sm font-medium text-gray-700">
+                <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
                   Hizmeti aktif olarak göster
                 </label>
               </div>

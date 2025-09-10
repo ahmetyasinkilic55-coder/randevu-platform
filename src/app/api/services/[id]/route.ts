@@ -10,7 +10,7 @@ const serviceUpdateSchema = z.object({
   duration: z.number().min(5, 'Süre en az 5 dakika olmalı').optional(),
   description: z.string().optional(),
   category: z.string().min(1, 'Kategori seçmelisiniz').optional(),
-  active: z.boolean().optional()
+  isActive: z.boolean().optional() // active yerine isActive kullan
 })
 
 // PUT - Hizmeti güncelle
@@ -62,11 +62,7 @@ export async function PUT(
       where: {
         id: serviceId
       },
-      data: {
-        ...validatedData,
-        // API'deki 'active' field'ini 'isActive' olarak map et
-        ...(validatedData.active !== undefined && { isActive: validatedData.active })
-      }
+      data: validatedData // Direkt validatedData kullan, mapping gerekmiyor
     })
 
     return NextResponse.json(

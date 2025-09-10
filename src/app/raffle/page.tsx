@@ -21,6 +21,9 @@ import {
 import { StarIcon as StarSolid, GiftIcon as GiftSolid } from '@heroicons/react/24/solid'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import MainHeader from '@/components/MainHeader'
+import Footer from '@/components/Footer'
+import AuthModal from '@/components/AuthModal'
 
 interface RaffleData {
   currentMonth: string
@@ -84,8 +87,15 @@ export default function RafflePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [participateLoading, setParticipateLoading] = useState(false)
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  
+  // Auth modal states
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
+  const [userType, setUserType] = useState<'customer' | 'business'>('customer')
+  
+  const resetForm = () => {
+    // Reset form function for auth modal
+  }
   
   // Countdown state
   const [countdown, setCountdown] = useState({
@@ -144,20 +154,6 @@ export default function RafflePage() {
     const interval = setInterval(updateCountdown, 1000)
     
     return () => clearInterval(interval)
-  }, [])
-  
-  // Click outside handler for dropdown
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
   }, [])
 
   const fetchRaffleData = async () => {
@@ -221,101 +217,20 @@ export default function RafflePage() {
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* Header Skeleton */}
-        <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 shadow-lg border-b border-slate-700 sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16 sm:h-18">
-              <div className="flex items-center space-x-3 sm:space-x-4">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-lg sm:text-xl">R</span>
-                </div>
-
-        {/* Countdown Timer */}
-        <div className="bg-gradient-to-r from-red-500 via-pink-500 to-purple-600 rounded-2xl shadow-lg border border-slate-200 mb-6 sm:mb-8">
-          <div className="p-6 sm:p-8 text-center">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <ClockIcon className="w-6 h-6 text-white" />
-              <h2 className="text-xl sm:text-2xl font-bold text-white">
-                Çekiliş Sonucuna Kalan Süre
-              </h2>
-            </div>
-            <p className="text-white/90 text-sm sm:text-base mb-6">
-              Sonrakı ayın 1. günü saat 13:00'da (Çekiliş Türkiye saati)
-            </p>
-            
-            {/* Countdown Display */}
-            <div className="grid grid-cols-4 gap-4 sm:gap-6 max-w-md mx-auto">
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 sm:p-4">
-                <div className="text-2xl sm:text-3xl font-bold text-white">
-                  {countdown.days.toString().padStart(2, '0')}
-                </div>
-                <div className="text-xs sm:text-sm text-white/80 font-medium">
-                  Gün
-                </div>
-              </div>
-              
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 sm:p-4">
-                <div className="text-2xl sm:text-3xl font-bold text-white">
-                  {countdown.hours.toString().padStart(2, '0')}
-                </div>
-                <div className="text-xs sm:text-sm text-white/80 font-medium">
-                  Saat
-                </div>
-              </div>
-              
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 sm:p-4">
-                <div className="text-2xl sm:text-3xl font-bold text-white">
-                  {countdown.minutes.toString().padStart(2, '0')}
-                </div>
-                <div className="text-xs sm:text-sm text-white/80 font-medium">
-                  Dakika
-                </div>
-              </div>
-              
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 sm:p-4">
-                <div className="text-2xl sm:text-3xl font-bold text-white animate-pulse">
-                  {countdown.seconds.toString().padStart(2, '0')}
-                </div>
-                <div className="text-xs sm:text-sm text-white/80 font-medium">
-                  Saniye
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-6 text-center">
-              <span className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-medium">
-                <SparklesIcon className="w-4 h-4 mr-2" />
-                Sonuçlar Açıklandığında Bildirim Alın!
-              </span>
-            </div>
-          </div>
-        </div>
-                <div className="flex flex-col">
-                  <span className="text-lg sm:text-xl font-bold text-white">RandeVur</span>
-                  <span className="text-xs text-slate-400 hidden md:block">Dijital Randevu Sistemi</span>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="hidden md:flex items-center space-x-1">
-                  <div className="animate-pulse bg-slate-700 h-8 w-20 rounded-lg"></div>
-                  <div className="animate-pulse bg-slate-700 h-8 w-24 rounded-lg"></div>
-                  <div className="animate-pulse bg-slate-700 h-8 w-20 rounded-lg"></div>
-                  <div className="animate-pulse bg-purple-600 h-8 w-20 rounded-lg"></div>
-                </div>
-                <div className="md:hidden">
-                  <div className="animate-pulse bg-slate-700 h-8 w-8 rounded-lg"></div>
-                </div>
-                <div className="animate-pulse bg-slate-700 h-10 w-32 rounded-lg"></div>
-              </div>
-            </div>
-          </div>
-        </header>
+        {/* Main Header */}
+        <MainHeader 
+          setShowAuthModal={setShowAuthModal}
+          authMode={authMode}
+          setAuthMode={setAuthMode}
+          userType={userType}
+          setUserType={setUserType}
+          resetForm={resetForm}
+        />
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        
-          {/* Countdown Timer - Always show */}
-          <div className="bg-gradient-to-r from-red-500 via-pink-500 to-purple-600 rounded-2xl shadow-lg border border-slate-200 mb-6 sm:mb-8">
-            <div className="p-6 sm:p-8 text-center">
+        {/* Countdown Timer - Always show */}
+        <div className="bg-gradient-to-r from-red-500 via-pink-500 to-purple-600">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            <div className="text-center">
               <div className="flex items-center justify-center space-x-2 mb-4">
                 <ClockIcon className="w-6 h-6 text-white" />
                 <h2 className="text-xl sm:text-2xl font-bold text-white">
@@ -373,7 +288,9 @@ export default function RafflePage() {
               </div>
             </div>
           </div>
-
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="animate-pulse space-y-6 sm:space-y-8">
             <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 sm:p-8">
               <div className="h-8 bg-slate-200 rounded w-1/4 mb-4"></div>
@@ -394,112 +311,15 @@ export default function RafflePage() {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 shadow-lg border-b border-slate-700 sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16 sm:h-18">
-              <div className="flex items-center space-x-3 sm:space-x-4">
-                <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                    <span className="text-white font-bold text-lg sm:text-xl">R</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-lg sm:text-xl font-bold text-white group-hover:text-emerald-300 transition-colors">RandeVur</span>
-                    <span className="text-xs text-slate-400 hidden md:block">Dijital Randevu Sistemi</span>
-                  </div>
-                </Link>
-              </div>
-              <div className="flex items-center space-x-2 sm:space-x-4">
-                {session && (
-                  <div className="flex items-center space-x-3">
-                    {/* Navigation Menu */}
-                    <nav className="hidden md:flex items-center space-x-1">
-                      <Link
-                        href="/"
-                        className="px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
-                      >
-                        Ana Sayfa
-                      </Link>
-                      <Link
-                        href="/appointments"
-                        className="px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
-                      >
-                        Randevularım
-                      </Link>
-                      <Link
-                        href="/favorites"
-                        className="px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
-                      >
-                        Favoriler
-                      </Link>
-                      <Link
-                        href="/raffle"
-                        className="px-3 py-2 text-sm font-medium bg-purple-600 text-white hover:bg-purple-700 rounded-lg transition-colors flex items-center space-x-1"
-                      >
-                        <GiftIcon className="w-4 h-4" />
-                        <span>Çekiliş</span>
-                      </Link>
-                    </nav>
-                    
-                    {/* Mobile Navigation Menu */}
-                    <div className="md:hidden relative" ref={dropdownRef}>
-                      <button
-                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                        className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
-                      >
-                        <Bars3Icon className="w-5 h-5" />
-                      </button>
-                      
-                      {isDropdownOpen && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                          <Link
-                            href="/"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                            onClick={() => setIsDropdownOpen(false)}
-                          >
-                            Ana Sayfa
-                          </Link>
-                          <Link
-                            href="/appointments"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                            onClick={() => setIsDropdownOpen(false)}
-                          >
-                            Randevularım
-                          </Link>
-                          <Link
-                            href="/favorites"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                            onClick={() => setIsDropdownOpen(false)}
-                          >
-                            Favoriler
-                          </Link>
-                          <Link
-                            href="/raffle"
-                            className="flex items-center space-x-2 px-4 py-2 text-sm bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors"
-                            onClick={() => setIsDropdownOpen(false)}
-                          >
-                            <GiftIcon className="w-4 h-4" />
-                            <span>Çekiliş</span>
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* User Profile */}
-                    <div className="flex items-center space-x-1 sm:space-x-2 bg-slate-700 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 border border-slate-600">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center">
-                        <UserIcon className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-                      </div>
-                      <span className="text-xs sm:text-sm font-medium text-white hidden sm:block">
-                        {session.user?.name || 'Kullanıcı'}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </header>
+        {/* Main Header */}
+        <MainHeader 
+          setShowAuthModal={setShowAuthModal}
+          authMode={authMode}
+          setAuthMode={setAuthMode}
+          userType={userType}
+          setUserType={setUserType}
+          resetForm={resetForm}
+        />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8 sm:p-12 text-center">
@@ -525,115 +345,15 @@ export default function RafflePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header - Ana sayfa ile uyumlu */}
-      <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 shadow-lg border-b border-slate-700 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-18">
-            {/* Left side - Logo */}
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                  <span className="text-white font-bold text-lg sm:text-xl">R</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-lg sm:text-xl font-bold text-white group-hover:text-emerald-300 transition-colors">RandeVur</span>
-                  <span className="text-xs text-slate-400 hidden md:block">Dijital Randevu Sistemi</span>
-                </div>
-              </Link>
-            </div>
-
-            {/* Right side - User Menu */}
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              {session && (
-                <div className="flex items-center space-x-3">
-                  {/* Navigation Menu */}
-                  <nav className="hidden md:flex items-center space-x-1">
-                    <Link
-                      href="/"
-                      className="px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
-                    >
-                      Ana Sayfa
-                    </Link>
-                    <Link
-                      href="/appointments"
-                      className="px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
-                    >
-                      Randevularım
-                    </Link>
-                    <Link
-                      href="/favorites"
-                      className="px-3 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
-                    >
-                      Favoriler
-                    </Link>
-                    <Link
-                      href="/raffle"
-                      className="px-3 py-2 text-sm font-medium bg-purple-600 text-white hover:bg-purple-700 rounded-lg transition-colors flex items-center space-x-1"
-                    >
-                      <GiftIcon className="w-4 h-4" />
-                      <span>Çekiliş</span>
-                    </Link>
-                  </nav>
-                  
-                  {/* Mobile Navigation Menu */}
-                  <div className="md:hidden relative" ref={dropdownRef}>
-                    <button
-                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition-colors"
-                    >
-                      <Bars3Icon className="w-5 h-5" />
-                    </button>
-                    
-                    {isDropdownOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                        <Link
-                          href="/"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          Ana Sayfa
-                        </Link>
-                        <Link
-                          href="/appointments"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          Randevularım
-                        </Link>
-                        <Link
-                          href="/favorites"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          Favoriler
-                        </Link>
-                        <Link
-                          href="/raffle"
-                          className="flex items-center space-x-2 px-4 py-2 text-sm bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          <GiftIcon className="w-4 h-4" />
-                          <span>Çekiliş</span>
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* User Profile */}
-                  <div className="flex items-center space-x-1 sm:space-x-2 bg-slate-700 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 border border-slate-600">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center">
-                      <UserIcon className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-                    </div>
-                    <span className="text-xs sm:text-sm font-medium text-white hidden sm:block">
-                      {session.user?.name || 'Kullanıcı'}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Main Header */}
+      <MainHeader 
+        setShowAuthModal={setShowAuthModal}
+        authMode={authMode}
+        setAuthMode={setAuthMode}
+        userType={userType}
+        setUserType={setUserType}
+        resetForm={resetForm}
+      />
 
       {/* Countdown Timer - Always show */}
       <div className="bg-gradient-to-r from-red-500 via-pink-500 to-purple-600">
@@ -1034,6 +754,17 @@ export default function RafflePage() {
           </div>
         )}
       </div>
+      
+      {/* Footer */}
+      <Footer />
+      
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        initialMode={authMode}
+        initialUserType={userType}
+      />
     </div>
   )
 }

@@ -20,7 +20,7 @@ interface CreateServiceData {
   duration: number
   description?: string
   category: string
-  active: boolean
+  isActive: boolean // active yerine isActive
   businessId: string
 }
 
@@ -30,7 +30,7 @@ interface UpdateServiceData {
   duration?: number
   description?: string
   category?: string
-  active?: boolean
+  isActive?: boolean // active yerine isActive
 }
 
 export function useServices(businessId: string | null) {

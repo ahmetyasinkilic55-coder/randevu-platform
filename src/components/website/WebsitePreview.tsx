@@ -13,6 +13,7 @@ import ConsultationModal from '../modals/ConsultationModal'
 import ContactModal from '../modals/ContactModal'
 import AIChatWidget from '../ai/AIChatWidget'
 import { CloudinaryImage } from '@/components/cloudinary'
+import MainHeader from '@/components/MainHeader'
 
 interface BusinessData {
   id: string
@@ -142,6 +143,15 @@ export default function WebsitePreview({
   const [consultationModalOpen, setConsultationModalOpen] = useState(false)
   const [contactModalOpen, setContactModalOpen] = useState(false)
   
+  // Auth modal states for MainHeader
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
+  const [userType, setUserType] = useState<'customer' | 'business'>('customer')
+  
+  const resetForm = () => {
+    // Reset form function for auth modal
+  }
+  
   // Gallery lightbox states
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
   const [touchStartX, setTouchStartX] = useState<number | null>(null)
@@ -269,6 +279,16 @@ export default function WebsitePreview({
 
   return (
     <div className={`${deviceClasses[device as keyof typeof deviceClasses]} bg-black overflow-y-auto min-h-screen`}>
+      
+      {/* Main Header */}
+      <MainHeader 
+        setShowAuthModal={setShowAuthModal}
+        authMode={authMode}
+        setAuthMode={setAuthMode}
+        userType={userType}
+        setUserType={setUserType}
+        resetForm={resetForm}
+      />
       
       {/* Ultra Modern Hero Section with Cover & Profile Photos */}
       <div className="relative min-h-screen overflow-hidden flex items-center justify-center">

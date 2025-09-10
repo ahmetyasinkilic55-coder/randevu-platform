@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
 const prisma = new PrismaClient()
 
@@ -51,8 +53,52 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: 'Yetkilendirme gerekli' },
+        { status: 401 }
+      )
+    }
+
     const { id } = await params
     const body = await request.json()
+    
+    // Kullanıcının işletmesini bul
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: {
+        businesses: {
+          select: { id: true },
+          take: 1
+        }
+      }
+    })
+
+    const businessId = user?.businesses[0]?.id
+    
+    if (!businessId) {
+      return NextResponse.json(
+        { error: 'İşletme bulunamadı' },
+        { status: 404 }
+      )
+    }
+
+    // Blog yazısının bu işletmeye ait olduğunu kontrol et
+    const existingPost = await prisma.blogPost.findFirst({
+      where: {
+        id,
+        businessId
+      }
+    })
+
+    if (!existingPost) {
+      return NextResponse.json(
+        { error: 'Blog yazısı bulunamadı veya yetkiniz yok' },
+        { status: 404 }
+      )
+    }
     
     const updatedPost = await prisma.blogPost.update({
       where: { id },
@@ -95,7 +141,51 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await getServerSession(authOptions)
+    
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { error: 'Yetkilendirme gerekli' },
+        { status: 401 }
+      )
+    }
+
     const { id } = await params
+    
+    // Kullanıcının işletmesini bul
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: {
+        businesses: {
+          select: { id: true },
+          take: 1
+        }
+      }
+    })
+
+    const businessId = user?.businesses[0]?.id
+    
+    if (!businessId) {
+      return NextResponse.json(
+        { error: 'İşletme bulunamadı' },
+        { status: 404 }
+      )
+    }
+
+    // Blog yazısının bu işletmeye ait olduğunu kontrol et
+    const existingPost = await prisma.blogPost.findFirst({
+      where: {
+        id,
+        businessId
+      }
+    })
+
+    if (!existingPost) {
+      return NextResponse.json(
+        { error: 'Blog yazısı bulunamadı veya yetkiniz yok' },
+        { status: 404 }
+      )
+    }
     
     const deletedPost = await prisma.blogPost.delete({
       where: { id }

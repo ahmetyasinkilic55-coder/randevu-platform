@@ -32,6 +32,9 @@ import { StarIcon as StarSolid, HeartIcon as HeartSolid } from '@heroicons/react
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CloudinaryImage } from '@/components/cloudinary'
+import MainHeader from '@/components/MainHeader'
+import Footer from '@/components/Footer'
+import AuthModal from '@/components/AuthModal'
 
 interface Appointment {
   id: string
@@ -311,6 +314,15 @@ export default function AppointmentsPage() {
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'past' | 'cancelled'>('all')
   const [searchTerm, setSearchTerm] = useState('')
   
+  // Auth modal states
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
+  const [userType, setUserType] = useState<'customer' | 'business'>('customer')
+  
+  const resetForm = () => {
+    // Reset form function for auth modal
+  }
+  
   // Review Modal State
   const [showReviewModal, setShowReviewModal] = useState(false)
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
@@ -445,23 +457,15 @@ export default function AppointmentsPage() {
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* Header Skeleton */}
-        <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 shadow-lg border-b border-slate-700 sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16 sm:h-18">
-              <div className="flex items-center space-x-3 sm:space-x-4">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-lg sm:text-xl">R</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-lg sm:text-xl font-bold text-white">RandeVur</span>
-                  <span className="text-xs text-slate-400 hidden md:block">Dijital Randevu Sistemi</span>
-                </div>
-              </div>
-              <div className="animate-pulse bg-slate-700 h-10 w-32 rounded-lg"></div>
-            </div>
-          </div>
-        </header>
+        {/* Main Header */}
+        <MainHeader 
+        setShowAuthModal={setShowAuthModal}
+        authMode={authMode}
+        setAuthMode={setAuthMode}
+        userType={userType}
+        setUserType={setUserType}
+        resetForm={resetForm}
+        />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="animate-pulse space-y-6 sm:space-y-8">
@@ -482,43 +486,18 @@ export default function AppointmentsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header - Ana sayfa ile uyumlu */}
-      <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 shadow-lg border-b border-slate-700 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-18">
-            {/* Left side - Logo */}
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                  <span className="text-white font-bold text-lg sm:text-xl">R</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-lg sm:text-xl font-bold text-white group-hover:text-emerald-300 transition-colors">RandeVur</span>
-                  <span className="text-xs text-slate-400 hidden md:block">Dijital Randevu Sistemi</span>
-                </div>
-              </Link>
-            </div>
-
-            {/* Right side - User Menu */}
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              {session && (
-                <div className="flex items-center space-x-1 sm:space-x-2 bg-slate-700 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 border border-slate-600">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center">
-                    <UserIcon className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-                  </div>
-                  <span className="text-xs sm:text-sm font-medium text-white hidden sm:block">
-                    {session.user?.name || 'Kullanıcı'}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
+      {/* Main Header */}
+      <MainHeader 
+        setShowAuthModal={setShowAuthModal}
+        authMode={authMode}
+        setAuthMode={setAuthMode}
+        userType={userType}
+        setUserType={setUserType}
+        resetForm={resetForm}
+      />
+      
+      {/* Enhanced Header - Ana sayfa tasarımıyla uyumlu */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* Enhanced Header - Ana sayfa tasarımıyla uyumlu */}
         <div className="relative overflow-hidden bg-white rounded-2xl shadow-lg border border-slate-200 mb-6 sm:mb-8">
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-50 to-teal-50 opacity-50"></div>
           <div className="relative p-6 sm:p-8">
@@ -972,6 +951,17 @@ export default function AppointmentsPage() {
           </div>
         )}
       </div>
+      
+      {/* Footer */}
+      <Footer />
+      
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        initialMode={authMode}
+        initialUserType={userType}
+      />
         
       {/* Review Modal */}
       {selectedAppointment && (

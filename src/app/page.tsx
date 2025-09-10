@@ -1,11 +1,14 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { toast } from 'react-hot-toast'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { CloudinaryImage } from '@/components/cloudinary'
 import AuthModal from '@/components/AuthModal'
+import Footer from '@/components/Footer'
+import MainHeader from '@/components/MainHeader'
 import { 
   MagnifyingGlassIcon, 
   MapPinIcon, 
@@ -22,6 +25,73 @@ import {
   GiftIcon
 } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid'
+
+// Premium glow animation CSS
+const premiumStyles = `
+  @keyframes emerald-glow {
+    0% {
+      box-shadow: 
+        0 0 15px rgba(16, 185, 129, 0.4), 
+        0 0 30px rgba(16, 185, 129, 0.2), 
+        0 0 45px rgba(16, 185, 129, 0.1);
+    }
+    50% {
+      box-shadow: 
+        0 0 25px rgba(5, 150, 105, 0.6), 
+        0 0 50px rgba(5, 150, 105, 0.4), 
+        0 0 75px rgba(5, 150, 105, 0.2);
+    }
+    100% {
+      box-shadow: 
+        0 0 15px rgba(16, 185, 129, 0.4), 
+        0 0 30px rgba(16, 185, 129, 0.2), 
+        0 0 45px rgba(16, 185, 129, 0.1);
+    }
+  }
+  
+  @keyframes emerald-border {
+    0% {
+      border-color: #10b981;
+    }
+    50% {
+      border-color: #059669;
+    }
+    100% {
+      border-color: #10b981;
+    }
+  }
+  
+  .premium-card {
+    border: 3px solid #10b981;
+    animation: emerald-border 2s ease-in-out infinite alternate,
+               emerald-glow 2s ease-in-out infinite alternate;
+    position: relative;
+  }
+  
+  .premium-card::before {
+    content: '♦';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    font-size: 12px;
+    color: #059669;
+    z-index: 10;
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+    animation: emerald-glow 2s ease-in-out infinite alternate;
+  }
+  
+  .premium-card::after {
+    content: '♦';
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    font-size: 12px;
+    color: #059669;
+    z-index: 10;
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+    animation: emerald-glow 2s ease-in-out infinite alternate;
+  }
+`
 
 // Types
 interface Business {
@@ -57,6 +127,7 @@ interface Business {
   description?: string
   latitude?: number
   longitude?: number
+  isPremium?: boolean
 }
 
 interface Service {
@@ -111,8 +182,10 @@ interface District {
   longitude: string
 }
 
-export default function Home() {
+function HomeContent() {
   const { data: session, status } = useSession()
+  const router = useRouter()
+  const searchParams = useSearchParams()
   
   // State Management
   const [businesses, setBusinesses] = useState<Business[]>([])
@@ -124,12 +197,16 @@ export default function Home() {
   const [provincesLoading, setProvincesLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
-  // Search & Filter States
-  const [selectedProvinceId, setSelectedProvinceId] = useState<number | null>(null)
-  const [selectedDistrictId, setSelectedDistrictId] = useState<number | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('')
-  const [selectedSubcategory, setSelectedSubcategory] = useState('')
+  // Search & Filter States - URL'den başlangıç değerleri al
+  const [selectedProvinceId, setSelectedProvinceId] = useState<number | null>(
+    searchParams.get('provinceId') ? parseInt(searchParams.get('provinceId')!) : null
+  )
+  const [selectedDistrictId, setSelectedDistrictId] = useState<number | null>(
+    searchParams.get('districtId') ? parseInt(searchParams.get('districtId')!) : null
+  )
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '')
+  const [selectedSubcategory, setSelectedSubcategory] = useState(searchParams.get('subcategory') || '')
   const [expandedCategory, setExpandedCategory] = useState('')
   
   // UI States
@@ -138,13 +215,33 @@ export default function Home() {
   const [userType, setUserType] = useState<'customer' | 'business'>('customer')
   const [locationEnabled, setLocationEnabled] = useState(false)
   const [showMobileSidebar, setShowMobileSidebar] = useState(false)
-  const [showCampaignModal, setShowCampaignModal] = useState(true) // Kampanya popup state
+  const [showCampaignModal, setShowCampaignModal] = useState(false) // Kampanya popup state
   
   // User States
   const [favorites, setFavorites] = useState<string[]>([])
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // URL güncelleme fonksiyonu
+  const updateURL = useCallback((params: {
+    provinceId?: number | null
+    districtId?: number | null
+    search?: string
+    category?: string
+    subcategory?: string
+  }) => {
+    const newSearchParams = new URLSearchParams()
+    
+    if (params.provinceId) newSearchParams.set('provinceId', params.provinceId.toString())
+    if (params.districtId) newSearchParams.set('districtId', params.districtId.toString())
+    if (params.search && params.search.trim()) newSearchParams.set('search', params.search.trim())
+    if (params.category) newSearchParams.set('category', params.category)
+    if (params.subcategory) newSearchParams.set('subcategory', params.subcategory)
+    
+    const newURL = newSearchParams.toString() ? `?${newSearchParams.toString()}` : '/'
+    router.push(newURL, { scroll: false })
+  }, [router])
 
   // API Functions
   const fetchCategories = async () => {
@@ -478,6 +575,15 @@ export default function Home() {
     setSelectedDistrictId(null)
     setDistricts([])
     setUserLocation(null)
+    
+    // URL'yi güncelle
+    updateURL({
+      provinceId: null,
+      districtId: null,
+      search: searchQuery,
+      category: selectedCategory,
+      subcategory: selectedSubcategory
+    })
   }
 
   const clearFilters = () => {
@@ -485,6 +591,15 @@ export default function Home() {
     setSelectedSubcategory('')
     setExpandedCategory('')
     setSearchQuery('')
+    
+    // URL'yi güncelle
+    updateURL({
+      provinceId: selectedProvinceId,
+      districtId: selectedDistrictId,
+      search: '',
+      category: '',
+      subcategory: ''
+    })
   }
 
   const resetForm = () => {
@@ -514,6 +629,15 @@ export default function Home() {
     const newSubcategoryId = selectedSubcategory === subcategoryId ? '' : subcategoryId
     setSelectedSubcategory(newSubcategoryId)
     setShowMobileSidebar(false) // Mobil sidebar'ı kapat
+    
+    // URL'yi güncelle
+    updateURL({
+      provinceId: selectedProvinceId,
+      districtId: selectedDistrictId,
+      search: searchQuery,
+      category: selectedCategory,
+      subcategory: newSubcategoryId
+    })
     // fetchBusinesses otomatik olarak useEffect ile çağrılacak
   }
 
@@ -526,10 +650,28 @@ export default function Home() {
     if (provinceId) {
       await fetchDistricts(provinceId)
     }
+    
+    // URL'yi güncelle
+    updateURL({
+      provinceId: provinceId || null,
+      districtId: null,
+      search: searchQuery,
+      category: selectedCategory,
+      subcategory: selectedSubcategory
+    })
   }
 
   const handleDistrictChange = (districtId: number) => {
     setSelectedDistrictId(districtId)
+    
+    // URL'yi güncelle
+    updateURL({
+      provinceId: selectedProvinceId,
+      districtId: districtId || null,
+      search: searchQuery,
+      category: selectedCategory,
+      subcategory: selectedSubcategory
+    })
   }
 
   // Get category icon (fallback to emoji)
@@ -580,6 +722,66 @@ export default function Home() {
     return iconMap[subcategory.slug] || '📋'
   }
 
+  // Kampanya popup kontrolü
+  const checkCampaignModalDisplay = useCallback(() => {
+    try {
+      const lastShown = localStorage.getItem('campaignModalLastShown')
+      const today = new Date().toDateString()
+      
+      // Eğer bugün gösterilmediyse göster
+      if (lastShown !== today) {
+        setShowCampaignModal(true)
+        localStorage.setItem('campaignModalLastShown', today)
+      }
+    } catch (error) {
+      // LocalStorage hatası durumunda varsayılan olarak gösterme
+      console.warn('LocalStorage error:', error)
+    }
+  }, [])
+
+  // Kampanya modalını kapatma
+  const handleCloseCampaignModal = () => {
+    setShowCampaignModal(false)
+    // Kapattığında da bugünün tarihini kaydet (tekrar açmasın)
+    try {
+      localStorage.setItem('campaignModalLastShown', new Date().toDateString())
+    } catch (error) {
+      console.warn('LocalStorage error:', error)
+    }
+  }
+
+  // Debounced search URL update
+  const debouncedUpdateSearchURL = useCallback(
+    debounce((searchValue: string) => {
+      updateURL({
+        provinceId: selectedProvinceId,
+        districtId: selectedDistrictId,
+        search: searchValue,
+        category: selectedCategory,
+        subcategory: selectedSubcategory
+      })
+    }, 500),
+    [selectedProvinceId, selectedDistrictId, selectedCategory, selectedSubcategory, updateURL]
+  )
+
+  // Search handler
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value)
+    debouncedUpdateSearchURL(value)
+  }
+
+  // Debounce utility function
+  function debounce<T extends (...args: any[]) => any>(
+    func: T,
+    wait: number
+  ): (...args: Parameters<T>) => void {
+    let timeout: NodeJS.Timeout
+    return (...args: Parameters<T>) => {
+      clearTimeout(timeout)
+      timeout = setTimeout(() => func(...args), wait)
+    }
+  }
+
   // Effects
   useEffect(() => {
     // Check geolocation support
@@ -591,7 +793,21 @@ export default function Home() {
     fetchCategories()
     fetchProvinces()
     fetchBusinesses()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    
+    // Kampanya modal kontrolü - sayfa yüklendikten 2 saniye sonra
+    const timer = setTimeout(() => {
+      checkCampaignModalDisplay()
+    }, 2000)
+    
+    return () => clearTimeout(timer)
+  }, [checkCampaignModalDisplay]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // URL'den gelen provinceId için ilçeleri yükle
+  useEffect(() => {
+    if (selectedProvinceId && provinces.length > 0) {
+      fetchDistricts(selectedProvinceId)
+    }
+  }, [selectedProvinceId, provinces.length])
 
   // Click outside handlers
   useEffect(() => {
@@ -633,8 +849,24 @@ export default function Home() {
   }, [session?.user?.id]) // fetchFavorites dependency'sini kaldırdık
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile Sidebar Overlay */}
+    <>
+      {/* Premium Glow Animation Styles */}
+      <style jsx>{premiumStyles}</style>
+      
+      <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <MainHeader
+        showMobileSidebar={showMobileSidebar}
+        setShowMobileSidebar={setShowMobileSidebar}
+        userType={userType}
+        setUserType={setUserType}
+        authMode={authMode}
+        setAuthMode={setAuthMode}
+        setShowAuthModal={setShowAuthModal}
+        resetForm={resetForm}
+      />
+
+      {/* Mobile Sidebar Overlay - Sadece ana sayfa için */}
       {showMobileSidebar && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
           {/* Backdrop */}
@@ -732,161 +964,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Header */}
-      <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 shadow-lg border-b border-slate-700 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-18 min-w-0">
-            {/* Left side - Mobile Menu + Logo */}
-            <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-shrink-0">
-              {/* Mobile Menu Button */}
-              <button
-                onClick={() => setShowMobileSidebar(true)}
-                className="lg:hidden p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 transition-all duration-200 flex-shrink-0"
-              >
-                <Bars3Icon className="w-6 h-6" />
-              </button>
-
-              {/* Logo */}
-              <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group min-w-0">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 flex-shrink-0">
-                  <span className="text-white font-bold text-lg sm:text-xl">R</span>
-                </div>
-                <div className="flex flex-col min-w-0 overflow-hidden">
-                  <span className="text-lg sm:text-xl font-bold text-white group-hover:text-emerald-300 transition-colors whitespace-nowrap overflow-hidden text-ellipsis">RandeVur</span>
-                  <span className="text-xs text-slate-400 hidden lg:block whitespace-nowrap overflow-hidden text-ellipsis">Dijital Randevu Sistemi</span>
-                </div>
-              </Link>
-            </div>
-
-            {/* Right side - User Menu */}
-            <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
-              {session ? (
-                <>
-                  <div className="relative" ref={dropdownRef}>
-                    <button
-                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="flex items-center space-x-1 sm:space-x-2 bg-slate-700 hover:bg-slate-600 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 transition-all duration-200 border border-slate-600 whitespace-nowrap"
-                    >
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center">
-                        <UserIcon className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-                      </div>
-                      <span className="text-xs sm:text-sm font-medium text-white hidden sm:block">
-                        {session.user?.name || 'Kullanıcı'}
-                      </span>
-                      <ChevronDownIcon className={`w-3 h-3 sm:w-4 sm:h-4 text-slate-300 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {/* User Dropdown Menu */}
-                    {isDropdownOpen && (
-                      <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-[100]">
-                        <div className="px-4 py-2 border-b border-gray-100">
-                          <p className="text-sm font-medium text-gray-900 truncate">{session.user?.name}</p>
-                          <p className="text-xs text-gray-500 truncate">{session.user?.email}</p>
-                        </div>
-                        
-                        <Link
-                          href="/appointments"
-                          className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          <CalendarDaysIcon className="w-4 h-4" />
-                          <span>Randevularım</span>
-                        </Link>
-                        
-                        <Link
-                          href="/favorites"
-                          className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          <HeartIcon className="w-4 h-4" />
-                          <span>Favorilerim</span>
-                        </Link>
-                        
-                        <Link
-                          href="/raffle"
-                          className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          <GiftIcon className="w-4 h-4" />
-                          <span>Çekiliş Hakları</span>
-                        </Link>
-                        
-                        <Link
-                          href="/settings"
-                          className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          <UserIcon className="w-4 h-4" />
-                          <span>Ayarlar</span>
-                        </Link>
-                        
-                        {session.user?.role === 'BUSINESS_OWNER' && (
-                          <Link
-                            href="/dashboard"
-                            className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                            onClick={() => setIsDropdownOpen(false)}
-                          >
-                            <BuildingStorefrontIcon className="w-4 h-4" />
-                            <span>İşletme Paneli</span>
-                          </Link>
-                        )}
-                        
-                        <div className="border-t border-gray-100 mt-2 pt-2">
-                          <button
-                            onClick={handleLogout}
-                            className="flex items-center space-x-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors w-full text-left"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            </svg>
-                            <span>Çıkış Yap</span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => {
-                      setUserType('customer')
-                      setAuthMode('login')
-                      setShowAuthModal(true)
-                      resetForm()
-                    }}
-                    className="text-slate-300 hover:text-white font-medium text-sm transition-colors duration-200 px-2 sm:px-3 py-2 rounded-lg hover:bg-slate-700 whitespace-nowrap"
-                  >
-                    <span className="hidden sm:inline">Giriş Yap</span>
-                    <span className="sm:hidden">Giriş</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setUserType('customer')
-                      setAuthMode('register')
-                      setShowAuthModal(true)
-                      resetForm()
-                    }}
-                    className="text-slate-300 hover:text-white font-medium text-sm transition-colors duration-200 px-2 sm:px-3 py-2 rounded-lg hover:bg-slate-700 whitespace-nowrap"
-                  >
-                    <span className="hidden sm:inline">Kayıt Ol</span>
-                    <span className="sm:hidden">Kayıt</span>
-                  </button>
-                  <div className="w-px h-4 sm:h-6 bg-slate-600 hidden xs:block"></div>
-                  <Link
-                    href="/business"
-                    className="px-2 sm:px-4 py-2 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 inline-block text-xs sm:text-sm bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600 border border-emerald-400 whitespace-nowrap"
-                  >
-                    <span className="hidden sm:inline">İşletme Kaydı</span>
-                    <span className="sm:hidden">İşletme</span>
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Search Bar Section */}
       <section className="bg-gradient-to-br from-slate-50 to-gray-100 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -950,7 +1027,7 @@ export default function Home() {
                 type="text"
                 placeholder="İşletme adı, hizmet ara..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white text-slate-800 placeholder-slate-500 shadow-sm hover:border-slate-400 transition-colors"
               />
             </div>
@@ -1253,7 +1330,11 @@ export default function Home() {
                   <Link
                     key={business.id}
                     href={`/${business.slug || business.id}`}
-                    className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200 group cursor-pointer block hover:border-emerald-300"
+                    className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer block ${
+                      business.isPremium 
+                        ? 'premium-card shadow-emerald-200/50 hover:shadow-emerald-300/50' 
+                        : 'border border-slate-200 hover:border-emerald-300'
+                    }`}
                   >
                     <div className="relative h-48 overflow-hidden">
                       <CloudinaryImage
@@ -1315,6 +1396,14 @@ export default function Home() {
                           <span className="text-sm font-medium text-slate-900">{business.rating}</span>
                           <span className="text-sm text-slate-500">({business.reviewCount})</span>
                         </div>
+                        {business.isPremium && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-emerald-500 text-sm animate-pulse">👑</span>
+                            <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300 animate-pulse">
+                              PREMİUM
+                            </span>
+                          </div>
+                        )}
                         {business.distance && (
                           <div className="flex items-center space-x-1 text-gray-500">
                             <MapPinIcon className="w-4 h-4" />
@@ -1411,7 +1500,7 @@ export default function Home() {
           <div className="bg-white rounded-2xl max-w-sm sm:max-w-lg w-full p-4 sm:p-8 relative animate-fadeIn shadow-2xl max-h-[90vh] overflow-y-auto">
             {/* Kapat Butonu */}
             <button
-              onClick={() => setShowCampaignModal(false)}
+              onClick={handleCloseCampaignModal}
               className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
             >
               <XMarkIcon className="w-6 h-6 text-gray-500" />
@@ -1495,12 +1584,12 @@ export default function Home() {
               <Link
                 href="/business"
                 className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-2.5 sm:py-3 rounded-xl font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 text-center shadow-lg hover:shadow-xl text-sm sm:text-base"
-                onClick={() => setShowCampaignModal(false)}
+                onClick={handleCloseCampaignModal}
               >
                 İşletme Kaydı Oluştur
               </Link>
               <button
-                onClick={() => setShowCampaignModal(false)}
+                onClick={handleCloseCampaignModal}
                 className="flex-1 bg-slate-100 text-slate-700 py-2.5 sm:py-3 rounded-xl font-semibold hover:bg-slate-200 transition-colors text-sm sm:text-base"
               >
                 Şimdi Değil
@@ -1509,6 +1598,23 @@ export default function Home() {
           </div>
         </div>
       )}
-    </div>
+      
+      {/* Footer */}
+      <Footer />
+      </div>
+    </>
+  )
+}
+
+// Suspense wrapper for useSearchParams
+export default function Home() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+      </div>
+    }>
+      <HomeContent />
+    </Suspense>
   )
 }

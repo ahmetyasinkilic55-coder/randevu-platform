@@ -5,6 +5,9 @@ import { useSession } from 'next-auth/react'
 import { toast } from 'react-hot-toast'
 import Link from 'next/link'
 import { CloudinaryImage } from '@/components/cloudinary'
+import MainHeader from '@/components/MainHeader'
+import Footer from '@/components/Footer'
+import AuthModal from '@/components/AuthModal'
 import { 
   HeartIcon,
   StarIcon,
@@ -47,6 +50,15 @@ export default function FavoritesPage() {
   const [businesses, setBusinesses] = useState<Business[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  // Auth modal states
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
+  const [userType, setUserType] = useState<'customer' | 'business'>('customer')
+  
+  const resetForm = () => {
+    // Reset form function for auth modal
+  }
 
   // Favorileri getir
   const fetchFavorites = async () => {
@@ -119,6 +131,16 @@ export default function FavoritesPage() {
   if (!session && status !== 'loading') {
     return (
       <div className="min-h-screen bg-gray-50">
+        {/* Main Header */}
+        <MainHeader 
+          setShowAuthModal={setShowAuthModal}
+          authMode={authMode}
+          setAuthMode={setAuthMode}
+          userType={userType}
+          setUserType={setUserType}
+          resetForm={resetForm}
+        />
+        
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
             <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -136,13 +158,34 @@ export default function FavoritesPage() {
             </Link>
           </div>
         </div>
+        
+        {/* Footer */}
+        <Footer />
+        
+        {/* Auth Modal */}
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          initialMode={authMode}
+          initialUserType={userType}
+        />
       </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Main Header */}
+      <MainHeader 
+        setShowAuthModal={setShowAuthModal}
+        authMode={authMode}
+        setAuthMode={setAuthMode}
+        userType={userType}
+        setUserType={setUserType}
+        resetForm={resetForm}
+      />
+      
+      {/* Page Header */}
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between">
@@ -323,6 +366,17 @@ export default function FavoritesPage() {
           </div>
         )}
       </div>
+      
+      {/* Footer */}
+      <Footer />
+      
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        initialMode={authMode}
+        initialUserType={userType}
+      />
     </div>
   )
 }

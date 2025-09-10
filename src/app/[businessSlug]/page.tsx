@@ -238,7 +238,26 @@ async function getBusinessBySlug(slug: string) {
     return businessData
 
   } catch (error) {
-    console.error('Error fetching business data:', error)
+    console.error('❌ [businessSlug] Error fetching business data for slug:', slug, error)
+    
+    // Prisma veya DB bağlantı hatası durumunda
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      })
+    }
+    
+    // Geliştirme ortamında daha detaylı hata bilgisi
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Development debug info:', {
+        slug,
+        prismaAvailable: !!prisma,
+        databaseUrl: process.env.DATABASE_URL ? 'Set' : 'Not set'
+      })
+    }
+    
     return null
   }
 }

@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from '@/components/providers'
 import { Toaster } from 'react-hot-toast'
-import PublicHeader from '@/components/PublicHeader'
 import "./globals.css";
 import Script from 'next/script';
 
@@ -77,7 +76,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
       >
         <Providers>
-          <PublicHeader />
           <main className="min-h-screen pb-safe">
             {children}
           </main>

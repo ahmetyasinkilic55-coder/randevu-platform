@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useSession } from 'next-auth/react'
 import { useBusiness } from '@/contexts/BusinessContext'
 import { 
   PencilSquareIcon,
@@ -120,7 +121,16 @@ export default function BlogManagementPage() {
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const { data: session } = useSession()
   const { businessSlug, businessData } = useBusiness()
+
+  // Session kontrolü
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Blog Management - session:', session)
+      console.log('Blog Management - businessData:', businessData)
+    }
+  }, [session, businessData])
 
   const [formData, setFormData] = useState<{
     title: string
@@ -256,8 +266,10 @@ export default function BlogManagementPage() {
 
   // Blog yazılarını yükle
   useEffect(() => {
-    fetchPosts()
-  }, [])
+    if (session?.user?.email) {
+      fetchPosts()
+    }
+  }, [session])
 
   // Filtreleme ve arama
   useEffect(() => {
@@ -283,6 +295,8 @@ export default function BlogManagementPage() {
 
   // API fonksiyonları
   const fetchPosts = async () => {
+    if (!session?.user?.email) return
+    
     setIsLoading(true)
     try {
       const response = await fetch('/api/blog/posts')
@@ -302,6 +316,8 @@ export default function BlogManagementPage() {
   }
 
   const createPost = async (postData: Omit<BlogPost, 'id' | 'views' | 'createdAt' | 'updatedAt'>) => {
+    if (!session?.user?.email) return
+    
     setIsLoading(true)
     try {
       const response = await fetch('/api/blog/posts', {
@@ -330,6 +346,8 @@ export default function BlogManagementPage() {
   }
 
   const updatePost = async (id: string, updates: Partial<BlogPost>) => {
+    if (!session?.user?.email) return
+    
     setIsLoading(true)
     try {
       const response = await fetch(`/api/blog/posts/${id}`, {
@@ -357,6 +375,7 @@ export default function BlogManagementPage() {
 
   const deletePost = async (id: string) => {
     if (!confirm('Bu blog yazısını silmek istediğinizden emin misiniz?')) return
+    if (!session?.user?.email) return
     
     setIsLoading(true)
     try {
@@ -472,10 +491,13 @@ export default function BlogManagementPage() {
     setShowAddModal(true)
   }
 
-  if (!editor) {
+  if (!editor || !session?.user?.email) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        <p className="ml-4 text-gray-600">
+          {!editor ? 'Editör yükleniyor...' : 'Oturum bilgileri yükleniyor...'}
+        </p>
       </div>
     )
   }
