@@ -1,11 +1,57 @@
 'use client'
 
-import React, { useState } from 'react'
-import WebsitePreview from '@/components/website/WebsitePreview'
-import PremiumWebsitePreview from '@/components/website/PremiumWebsitePreview'
-import GlassmorphismWebsitePreview from '@/components/website/GlassMorpWebsitePreview'
-import IOSWebsitePreview from '@/components/website/IOSwebsitePreview'
+import React, { useState, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import { Eye, Crown, Sparkles, Zap, Smartphone } from 'lucide-react'
+
+// Dynamically import website preview components
+const WebsitePreview = dynamic(() => import('@/components/website/WebsitePreview'), {
+  loading: () => (
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex flex-col items-center space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+        <p className="text-gray-600">Sayfa yükleniyor...</p>
+      </div>
+    </div>
+  ),
+  ssr: false
+})
+
+const PremiumWebsitePreview = dynamic(() => import('@/components/website/PremiumWebsitePreview'), {
+  loading: () => (
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex flex-col items-center space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+        <p className="text-gray-600">Sayfa yükleniyor...</p>
+      </div>
+    </div>
+  ),
+  ssr: false
+})
+
+const GlassmorphismWebsitePreview = dynamic(() => import('@/components/website/GlassMorpWebsitePreview'), {
+  loading: () => (
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex flex-col items-center space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+        <p className="text-gray-600">Sayfa yükleniyor...</p>
+      </div>
+    </div>
+  ),
+  ssr: false
+})
+
+const IOSWebsitePreview = dynamic(() => import('@/components/website/IOSwebsitePreview'), {
+  loading: () => (
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex flex-col items-center space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+        <p className="text-gray-600">Sayfa yükleniyor...</p>
+      </div>
+    </div>
+  ),
+  ssr: false
+})
 
 interface BusinessData {
   id: string
@@ -244,7 +290,15 @@ export default function BusinessSiteClient({
   }
 
   return (
-    <div className="relative">
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+          <p className="text-gray-600">Sayfa yükleniyor...</p>
+        </div>
+      </div>
+    }>
+      <div className="relative">
       {/* Floating Template Selector */}
       <div className="fixed bottom-6 right-6 z-50">
         <div className="flex flex-col items-end space-y-3">
@@ -393,6 +447,7 @@ export default function BusinessSiteClient({
           animation: fade-in-up 0.3s ease-out;
         }
       `}</style>
-    </div>
+        </div>
+        </Suspense>
   )
 }

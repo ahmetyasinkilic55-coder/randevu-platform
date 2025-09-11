@@ -216,6 +216,7 @@ function HomeContent() {
   const [locationEnabled, setLocationEnabled] = useState(false)
   const [showMobileSidebar, setShowMobileSidebar] = useState(false)
   const [showCampaignModal, setShowCampaignModal] = useState(false) // Kampanya popup state
+  const [businessLoading, setBusinessLoading] = useState<string | null>(null) // Business navigation loading
   
   // User States
   const [favorites, setFavorites] = useState<string[]>([])
@@ -747,6 +748,20 @@ function HomeContent() {
       localStorage.setItem('campaignModalLastShown', new Date().toDateString())
     } catch (error) {
       console.warn('LocalStorage error:', error)
+    }
+  }
+
+  // Business navigation handler
+  const handleBusinessClick = async (businessId: string, businessSlug?: string) => {
+    setBusinessLoading(businessId)
+    const url = `/${businessSlug || businessId}`
+    try {
+      await router.push(url)
+    } catch (error) {
+      console.error('Navigation error:', error)
+    } finally {
+      // Loading state will be cleared when component unmounts
+      setTimeout(() => setBusinessLoading(null), 100)
     }
   }
 
@@ -1327,15 +1342,25 @@ function HomeContent() {
             {!loading && (
               <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                 {businesses.map((business) => (
-                  <Link
+                  <div
                     key={business.id}
-                    href={`/${business.slug || business.id}`}
-                    className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer block ${
+                    onClick={() => handleBusinessClick(business.id, business.slug)}
+                    className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer block relative ${
                       business.isPremium 
                         ? 'premium-card shadow-emerald-200/50 hover:shadow-emerald-300/50' 
                         : 'border border-slate-200 hover:border-emerald-300'
                     }`}
                   >
+                    {/* Loading Overlay */}
+                    {businessLoading === business.id && (
+                      <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-20 rounded-2xl">
+                        <div className="flex flex-col items-center space-y-3">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+                          <p className="text-sm text-gray-600 font-medium">Yükleniyor...</p>
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="relative h-48 overflow-hidden">
                       <CloudinaryImage
                         src={business.image || business.profileImage || business.logo || business.coverPhotoUrl}
@@ -1423,31 +1448,33 @@ function HomeContent() {
                       </div>
 
                       <div className="space-y-3">
-                        <div className="flex items-center space-x-3">
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              window.location.href = `/${business.slug || business.id}`;
-                            }}
-                            className="flex-1 bg-slate-100 text-slate-700 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-200 transition-all duration-200 text-center border border-slate-200"
-                          >
-                            İncele
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              window.location.href = `/${business.slug || business.id}`;
-                            }}
-                            className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 text-center shadow-md hover:shadow-lg"
-                          >
-                            Randevu Al
+                      <div className="flex items-center space-x-3">
+                      <button
+                      onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleBusinessClick(business.id, business.slug);
+                      }}
+                      disabled={businessLoading === business.id}
+                        className="flex-1 bg-slate-100 text-slate-700 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-200 transition-all duration-200 text-center border border-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        İncele
+                      </button>
+                      <button
+                      onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                        handleBusinessClick(business.id, business.slug);
+                      }}
+                        disabled={businessLoading === business.id}
+                      className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 text-center shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                          Randevu Al
                           </button>
                         </div>
                       </div>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             )}

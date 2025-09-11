@@ -258,30 +258,24 @@ export default function RevolutionaryWebsitePreview({
     <div className="min-h-screen bg-gray-50 overflow-hidden">
       {/* Revolutionary Hero Section */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
-        {/* Dynamic Background */}
+        {/* Dynamic Background - Mobile Optimized */}
         <div className="absolute inset-0">
           {/* Cover Photo or Dynamic Gradient */}
           {(customizations.coverPhoto || businessData?.coverPhotoUrl) ? (
             <>
+              {/* Mobile-First Cover Photo Background */}
               <div 
                 className="absolute inset-0"
                 style={{
+                  backgroundImage: `url("https://res.cloudinary.com/ddapurgju/image/upload/w_1920,h_1080,c_fill,g_auto,q_auto/${customizations.coverPhoto || businessData?.coverPhotoUrl}")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  width: '100%',
+                  height: '100%',
                   transform: `translateY(${scrollY * 0.3}px) scale(1.1)`
                 }}
-              >
-                <CloudinaryImage
-                  publicId={customizations.coverPhoto || businessData?.coverPhotoUrl}
-                  alt="Cover"
-                  className="w-full h-full object-cover"
-                  transformation={{
-                    width: 1920,
-                    height: 1080,
-                    crop: 'fill',
-                    gravity: 'auto',
-                    quality: 'auto'
-                  }}
-                />
-              </div>
+              />
               <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-transparent" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
             </>
@@ -320,176 +314,162 @@ export default function RevolutionaryWebsitePreview({
           )}
         </div>
 
-        {/* Floating Navigation */}
-        <nav className="absolute top-8 left-8 right-8 z-30">
-          <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl px-6 py-4 shadow-2xl">
+        {/* Floating Navigation - Mobile Responsive */}
+        <nav className="absolute top-4 sm:top-6 lg:top-8 left-2 sm:left-4 lg:left-8 right-2 sm:right-4 lg:right-8 z-30">
+          <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl sm:rounded-3xl px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 shadow-2xl">
             <div className="flex items-center justify-between">
-              {/* Logo/Brand */}
-              <div className="flex items-center space-x-4">
+              {/* Logo/Brand - Mobile Responsive */}
+              <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
                 <div className="relative group">
                   {/* Profile Photo */}
-                  <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white/30 group-hover:border-white/60 transition-all">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl overflow-hidden border-2 border-white/30 group-hover:border-white/60 transition-all">
                     {(customizations.profilePhoto || businessData?.profilePhotoUrl) ? (
-                      <CloudinaryImage
-                        publicId={customizations.profilePhoto || businessData?.profilePhotoUrl}
-                        alt={businessData?.name}
-                        className="w-full h-full object-cover"
-                        transformation={{
-                          width: 100,
-                          height: 100,
-                          crop: 'fill',
-                          quality: 'auto'
+                      <div 
+                        className="w-full h-full"
+                        style={{
+                          backgroundImage: `url("https://res.cloudinary.com/ddapurgju/image/upload/w_150,h_150,c_fill,g_auto,q_auto/${customizations.profilePhoto || businessData?.profilePhotoUrl}")`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat'
                         }}
                       />
                     ) : (
                       <div className={`w-full h-full bg-gradient-to-br ${theme.primary} flex items-center justify-center`}>
-                        <SectorIcon className="w-6 h-6 text-white" />
+                        <SectorIcon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
                       </div>
                     )}
                   </div>
                   
                   {/* Online Status */}
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full">
+                  <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4 bg-green-500 border-1 sm:border-2 border-white rounded-full">
                     <div className="w-full h-full bg-green-400 rounded-full animate-pulse" />
                   </div>
                 </div>
                 
-                <div className="hidden md:block">
-                  <h3 className="text-white font-bold text-lg drop-shadow-lg">{businessData?.name}</h3>
-                  <p className="text-white/80 text-sm drop-shadow">{businessData?.sector}</p>
+                <div className="hidden sm:block">
+                  <h3 className="text-white font-bold text-sm sm:text-base lg:text-lg drop-shadow-lg truncate max-w-32 sm:max-w-40 lg:max-w-none">{businessData?.name}</h3>
+                  <p className="text-white/80 text-xs sm:text-sm drop-shadow hidden lg:block">{businessData?.sector}</p>
                 </div>
               </div>
 
-              {/* Desktop Navigation */}
-              <div className="hidden lg:flex items-center space-x-8">
+              {/* Desktop Navigation - Responsive */}
+              <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
                 {customizations.showServices && (
-                  <a href="#services" className="text-white/90 hover:text-white font-medium transition-colors drop-shadow-lg">
+                  <a href="#services" className="text-white/90 hover:text-white font-medium transition-colors drop-shadow-lg text-sm xl:text-base">
                     Hizmetler
                   </a>
                 )}
                 {customizations.showTeam && (
-                  <a href="#team" className="text-white/90 hover:text-white font-medium transition-colors drop-shadow-lg">
+                  <a href="#team" className="text-white/90 hover:text-white font-medium transition-colors drop-shadow-lg text-sm xl:text-base">
                     Ekip
                   </a>
                 )}
                 {customizations.showGallery && (
-                  <a href="#gallery" className="text-white/90 hover:text-white font-medium transition-colors drop-shadow-lg">
+                  <a href="#gallery" className="text-white/90 hover:text-white font-medium transition-colors drop-shadow-lg text-sm xl:text-base">
                     Galeri
                   </a>
                 )}
                 {blogPosts.length > 0 && customizations.showBlog && (
-                  <a href="#blog" className="text-white/90 hover:text-white font-medium transition-colors drop-shadow-lg">
+                  <a href="#blog" className="text-white/90 hover:text-white font-medium transition-colors drop-shadow-lg text-sm xl:text-base">
                     Blog
                   </a>
                 )}
                 {customizations.showReviews && (
-                  <a href="#reviews" className="text-white/90 hover:text-white font-medium transition-colors drop-shadow-lg">
+                  <a href="#reviews" className="text-white/90 hover:text-white font-medium transition-colors drop-shadow-lg text-sm xl:text-base">
                     Yorumlar
                   </a>
                 )}
                 {customizations.showContact && (
-                  <a href="#contact" className="text-white/90 hover:text-white font-medium transition-colors drop-shadow-lg">
+                  <a href="#contact" className="text-white/90 hover:text-white font-medium transition-colors drop-shadow-lg text-sm xl:text-base">
                     İletişim
                   </a>
                 )}
               </div>
 
-              {/* CTA Button & Mobile Menu */}
-              <div className="flex items-center space-x-4">
+              {/* CTA Button & Mobile Menu - Responsive */}
+              <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
                 <button
                   onClick={handleAction}
-                  className="hidden sm:flex items-center space-x-2 bg-white text-gray-900 px-6 py-3 rounded-2xl font-bold shadow-2xl hover:shadow-3xl transition-all hover:scale-105"
+                  className="hidden sm:flex items-center space-x-2 bg-white/20 hover:bg-white/30 backdrop-blur-lg text-white font-semibold px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 rounded-full transition-all duration-300 shadow-xl hover:shadow-2xl text-xs sm:text-sm lg:text-base"
                 >
-                  <Calendar className="w-4 h-4" />
-                  <span>{customizations.buttonText || 'Randevu Al'}</span>
+                  <Rocket className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5" />
+                  <span className="hidden sm:inline">{customizations.buttonText || 'Randevu Al'}</span>
                 </button>
                 
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="lg:hidden p-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-2xl text-white hover:bg-white/30 transition-all"
+                  className="lg:hidden p-2 sm:p-2.5 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-lg transition-colors"
                 >
-                  <Menu className="w-5 h-5" />
+                  <Menu className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </button>
               </div>
             </div>
           </div>
         </nav>
 
-        {/* Hero Content */}
-        <div className="relative z-20 w-full px-8">
+        {/* Hero Content - Mobile Responsive */}
+        <div className="relative z-20 w-full px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto text-center">
-            {/* Profile Showcase */}
-            <div className="mb-12">
+            {/* Profile Showcase - Mobile Responsive */}
+            <div className="mb-8 sm:mb-10 lg:mb-12">
               <div className="relative inline-block">
-                <div className="w-32 h-32 mx-auto mb-6">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 mx-auto mb-4 sm:mb-6">
                   {/* Rotating Ring */}
-                  <div className="absolute inset-0 border-4 border-dashed border-white/30 rounded-full animate-spin" style={{animationDuration: '20s'}} />
-                  <div className="absolute inset-2 border-2 border-white/20 rounded-full animate-pulse" />
+                  <div className="absolute inset-0 border-2 sm:border-3 lg:border-4 border-dashed border-white/30 rounded-full animate-spin" style={{animationDuration: '20s'}} />
+                  <div className="absolute inset-1 sm:inset-2 border border-white/20 rounded-full animate-pulse" />
                   
-                  {/* Profile Photo */}
-                  <div className="absolute inset-4 rounded-full overflow-hidden bg-white/20 backdrop-blur-sm border-2 border-white/40">
+                  {/* Profile Photo - Mobile Responsive */}
+                  <div className="absolute inset-2 sm:inset-3 lg:inset-4 rounded-full overflow-hidden bg-white/20 backdrop-blur-sm border border-white/40">
                     {(customizations.profilePhoto || businessData?.profilePhotoUrl) ? (
-                      <CloudinaryImage
-                        publicId={customizations.profilePhoto || businessData?.profilePhotoUrl}
-                        alt={businessData?.name}
-                        className="w-full h-full object-cover"
-                        transformation={{
-                          width: 200,
-                          height: 200,
-                          crop: 'fill',
-                          quality: 'auto'
+                      <div 
+                        className="w-full h-full"
+                        style={{
+                          backgroundImage: `url("https://res.cloudinary.com/ddapurgju/image/upload/w_200,h_200,c_fill,g_auto,q_auto/${customizations.profilePhoto || businessData?.profilePhotoUrl}")`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat'
                         }}
                       />
                     ) : (
                       <div className={`w-full h-full bg-gradient-to-br ${theme.primary} flex items-center justify-center`}>
-                        <SectorIcon className="w-12 h-12 text-white" />
+                        <SectorIcon className="w-6 h-6 sm:w-8 sm:h-8 lg:w-12 lg:h-12 text-white" />
                       </div>
                     )}
                   </div>
                   
-                  {/* Floating Badges */}
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 border-4 border-white rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                  {/* Floating Badges - Mobile Responsive */}
+                  <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 bg-green-500 border-2 sm:border-3 lg:border-4 border-white rounded-full flex items-center justify-center">
+                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 lg:w-2 lg:h-2 bg-white rounded-full animate-pulse" />
                   </div>
                   
-                  <div className="absolute -bottom-2 -left-2 w-8 h-8 bg-yellow-500 border-4 border-white rounded-full flex items-center justify-center">
-                    <Award className="w-3 h-3 text-white" />
-                  </div>
-                </div>
-                
-                {/* Floating Elements */}
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-white/20 backdrop-blur-md border border-white/30 rounded-full px-4 py-2">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                      <span className="text-white text-sm font-medium">Aktif</span>
-                    </div>
+                  <div className="absolute -bottom-1 -left-1 sm:-bottom-2 sm:-left-2 w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 bg-yellow-500 border-2 sm:border-3 lg:border-4 border-white rounded-full flex items-center justify-center">
+                    <Award className="w-2 h-2 sm:w-3 sm:h-3 text-white" />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Main Title */}
-            <div className="space-y-8">
-              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-none text-white drop-shadow-2xl">
+            {/* Main Title - Mobile Responsive */}
+            <div className="space-y-6 sm:space-y-8">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black leading-none text-white drop-shadow-2xl">
                 <span className="block">
                   {customizations.heroTitle || businessData?.name}
                 </span>
               </h1>
 
-              <p className="text-xl sm:text-2xl md:text-3xl text-white/90 max-w-4xl mx-auto leading-relaxed drop-shadow-lg">
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl text-white/90 max-w-4xl mx-auto leading-relaxed drop-shadow-lg px-4">
                 {customizations.heroSubtitle || `Uzman ${businessData?.sector} hizmetleri ile sağlıklı yaşam`}
               </p>
 
-              {/* Trust Indicators */}
-              <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-8">
+              {/* Trust Indicators - Mobile Responsive */}
+              <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-4 lg:gap-6 xl:gap-8">
                 {/* Rating */}
-                <div className="bg-white/15 backdrop-blur-md border border-white/25 rounded-2xl px-6 py-4">
-                  <div className="flex items-center space-x-2 mb-2">
+                <div className="bg-white/15 backdrop-blur-md border border-white/25 rounded-xl sm:rounded-2xl px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4">
+                  <div className="flex items-center space-x-1 sm:space-x-2 mb-1 sm:mb-2">
                     {[...Array(5)].map((_, i) => (
                       <Star 
                         key={i} 
-                        className={`w-5 h-5 ${
+                        className={`w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 ${
                           i < Math.floor(businessData?.avgRating) 
                             ? 'text-yellow-400 fill-current' 
                             : 'text-white/40'
@@ -498,60 +478,132 @@ export default function RevolutionaryWebsitePreview({
                     ))}
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-black text-white">{businessData?.avgRating?.toFixed(1)}</div>
-                    <div className="text-white/70 text-sm">{businessData?.reviewCount} Değerlendirme</div>
+                    <div className="text-lg sm:text-xl lg:text-2xl font-black text-white">{businessData?.avgRating?.toFixed(1)}</div>
+                    <div className="text-white/70 text-xs sm:text-sm">{businessData?.reviewCount} Değerlendirme</div>
                   </div>
                 </div>
 
                 {/* Appointments */}
-                <div className="bg-white/15 backdrop-blur-md border border-white/25 rounded-2xl px-6 py-4">
+                <div className="bg-white/15 backdrop-blur-md border border-white/25 rounded-xl sm:rounded-2xl px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4">
                   <div className="text-center">
-                    <div className="text-2xl font-black text-white">{businessData?.totalAppointments}+</div>
-                    <div className="text-white/70 text-sm">Başarılı Randevu</div>
+                    <div className="text-lg sm:text-xl lg:text-2xl font-black text-white">{businessData?.totalAppointments}+</div>
+                    <div className="text-white/70 text-xs sm:text-sm">Başarılı Randevu</div>
                   </div>
                 </div>
 
                 {/* Team */}
-                <div className="bg-white/15 backdrop-blur-md border border-white/25 rounded-2xl px-6 py-4">
+                <div className="bg-white/15 backdrop-blur-md border border-white/25 rounded-xl sm:rounded-2xl px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4">
                   <div className="text-center">
-                    <div className="text-2xl font-black text-white">{businessData?.staff?.length || 0}</div>
-                    <div className="text-white/70 text-sm">Uzman Ekip</div>
+                    <div className="text-lg sm:text-xl lg:text-2xl font-black text-white">{businessData?.staff?.length || 0}</div>
+                    <div className="text-white/70 text-xs sm:text-sm">Uzman Ekip</div>
                   </div>
                 </div>
               </div>
 
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-8">
+              {/* CTA Buttons - Mobile Responsive */}
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center pt-6 sm:pt-8">
                 <button
                   onClick={handleAction}
-                  className="group relative bg-white text-gray-900 px-10 py-5 rounded-3xl font-black text-xl shadow-2xl hover:shadow-3xl transition-all hover:scale-105 flex items-center space-x-3"
+                  className="group relative bg-white text-gray-900 px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 rounded-2xl sm:rounded-3xl font-black text-base sm:text-lg lg:text-xl shadow-2xl hover:shadow-3xl transition-all hover:scale-105 flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto justify-center"
                 >
-                  <Calendar className="w-6 h-6" />
+                  <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />
                   <span>{customizations.buttonText || 'Randevu Al'}</span>
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
                 
                 <button
                   onClick={() => setContactModalOpen(true)}
-                  className="group bg-white/20 backdrop-blur-md border-2 border-white/40 text-white px-10 py-5 rounded-3xl font-bold text-xl hover:bg-white/30 transition-all hover:scale-105 flex items-center space-x-3"
+                  className="group bg-white/20 backdrop-blur-md border-2 border-white/40 text-white px-6 sm:px-8 lg:px-10 py-3 sm:py-4 lg:py-5 rounded-2xl sm:rounded-3xl font-bold text-base sm:text-lg lg:text-xl hover:bg-white/30 transition-all hover:scale-105 flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto justify-center"
                 >
-                  <MessageCircle className="w-6 h-6" />
+                  <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                   <span>İletişim</span>
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform opacity-0 group-hover:opacity-100" />
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform opacity-0 group-hover:opacity-100" />
                 </button>
               </div>
             </div>
 
-            {/* Scroll Indicator */}
-            <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-white/60 animate-bounce">
-              <div className="flex flex-col items-center space-y-2">
-                <span className="text-sm font-medium">Keşfet</span>
-                <ChevronRight className="w-5 h-5 rotate-90" />
+            {/* Scroll Indicator - Mobile Responsive */}
+            <div className="absolute bottom-6 sm:bottom-8 lg:bottom-10 left-1/2 transform -translate-x-1/2 text-white/60 animate-bounce">
+              <div className="flex flex-col items-center space-y-1 sm:space-y-2">
+                <span className="text-xs sm:text-sm font-medium">Keşfet</span>
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 rotate-90" />
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Mobile Menu - Enhanced */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setMobileMenuOpen(false)}>
+          <div className="absolute top-20 sm:top-24 left-2 right-2 sm:left-4 sm:right-4 bg-white/10 backdrop-blur-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/20 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="space-y-3 sm:space-y-4">
+              {customizations.showServices && (
+                <a href="#services" className="block text-white hover:text-yellow-300 transition-colors py-2 sm:py-3 text-base sm:text-lg font-medium" onClick={() => setMobileMenuOpen(false)}>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"></div>
+                    <span>Hizmetler</span>
+                  </div>
+                </a>
+              )}
+              {customizations.showTeam && (
+                <a href="#team" className="block text-white hover:text-yellow-300 transition-colors py-2 sm:py-3 text-base sm:text-lg font-medium" onClick={() => setMobileMenuOpen(false)}>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-full"></div>
+                    <span>Ekip</span>
+                  </div>
+                </a>
+              )}
+              {customizations.showGallery && (
+                <a href="#gallery" className="block text-white hover:text-yellow-300 transition-colors py-2 sm:py-3 text-base sm:text-lg font-medium" onClick={() => setMobileMenuOpen(false)}>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full"></div>
+                    <span>Galeri</span>
+                  </div>
+                </a>
+              )}
+              {blogPosts.length > 0 && customizations.showBlog && (
+                <a href="#blog" className="block text-white hover:text-yellow-300 transition-colors py-2 sm:py-3 text-base sm:text-lg font-medium" onClick={() => setMobileMenuOpen(false)}>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"></div>
+                    <span>Blog</span>
+                  </div>
+                </a>
+              )}
+              {customizations.showReviews && (
+                <a href="#reviews" className="block text-white hover:text-yellow-300 transition-colors py-2 sm:py-3 text-base sm:text-lg font-medium" onClick={() => setMobileMenuOpen(false)}>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-gradient-to-r from-rose-400 to-red-500 rounded-full"></div>
+                    <span>Yorumlar</span>
+                  </div>
+                </a>
+              )}
+              {customizations.showContact && (
+                <a href="#contact" className="block text-white hover:text-yellow-300 transition-colors py-2 sm:py-3 text-base sm:text-lg font-medium" onClick={() => setMobileMenuOpen(false)}>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-gradient-to-r from-indigo-400 to-violet-500 rounded-full"></div>
+                    <span>İletişim</span>
+                  </div>
+                </a>
+              )}
+              
+              {/* Mobile CTA Button */}
+              <div className="pt-3 sm:pt-4 border-t border-white/20">
+                <button
+                  onClick={() => {
+                    handleAction();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 hover:from-yellow-500 hover:via-orange-600 hover:to-red-600 text-white font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl text-base sm:text-lg transition-all duration-300 flex items-center justify-center space-x-2"
+                >
+                  <Calendar className="w-5 h-5" />
+                  <span>{customizations.buttonText || 'Randevu Al'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Revolutionary Services Section */}
       {customizations.showServices && businessData?.services?.length > 0 && (

@@ -3,10 +3,10 @@ import { prisma } from '@/lib/prisma'
 import BusinessSiteClient from './BusinessSiteClient'
 import { headers } from 'next/headers'
 
-// Force dynamic rendering to get fresh data
+// Optimize for production
 export const dynamic = 'force-dynamic'
-export const revalidate = 0
-export const fetchCache = 'force-no-store'
+export const revalidate = 60 // Cache for 1 minute
+export const fetchCache = 'default-cache'
 export const runtime = 'nodejs'
 
 interface PageProps {
@@ -29,50 +29,138 @@ async function getBusinessBySlug(slug: string) {
       return null
     }
    
-    // WebsiteConfig'den slug ile işletmeyi bul - geliştirme aşamasında isPublished kontrolünü kaldırdık
+    // Optimize edilmiş sorgu - sadece gerekli alanları çek
     const websiteConfig = await prisma.websiteConfig.findUnique({
       where: {
         urlSlug: slug,
         // TODO: Production'da isPublished: true kontrolünü geri ekle
         // isPublished: true,
       },
-      include: {
+      select: {
+        id: true,
+        urlSlug: true,
+        primaryColor: true,
+        secondaryColor: true,
+        gradientColors: true,
+        heroTitle: true,
+        heroSubtitle: true,
+        buttonText: true,
+        showServices: true,
+        showTeam: true,
+        showGallery: true,
+        showBlog: true,
+        showReviews: true,
+        showMap: true,
+        showContact: true,
+        updatedAt: true,
         business: {
-          include: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            category: true,
+            phone: true,
+            email: true,
+            address: true,
+            description: true,
+            profilePhotoUrl: true,
+            coverPhotoUrl: true,
+            latitude: true,
+            longitude: true,
+            instagramUrl: true,
+            facebookUrl: true,
+            websiteUrl: true,
             services: {
               where: { isActive: true },
-              orderBy: { popularity: 'desc' }
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                price: true,
+                duration: true,
+                popularity: true
+              },
+              orderBy: { popularity: 'desc' },
+              take: 20 // Limit services
             },
             staff: {
               where: { isActive: true },
-              include: {
+              select: {
+                id: true,
+                name: true,
+                specialty: true,
+                experience: true,
+                rating: true,
+                photoUrl: true,
                 staffLeaves: {
                   where: {
                     status: 'APPROVED',
                     endDate: {
-                      gte: new Date() // Sadece bugün ve sonrasındaki izinler
+                      gte: new Date()
                     }
+                  },
+                  select: {
+                    id: true,
+                    startDate: true,
+                    endDate: true,
+                    startTime: true,
+                    endTime: true,
+                    type: true,
+                    status: true
                   },
                   orderBy: { startDate: 'asc' }
                 }
-              }
+              },
+              take: 10 // Limit staff
             },
             gallery: {
               where: { isActive: true },
-              orderBy: { order: 'asc' }
+              select: {
+                id: true,
+                imageUrl: true,
+                title: true,
+                description: true
+              },
+              orderBy: { order: 'asc' },
+              take: 20 // Limit gallery items
             },
             reviews: {
               where: { 
                 isApproved: true,
                 isVisible: true 
               },
+              select: {
+                id: true,
+                rating: true,
+                comment: true,
+                customerName: true,
+                customerAvatar: true,
+                createdAt: true
+              },
               orderBy: { createdAt: 'desc' },
               take: 10
             },
             workingHours: {
+              select: {
+                dayOfWeek: true,
+                isOpen: true,
+                openTime: true,
+                closeTime: true
+              },
               orderBy: { dayOfWeek: 'asc' }
             },
-            settings: true
+            settings: {
+              select: {
+                serviceType: true,
+                buttonText: true,
+                consultationFee: true,
+                isConsultationFree: true,
+                minimumProjectAmount: true,
+                workingRadius: true,
+                supportedMeetingTypes: true
+              }
+            },
+            appointmentSettings: true
           }
         }
       }

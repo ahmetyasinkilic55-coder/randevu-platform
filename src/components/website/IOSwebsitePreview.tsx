@@ -372,21 +372,27 @@ export default function IOSWebsitePreview({
       )}
 
       {/* Hero Section - iOS Clean Style with Cover Photo */}
-      <section className="relative py-20 px-6 overflow-hidden">
+      <section className="relative min-h-screen py-20 px-6 overflow-hidden flex items-center justify-center">
         {/* Background with Cover Photo or Gradient */}
         <div className="absolute inset-0">
           {(customizations.coverPhoto || businessData?.coverPhotoUrl) ? (
             <>
-              {/* Cover Photo Background */}
-              <CloudinaryImage
-                src={customizations.coverPhoto || businessData?.coverPhotoUrl!}
-                alt={businessData.name}
-                width={1920}
-                height={1080}
-                className="w-full h-full object-cover"
-              />
-              {/* Dark overlay for text readability */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50"></div>
+              {/* Cover Photo Background - Mobile Responsive Fix */}
+              <div 
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: `url("https://res.cloudinary.com/ddapurgju/image/upload/w_1920,h_1080,c_fill,g_auto,q_auto/${customizations.coverPhoto || businessData?.coverPhotoUrl}")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  width: '100%',
+                  height: '100%'
+                }}
+              >
+                {/* Dark overlay for text readability */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40"></div>
+              </div>
             </>
           ) : (
             <>
@@ -396,8 +402,8 @@ export default function IOSWebsitePreview({
           )}
         </div>
 
-        <div className="relative z-10 max-w-6xl mx-auto">
-          <div className="text-center mb-16">
+        <div className="relative z-10 max-w-6xl mx-auto w-full">
+          <div className="text-center flex flex-col items-center justify-center min-h-[80vh]">
             {/* Profile Image */}
             <div className="relative inline-block mb-8">
               <div className="w-32 h-32 mx-auto rounded-3xl overflow-hidden shadow-2xl ring-4 ring-white">
@@ -428,13 +434,13 @@ export default function IOSWebsitePreview({
             </div>
 
             {/* Hero Text */}
-            <h1 className={`text-5xl md:text-6xl font-black mb-6 tracking-tight ${
+            <h1 className={`text-4xl md:text-5xl lg:text-6xl font-black mb-6 tracking-tight ${
               (customizations.coverPhoto || businessData?.coverPhotoUrl) ? 'text-white drop-shadow-2xl' : 'text-gray-900'
             }`}>
               {customizations.heroTitle || businessData.name}
             </h1>
             
-            <p className={`text-xl mb-8 max-w-3xl mx-auto leading-relaxed ${
+            <p className={`text-lg md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed ${
               (customizations.coverPhoto || businessData?.coverPhotoUrl) ? 'text-white/90 drop-shadow-lg' : 'text-gray-600'
             }`}>
               {customizations.heroSubtitle || `Profesyonel ${businessData.sector} hizmetleri ile size özel çözümler sunuyoruz.`}
@@ -456,12 +462,12 @@ export default function IOSWebsitePreview({
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6 w-full max-w-lg mx-auto">
               <button
                 onClick={handleAction}
-                className="group bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                className="group bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto"
               >
-                <span className="flex items-center space-x-2">
+                <span className="flex items-center justify-center space-x-2">
                   <Calendar className="w-5 h-5" />
                   <span>{customizations.buttonText || 'Randevu Al'}</span>
                 </span>
@@ -469,20 +475,15 @@ export default function IOSWebsitePreview({
               
               <button
                 onClick={() => setContactModalOpen(true)}
-                className="bg-white/80 backdrop-blur-sm border border-gray-200 hover:border-gray-300 text-gray-700 hover:text-gray-900 font-semibold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                className="bg-white/80 backdrop-blur-sm border border-gray-200 hover:border-gray-300 text-gray-700 hover:text-gray-900 font-semibold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:w-auto"
               >
-                <span className="flex items-center space-x-2">
+                <span className="flex items-center justify-center space-x-2">
                   <MessageCircle className="w-5 h-5" />
                   <span>İletişim</span>
                 </span>
               </button>
             </div>
           </div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <ChevronDown className="w-6 h-6 text-gray-400" />
         </div>
       </section>
 

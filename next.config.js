@@ -15,6 +15,16 @@ const nextConfig = {
       }
     ]
   },
+  // Performance optimizations
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@heroicons/react']
+  },
+  // Server external packages (moved from experimental)
+  serverExternalPackages: ['prisma'],
+  // Compiler options
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production'
+  },
   // NextAuth secret'i environment variables ile inject et
   env: {
     NEXTAUTH_SECRET: 'randevu-platform-secret-key-2025-very-secure-production',

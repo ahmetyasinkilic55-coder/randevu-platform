@@ -346,13 +346,13 @@ export default function PremiumWebsitePreview({
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Floating Navigation */}
-      <nav className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
-        <div className="bg-white/10 backdrop-blur-xl rounded-full px-6 py-3 border border-white/20 shadow-2xl">
-          <div className="flex items-center space-x-8 text-white">
-            <div className="flex items-center space-x-2">
-              <SectorIcon className="w-5 h-5" />
-              <span className="font-bold text-lg">{businessData.name}</span>
+      {/* Floating Navigation - Mobile Responsive */}
+      <nav className="fixed top-3 sm:top-4 left-1/2 transform -translate-x-1/2 z-50">
+        <div className="bg-white/10 backdrop-blur-xl rounded-full px-4 sm:px-6 py-2 sm:py-3 border border-white/20 shadow-2xl">
+          <div className="flex items-center space-x-4 sm:space-x-8 text-white">
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <SectorIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="font-bold text-sm sm:text-lg truncate max-w-32 sm:max-w-none">{businessData.name}</span>
             </div>
             
             <div className="hidden md:flex items-center space-x-6">
@@ -370,34 +370,34 @@ export default function PremiumWebsitePreview({
             
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-full hover:bg-white/20 transition-colors"
+              className="md:hidden p-1.5 sm:p-2 rounded-full hover:bg-white/20 transition-colors"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Improved */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden">
-          <div className="absolute top-20 left-4 right-4 bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20">
-            <div className="space-y-4">
-              <a href="#hizmetler" className="block text-white hover:text-yellow-300 transition-colors py-2">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden" onClick={() => setMobileMenuOpen(false)}>
+          <div className="absolute top-16 sm:top-20 left-2 right-2 sm:left-4 sm:right-4 bg-white/10 backdrop-blur-xl rounded-3xl p-4 sm:p-6 border border-white/20" onClick={(e) => e.stopPropagation()}>
+            <div className="space-y-3 sm:space-y-4">
+              <a href="#hizmetler" className="block text-white hover:text-yellow-300 transition-colors py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>
                 Hizmetler
               </a>
               {customizations.showTeam && (
-                <a href="#takim" className="block text-white hover:text-yellow-300 transition-colors py-2">
+                <a href="#takim" className="block text-white hover:text-yellow-300 transition-colors py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>
                   Ekip
                 </a>
               )}
               {customizations.showGallery && (
-                <a href="#galeri" className="block text-white hover:text-yellow-300 transition-colors py-2">
+                <a href="#galeri" className="block text-white hover:text-yellow-300 transition-colors py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>
                   Galeri
                 </a>
               )}
               {customizations.showReviews && (
-                <a href="#yorumlar" className="block text-white hover:text-yellow-300 transition-colors py-2">
+                <a href="#yorumlar" className="block text-white hover:text-yellow-300 transition-colors py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>
                   Yorumlar
                 </a>
               )}
@@ -408,105 +408,121 @@ export default function PremiumWebsitePreview({
 
       {/* Hero Section - Full Screen with Parallax */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background with Parallax Effect */}
+        {/* Background with Mobile-First Responsive Design */}
         <div className="absolute inset-0">
-          <div className={`absolute inset-0 bg-gradient-to-br ${theme.primary} opacity-90`} />
-          <div className="absolute inset-0 bg-black/20" />
-          
-          {customizations.coverPhoto && (
-            <CloudinaryImage
-              src={customizations.coverPhoto}
-              alt={businessData.name}
-              width={1920}
-              height={1080}
-              className="w-full h-full object-cover"
-            />
-          )}
-          
-          {/* Animated Particles */}
-          <div className="absolute inset-0 overflow-hidden">
-            {[...Array(20)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-2 h-2 bg-white/20 rounded-full animate-pulse"
+          {(customizations.coverPhoto || businessData?.coverPhotoUrl) ? (
+            <>
+              {/* Mobile-Optimized Cover Photo Background */}
+              <div 
+                className="absolute inset-0"
                 style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 3}s`,
-                  animationDuration: `${2 + Math.random() * 2}s`
+                  backgroundImage: `url("https://res.cloudinary.com/ddapurgju/image/upload/w_1920,h_1080,c_fill,g_auto,q_auto/${customizations.coverPhoto || businessData?.coverPhotoUrl}")`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  width: '100%',
+                  height: '100%'
                 }}
-              />
-            ))}
-          </div>
+              >
+                {/* Dark overlay for readability */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40"></div>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Gradient Background when no cover photo */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${theme.primary} opacity-90`} />
+              <div className="absolute inset-0 bg-black/20" />
+              
+              {/* Animated Particles */}
+              <div className="absolute inset-0 overflow-hidden">
+                {[...Array(20)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute w-2 h-2 bg-white/20 rounded-full animate-pulse"
+                    style={{
+                      left: `${Math.random() * 100}%`,
+                      top: `${Math.random() * 100}%`,
+                      animationDelay: `${Math.random() * 3}s`,
+                      animationDuration: `${2 + Math.random() * 2}s`
+                    }}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
-        {/* Hero Content */}
-        <div className={`relative z-10 text-center px-4 transform transition-all duration-1000 ${
+        {/* Hero Content - Mobile Responsive */}
+        <div className={`relative z-10 text-center px-4 sm:px-6 lg:px-8 transform transition-all duration-1000 ${
           heroLoaded ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'
         }`}>
           {/* Profile Photo with Glow Effect */}
-          <div className="mb-8">
+          <div className="mb-6 sm:mb-8">
             <div className="relative inline-block">
               <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 rounded-full animate-pulse blur-lg opacity-75" />
-              <div className="relative w-32 h-32 mx-auto">
-                {customizations.profilePhoto ? (
-                  <CloudinaryImage
-                    src={customizations.profilePhoto}
-                    alt={businessData.name}
-                    width={128}
-                    height={128}
-                    className="w-full h-full rounded-full object-cover border-4 border-white/30 backdrop-blur-sm"
+              <div className="relative w-24 h-24 sm:w-32 sm:h-32 mx-auto">
+                {(customizations.profilePhoto || businessData?.profilePhotoUrl) ? (
+                  <div 
+                    className="w-full h-full rounded-full border-4 border-white/30 backdrop-blur-sm"
+                    style={{
+                      backgroundImage: `url("https://res.cloudinary.com/ddapurgju/image/upload/w_200,h_200,c_fill,g_auto,q_auto/${customizations.profilePhoto || businessData?.profilePhotoUrl}")`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat'
+                    }}
                   />
                 ) : (
                   <div className="w-full h-full rounded-full bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-sm border-4 border-white/30 flex items-center justify-center">
-                    <SectorIcon className="w-12 h-12 text-white" />
+                    <SectorIcon className="w-8 h-8 sm:w-12 sm:h-12 text-white" />
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Business Info */}
-          <div className="space-y-6">
-            <h1 className="text-5xl md:text-7xl font-black text-white mb-4 drop-shadow-2xl">
+          {/* Business Info - Mobile Responsive */}
+          <div className="space-y-4 sm:space-y-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-white mb-3 sm:mb-4 drop-shadow-2xl leading-tight">
               {customizations.heroTitle || businessData.name}
             </h1>
             
-            <div className="flex items-center justify-center space-x-4 mb-6">
+            <div className="flex items-center justify-center space-x-3 sm:space-x-4 mb-4 sm:mb-6">
               <div className="flex items-center text-yellow-400">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-6 h-6 ${
+                    className={`w-4 h-4 sm:w-6 sm:h-6 ${
                       i < Math.floor(businessData.avgRating) ? 'fill-current' : ''
                     }`}
                   />
                 ))}
-                <span className="ml-2 text-white font-bold text-lg">
+                <span className="ml-2 text-white font-bold text-sm sm:text-lg">
                   {businessData.avgRating.toFixed(1)}
                 </span>
               </div>
               <div className="w-1 h-1 bg-white/50 rounded-full" />
-              <span className="text-white/80 text-lg">
+              <span className="text-white/80 text-sm sm:text-lg">
                 {businessData.reviewCount} değerlendirme
               </span>
             </div>
 
-            <p className="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl md:text-2xl text-white/90 max-w-2xl mx-auto leading-relaxed px-2">
               {customizations.heroSubtitle || `Profesyonel ${businessData.sector} hizmetleri`}
             </p>
 
-            {/* Rotating Service Highlight */}
+            {/* Rotating Service Highlight - Mobile Responsive */}
             {businessData.services && businessData.services.length > 0 && (
-              <div className="mt-8 p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 max-w-md mx-auto">
+              <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 max-w-sm sm:max-w-md mx-auto">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Sparkles className="w-6 h-6 text-yellow-400" />
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
                     <div>
-                      <h3 className="text-white font-semibold text-lg">
+                      <h3 className="text-white font-semibold text-base sm:text-lg">
                         {businessData.services[currentServiceIndex]?.name}
                       </h3>
-                      <p className="text-white/70 text-sm">
+                      <p className="text-white/70 text-xs sm:text-sm">
                         {businessData.services[currentServiceIndex]?.duration} dk • ₺{businessData.services[currentServiceIndex]?.price}
                       </p>
                     </div>
@@ -515,14 +531,14 @@ export default function PremiumWebsitePreview({
               </div>
             )}
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6 mt-10">
+            {/* CTA Buttons - Mobile Responsive */}
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 lg:space-x-6 mt-8 sm:mt-10">
               <button
                 onClick={handleAction}
-                className="group relative overflow-hidden bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 hover:from-yellow-500 hover:via-orange-600 hover:to-red-600 text-white font-bold py-4 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl"
+                className="group relative overflow-hidden bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 hover:from-yellow-500 hover:via-orange-600 hover:to-red-600 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-full text-base sm:text-lg transition-all duration-300 transform hover:scale-105 shadow-2xl w-full sm:w-auto"
               >
-                <span className="relative z-10 flex items-center space-x-2">
-                  <Rocket className="w-6 h-6" />
+                <span className="relative z-10 flex items-center justify-center space-x-2">
+                  <Rocket className="w-5 h-5 sm:w-6 sm:h-6" />
                   <span>{customizations.buttonText || 'Hemen Başla'}</span>
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -530,35 +546,35 @@ export default function PremiumWebsitePreview({
               
               <button
                 onClick={() => setContactModalOpen(true)}
-                className="group flex items-center space-x-2 text-white border-2 border-white/50 hover:border-white hover:bg-white/10 font-semibold py-4 px-8 rounded-full transition-all duration-300 backdrop-blur-sm"
+                className="group flex items-center justify-center space-x-2 text-white border-2 border-white/50 hover:border-white hover:bg-white/10 font-semibold py-3 sm:py-4 px-6 sm:px-8 rounded-full transition-all duration-300 backdrop-blur-sm w-full sm:w-auto"
               >
-                <MessageCircle className="w-5 h-5" />
+                <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>İletişim</span>
               </button>
             </div>
 
-            {/* Stats Bar */}
-            <div className="grid grid-cols-3 gap-6 mt-12 max-w-lg mx-auto">
+            {/* Stats Bar - Mobile Responsive */}
+            <div className="grid grid-cols-3 gap-4 sm:gap-6 mt-10 sm:mt-12 max-w-sm sm:max-w-lg mx-auto">
               <div className="text-center">
-                <div className="text-3xl font-black text-white">{businessData.totalAppointments}+</div>
-                <div className="text-white/70 text-sm">Mutlu Müşteri</div>
+                <div className="text-2xl sm:text-3xl font-black text-white">{businessData.totalAppointments}+</div>
+                <div className="text-white/70 text-xs sm:text-sm">Mutlu Müşteri</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-black text-white">{businessData.services?.length || 0}+</div>
-                <div className="text-white/70 text-sm">Hizmet Türü</div>
+                <div className="text-2xl sm:text-3xl font-black text-white">{businessData.services?.length || 0}+</div>
+                <div className="text-white/70 text-xs sm:text-sm">Hizmet Türü</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-black text-white">{businessData.staff?.length || 0}+</div>
-                <div className="text-white/70 text-sm">Uzman Ekip</div>
+                <div className="text-2xl sm:text-3xl font-black text-white">{businessData.staff?.length || 0}+</div>
+                <div className="text-white/70 text-xs sm:text-sm">Uzman Ekip</div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-white/70 rounded-full mt-2 animate-pulse" />
+        {/* Scroll Indicator - Mobile Responsive */}
+        <div className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <div className="w-5 h-8 sm:w-6 sm:h-10 border-2 border-white/50 rounded-full flex justify-center">
+            <div className="w-1 h-2 sm:h-3 bg-white/70 rounded-full mt-2 animate-pulse" />
           </div>
         </div>
       </section>
