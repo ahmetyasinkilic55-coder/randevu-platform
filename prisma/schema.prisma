@@ -42,6 +42,9 @@ model User {
   // Raffle relations
   raffleParticipations RaffleParticipation[]
   wonRaffles          Raffle[]
+  
+  // Service request relations
+  serviceRequests ServiceRequest[]
 
   @@map("users")
 }
@@ -230,6 +233,7 @@ model Business {
   projectRequests    ProjectRequest[]
   consultationRequests ConsultationRequest[]
   blogPosts          BlogPost[]
+  serviceRequestResponses ServiceRequestResponse[]
   
   @@map("businesses")
 }
@@ -678,6 +682,30 @@ enum StaffLeaveStatus {
   REJECTED    // Reddedildi
 }
 
+enum ServiceRequestUrgency {
+  LOW         // Düşük - 1 hafta içinde
+  NORMAL      // Normal - 2-3 gün içinde
+  HIGH        // Yüksek - 24 saat içinde
+  URGENT      // Acil - Bugün
+}
+
+enum ServiceRequestStatus {
+  PENDING     // Beklemede
+  ACTIVE      // Aktif - işletmeler teklif verebilir
+  RESPONDED   // Cevaplar alındı
+  ACCEPTED    // Müşteri bir teklifi kabul etti
+  EXPIRED     // Süresi doldu
+  CANCELLED   // İptal edildi
+  COMPLETED   // Tamamlandı
+}
+
+enum ServiceRequestResponseStatus {
+  PENDING     // Beklemede
+  ACCEPTED    // Kabul edildi
+  REJECTED    // Reddedildi
+  EXPIRED     // Süresi doldu
+}
+
 model NotificationSettings {
   id                    String  @id @default(cuid())
   userId                String  @unique
@@ -848,4 +876,82 @@ model RaffleParticipation {
   updatedAt     DateTime @updatedAt
   
   @@map("raffle_participations")
+}
+
+model ServiceRequest {
+  id            String    @id @default(cuid())
+  
+  // Customer info
+  customerName  String
+  customerPhone String
+  customerEmail String?
+  
+  // Request details
+  categoryId    String?   // Category ID
+  subcategoryId String?   // Subcategory ID 
+  serviceName   String    // Service name/description
+  serviceDetails String?  // Additional details
+  budget        Float?    // Budget range
+  urgency       ServiceRequestUrgency @default(NORMAL)
+  
+  // Location
+  provinceId    Int?      // Province ID
+  districtId    Int?      // District ID
+  province      String?   // Province name
+  district      String?   // District name
+  address       String?   // Detailed address
+  
+  // Timing
+  preferredDate DateTime?
+  preferredTime String?   // HH:MM format
+  flexibleTiming Boolean @default(true)
+  
+  // Status
+  status        ServiceRequestStatus @default(PENDING)
+  expiresAt     DateTime  // Request expiration
+  
+  // User relation (optional - for logged in users)
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  // Relations - responses from businesses
+  responses     ServiceRequestResponse[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@map("service_requests")
+}
+
+model ServiceRequestResponse {
+  id              String    @id @default(cuid())
+  
+  // Request relation
+  serviceRequestId String
+  serviceRequest   ServiceRequest @relation(fields: [serviceRequestId], references: [id], onDelete: Cascade)
+  
+  // Business relation
+  businessId      String
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  // Response details
+  message         String?
+  proposedPrice   Float?
+  proposedDate    DateTime?
+  proposedTime    String?   // HH:MM format
+  availability    String?   // Available time slots
+  
+  // Status
+  status          ServiceRequestResponseStatus @default(PENDING)
+  
+  // Customer feedback
+  customerViewed  Boolean   @default(false)
+  customerRating  Int?      // 1-5 stars
+  customerFeedback String?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@unique([serviceRequestId, businessId])
+  @@map("service_request_responses")
 }

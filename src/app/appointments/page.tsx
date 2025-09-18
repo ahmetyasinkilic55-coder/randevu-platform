@@ -31,7 +31,7 @@ import {
 import { StarIcon as StarSolid, HeartIcon as HeartSolid } from '@heroicons/react/24/solid'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CloudinaryImage } from '@/components/cloudinary'
+import CloudinaryImage from '@/components/cloudinary/CloudinaryImage'
 import MainHeader from '@/components/MainHeader'
 import Footer from '@/components/Footer'
 import AuthModal from '@/components/AuthModal'

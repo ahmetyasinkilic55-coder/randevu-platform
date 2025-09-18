@@ -1,0 +1,14 @@
+@echo off
+echo.
+echo 🔍 HIZMET KONTROLU
+echo Database'de hizmet var mi kontrol ediliyor...
+echo.
+
+cd /d "C:\Users\ahmetyasin\Desktop\randevu-platform"
+
+echo 🚀 Server başlatılıyor...
+echo 📋 Kontrol URL: http://localhost:3000/api/services/check
+echo 🔍 Autocomplete URL: http://localhost:3000/api/services/autocomplete?q=saç
+echo.
+
+call npm run dev

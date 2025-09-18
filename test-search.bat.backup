@@ -1,0 +1,21 @@
+@echo off
+echo.
+echo 🔍 RANDEVUR ARAMA TESTİ
+echo ✅ Büyük/küçük harf duyarsız arama
+echo ✅ Hizmetlerde arama özelliği
+echo.
+
+cd /d "C:\Users\ahmetyasin\Desktop\randevu-platform"
+
+echo 🚀 Development server başlatılıyor...
+echo.
+echo 🧪 TEST SENARYOLARI:
+echo   1. "AYK" ve "ayk" - her ikisi de aynı sonucu vermeli
+echo   2. "saç kesim" - bu hizmeti veren işletmeler çıkmalı
+echo   3. "Temizlik" - büyük T ile arama
+echo   4. "berber" - küçük harfle kategori arama
+echo.
+echo 📍 Test URL: http://localhost:3000
+echo.
+
+call npm run dev

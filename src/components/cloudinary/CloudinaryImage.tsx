@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 
-interface CloudinaryImageProps {
+export interface CloudinaryImageProps {
   publicId?: string;
   src?: string;
   alt?: string;
@@ -20,6 +20,8 @@ interface CloudinaryImageProps {
     format?: string;
     crop?: string;
     gravity?: string;
+    fetchFormat?: string;
+    dpr?: string | number;
   };
 }
 

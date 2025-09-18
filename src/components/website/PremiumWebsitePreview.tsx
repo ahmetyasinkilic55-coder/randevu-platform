@@ -14,7 +14,7 @@ import ProjectInquiryModal from '../modals/ProjectInquiryModal'
 import ConsultationModal from '../modals/ConsultationModal'
 import ContactModal from '../modals/ContactModal'
 import AIChatWidget from '../ai/AIChatWidget'
-import { CloudinaryImage } from '@/components/cloudinary'
+import CloudinaryImage from '@/components/cloudinary/CloudinaryImage'
 import MainHeader from '@/components/MainHeader'
 
 interface BusinessData {
@@ -687,9 +687,13 @@ export default function PremiumWebsitePreview({
                         <CloudinaryImage
                           src={member.photoUrl}
                           alt={member.name}
-                          width={96}
-                          height={96}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          transformation={{
+                            width: 96,
+                            height: 96,
+                            crop: 'fill',
+                            gravity: 'auto'
+                          }}
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">

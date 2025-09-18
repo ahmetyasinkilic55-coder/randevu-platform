@@ -1,0 +1,501 @@
+'use client'
+
+import React, { useState, useRef, useEffect } from 'react';
+import { 
+  SparklesIcon, 
+  PaperAirplaneIcon, 
+  MicrophoneIcon,
+  XMarkIcon,
+  ChatBubbleLeftRightIcon,
+  StarIcon,
+  MapPinIcon,
+  ClockIcon,
+  CurrencyDollarIcon,
+  PhoneIcon,
+  CalendarDaysIcon
+} from '@heroicons/react/24/outline';
+
+interface AIServiceSuggesterProps {
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onServiceSelect?: (service: any) => void;
+  selectedProvince?: string;
+  selectedDistrict?: string;
+}
+
+interface Message {
+  id: string;
+  type: 'user' | 'ai';
+  content: string;
+  timestamp: Date;
+  suggestions?: ServiceSuggestion[];
+}
+
+interface ServiceSuggestion {
+  id: string;
+  name: string;
+  category: string;
+  rating: number;
+  price: string;
+  distance: string;
+  availability: string;
+  description: string;
+  phone: string;
+  isPopular?: boolean;
+  isNearby?: boolean;
+  isAffordable?: boolean;
+}
+
+const AIServiceSuggester: React.FC<AIServiceSuggesterProps> = ({
+  isOpen: controlledIsOpen,
+  onOpenChange,
+  onServiceSelect,
+  selectedProvince = "Ankara",
+  selectedDistrict = "Keçiören"
+}) => {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
+  
+  const setIsOpen = (open: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(open);
+    } else {
+      setInternalIsOpen(open);
+    }
+  };
+  const [inputValue, setInputValue] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Welcome message
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      const welcomeMessage: Message = {
+        id: '1',
+        type: 'ai',
+        content: `Merhaba! Ben RandeVur AI asistanınızım. ${selectedDistrict}, ${selectedProvince} bölgesinde hangi hizmete ihtiyacınız var?`,
+        timestamp: new Date()
+      };
+      setMessages([welcomeMessage]);
+    }
+  }, [isOpen, selectedDistrict, selectedProvince]);
+
+  // Auto scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Focus input when opened
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
+
+  // Sample AI processing function
+  const processUserInput = async (input: string): Promise<{ response: string; suggestions: ServiceSuggestion[] }> => {
+    // Simulated AI processing with realistic delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    const inputLower = input.toLowerCase();
+    
+    // Saç kesimi
+    if (inputLower.includes('saç') || inputLower.includes('berber') || inputLower.includes('kuaför')) {
+      return {
+        response: `${selectedDistrict}'de saç kesimi için en iyi seçenekleri buldum! 💇‍♂️`,
+        suggestions: [
+          {
+            id: '1',
+            name: 'AYK Hair Design',
+            category: 'Berber & Kuaför',
+            rating: 4.9,
+            price: '45₺',
+            distance: '0.5km',
+            availability: 'Bugün açık',
+            description: 'Modern erkek saç kesimi uzmanı',
+            phone: '0312 555 0123',
+            isPopular: true
+          },
+          {
+            id: '2', 
+            name: 'Berber Mehmet',
+            category: 'Berber',
+            rating: 4.7,
+            price: '35₺',
+            distance: '0.2km',
+            availability: 'Şimdi açık',
+            description: 'Geleneksel berber hizmetleri',
+            phone: '0312 555 0124',
+            isNearby: true
+          },
+          {
+            id: '3',
+            name: 'Keçiören Berberi',
+            category: 'Berber',
+            rating: 4.5,
+            price: '25₺',
+            distance: '0.8km',
+            availability: 'Yarın açık',
+            description: 'Uygun fiyatlı kaliteli hizmet',
+            phone: '0312 555 0125',
+            isAffordable: true
+          }
+        ]
+      };
+    }
+    
+    // Ev temizliği
+    if (inputLower.includes('temizlik') || inputLower.includes('ev') || inputLower.includes('dağınık')) {
+      return {
+        response: `Ev temizliği için ${selectedDistrict}'de en güvenilir firmalar! 🧹`,
+        suggestions: [
+          {
+            id: '4',
+            name: 'Çankaya Temizlik',
+            category: 'Ev Temizliği',
+            rating: 4.8,
+            price: '250₺',
+            distance: '1.2km',
+            availability: '2 saat içinde',
+            description: 'Hızlı ve güvenilir temizlik',
+            phone: '0312 555 0130',
+            isPopular: true
+          },
+          {
+            id: '5',
+            name: 'Ev Bakım Pro',
+            category: 'Detaylı Temizlik',
+            rating: 4.9,
+            price: '350₺',
+            distance: '0.9km',
+            availability: 'Bugün müsait',
+            description: 'Kapsamlı ev bakım hizmeti',
+            phone: '0312 555 0131',
+            isNearby: true
+          }
+        ]
+      };
+    }
+
+    // Düğün / güzellik
+    if (inputLower.includes('düğün') || inputLower.includes('güzel') || inputLower.includes('makyaj')) {
+      return {
+        response: `Düğün hazırlığı için özel paket hazırladım! 💄✨`,
+        suggestions: [
+          {
+            id: '6',
+            name: 'Salon Güzellik',
+            category: 'Saç & Makyaj',
+            rating: 4.9,
+            price: '450₺',
+            distance: '0.7km',
+            availability: 'Randevu gerekli',
+            description: 'Profesyonel gelin makyajı',
+            phone: '0312 555 0140',
+            isPopular: true
+          },
+          {
+            id: '7',
+            name: 'Nail Art Studio',
+            category: 'Manikür & Pedikür',
+            rating: 4.8,
+            price: '150₺',
+            distance: '0.3km',
+            availability: 'Bugün açık',
+            description: 'Özel gün nail art',
+            phone: '0312 555 0141',
+            isNearby: true
+          }
+        ]
+      };
+    }
+
+    // Tamir / bozulma
+    if (inputLower.includes('bozul') || inputLower.includes('tamir') || inputLower.includes('arıza')) {
+      return {
+        response: `Tamir işleri için ${selectedDistrict}'de güvenilir ustalar! 🔧`,
+        suggestions: [
+          {
+            id: '8',
+            name: 'Usta Mehmet',
+            category: 'Genel Tamir',
+            rating: 4.7,
+            price: '100₺/saat',
+            distance: '0.4km',
+            availability: 'Şimdi müsait',
+            description: 'Her türlü ev tamiri',
+            phone: '0312 555 0150',
+            isNearby: true
+          },
+          {
+            id: '9',
+            name: 'Acil Tamir Servisi',
+            category: 'Acil Servis',
+            rating: 4.6,
+            price: '150₺',
+            distance: '1.1km',
+            availability: '30 dk içinde',
+            description: '7/24 acil tamir hizmeti',
+            phone: '0312 555 0151',
+            isPopular: true
+          }
+        ]
+      };
+    }
+
+    // Genel cevap
+    return {
+      response: `${selectedDistrict}'de aradığınız hizmet için genel öneriler:`,
+      suggestions: [
+        {
+          id: '10',
+          name: 'Popüler Hizmetler',
+          category: 'Çoklu Hizmet',
+          rating: 4.5,
+          price: 'Değişken',
+          distance: 'Bölge geneli',
+          availability: 'Çeşitli saatler',
+          description: 'En çok tercih edilen hizmetler',
+          phone: '0312 555 0160',
+          isPopular: true
+        }
+      ]
+    };
+  };
+
+  const handleSendMessage = async () => {
+    if (!inputValue.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: inputValue,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsLoading(true);
+
+    try {
+      const { response, suggestions } = await processUserInput(inputValue);
+      
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'ai',
+        content: response,
+        timestamp: new Date(),
+        suggestions
+      };
+
+      setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'ai',
+        content: 'Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const exampleQuestions = [
+    "Saçım çok uzadı, kestirmek istiyorum",
+    "Evim çok dağınık, temizlik lazım",
+    "Düğün var, güzel görünmeliyim",
+    "Evde musluk bozuldu"
+  ];
+
+  if (!isOpen) {
+    return (
+      <div className="fixed bottom-6 right-6 z-50">
+        <button
+          onClick={() => setIsOpen(true)}
+          className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 animate-pulse"
+        >
+          <div className="flex items-center space-x-2">
+            <SparklesIcon className="w-6 h-6" />
+            <span className="hidden sm:inline font-medium">AI Asistan</span>
+          </div>
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed bottom-6 right-6 z-50 w-80 sm:w-96">
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-4 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                <SparklesIcon className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold">AI Hizmet Asistanı</h3>
+                <p className="text-xs text-emerald-100">Ne arıyorsunuz?</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="p-2 hover:bg-white/20 rounded-full transition-colors"
+            >
+              <XMarkIcon className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Messages */}
+        <div className="h-80 overflow-y-auto p-4 space-y-4">
+          {messages.map((message) => (
+            <div key={message.id}>
+              {/* Message Bubble */}
+              <div className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-xs p-3 rounded-2xl ${
+                  message.type === 'user' 
+                    ? 'bg-emerald-500 text-white' 
+                    : 'bg-gray-100 text-gray-900'
+                }`}>
+                  <p className="text-sm">{message.content}</p>
+                </div>
+              </div>
+
+              {/* Service Suggestions */}
+              {message.suggestions && message.suggestions.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {message.suggestions.map((suggestion) => (
+                    <div
+                      key={suggestion.id}
+                      className="bg-white border border-gray-200 rounded-xl p-3 hover:border-emerald-300 transition-colors cursor-pointer"
+                      onClick={() => onServiceSelect?.(suggestion)}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <h4 className="font-semibold text-gray-900 text-sm">{suggestion.name}</h4>
+                            {suggestion.isPopular && (
+                              <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">🔥 Popüler</span>
+                            )}
+                            {suggestion.isNearby && (
+                              <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">📍 Yakın</span>
+                            )}
+                            {suggestion.isAffordable && (
+                              <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">💰 Uygun</span>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-500 mb-2">{suggestion.category}</p>
+                          <p className="text-xs text-gray-600">{suggestion.description}</p>
+                        </div>
+                        <span className="text-sm font-medium text-emerald-600">{suggestion.price}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-1">
+                            <StarIcon className="w-3 h-3 text-yellow-400 fill-current" />
+                            <span>{suggestion.rating}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <MapPinIcon className="w-3 h-3" />
+                            <span>{suggestion.distance}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <ClockIcon className="w-3 h-3" />
+                            <span>{suggestion.availability}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex space-x-2 mt-3">
+                        <button className="flex-1 bg-emerald-50 text-emerald-700 py-2 px-3 rounded-lg text-xs font-medium hover:bg-emerald-100 transition-colors flex items-center justify-center space-x-1">
+                          <CalendarDaysIcon className="w-3 h-3" />
+                          <span>Randevu Al</span>
+                        </button>
+                        <button className="flex-1 bg-gray-50 text-gray-700 py-2 px-3 rounded-lg text-xs font-medium hover:bg-gray-100 transition-colors flex items-center justify-center space-x-1">
+                          <PhoneIcon className="w-3 h-3" />
+                          <span>Ara</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+
+          {/* Loading indicator */}
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="bg-gray-100 p-3 rounded-2xl">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Example Questions */}
+        {messages.length <= 1 && (
+          <div className="p-4 border-t border-gray-100">
+            <p className="text-xs text-gray-500 mb-3">💡 Örnek sorular:</p>
+            <div className="space-y-2">
+              {exampleQuestions.map((question, index) => (
+                <button
+                  key={index}
+                  onClick={() => setInputValue(question)}
+                  className="w-full text-left text-xs bg-gray-50 hover:bg-gray-100 p-2 rounded-lg transition-colors text-gray-700"
+                >
+                  "{question}"
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Input */}
+        <div className="p-4 border-t border-gray-100">
+          <div className="flex space-x-2">
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Hangi hizmete ihtiyacınız var?"
+              className="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              disabled={isLoading}
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={!inputValue.trim() || isLoading}
+              className="bg-emerald-500 text-white p-2 rounded-xl hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <PaperAirplaneIcon className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AIServiceSuggester;

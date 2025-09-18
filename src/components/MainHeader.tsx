@@ -9,7 +9,8 @@ import {
   CalendarDaysIcon,
   HeartIcon,
   GiftIcon,
-  BuildingStorefrontIcon
+  BuildingStorefrontIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline'
 
 interface MainHeaderProps {
@@ -110,6 +111,15 @@ export default function MainHeader({
                         <p className="text-sm font-medium text-gray-900 truncate">{session.user?.name}</p>
                         <p className="text-xs text-gray-500 truncate">{session.user?.email}</p>
                       </div>
+                      
+                      <Link
+                        href="/my-requests"
+                        className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <ChatBubbleLeftRightIcon className="w-4 h-4" />
+                        <span>Taleplerimi Takip Et</span>
+                      </Link>
                       
                       <Link
                         href="/appointments"

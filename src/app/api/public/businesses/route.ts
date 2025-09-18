@@ -41,17 +41,49 @@ export async function GET(request: NextRequest) {
       whereClause.categoryId = category
     }
 
-    // Arama filtresi
+    // Arama filtresi - büyük/küçük harf duyarsız ve hizmetlerde arama
     if (search) {
+      const searchLower = search.toLowerCase();
       whereClause.OR = [
         {
           name: {
-            contains: search
+            contains: searchLower,
+            mode: 'insensitive'
           }
         },
         {
           description: {
-            contains: search
+            contains: searchLower,
+            mode: 'insensitive'
+          }
+        },
+        // Hizmetlerde arama
+        {
+          services: {
+            some: {
+              name: {
+                contains: searchLower,
+                mode: 'insensitive'
+              }
+            }
+          }
+        },
+        // Kategori adında arama
+        {
+          categoryRef: {
+            name: {
+              contains: searchLower,
+              mode: 'insensitive'
+            }
+          }
+        },
+        // Alt kategori adında arama
+        {
+          subcategory: {
+            name: {
+              contains: searchLower,
+              mode: 'insensitive'
+            }
           }
         }
       ]
@@ -79,6 +111,15 @@ export async function GET(request: NextRequest) {
             slug: true,
             icon: true,
             categoryId: true
+          }
+        },
+        services: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            price: true,
+            duration: true
           }
         }
       },
@@ -138,13 +179,13 @@ export async function GET(request: NextRequest) {
       isPremium: business.isPremium,
       isOpen: true, // Geçici - çalışma saatleri olmadan
       
-      // Geçici veriler
+      // Dinamik veriler
       rating: 4.5,
       reviewCount: 0,
       nextAvailable: 'Bugün 14:00',
       priceRange: '₺₺',
       tags: [],
-      services: [],
+      services: business.services || [],
       staff: [],
       
       // Zaman damgaları

@@ -7,7 +7,8 @@ import {
   Upload, Trash2, Eye, X, Loader2, Image as ImageIcon,
   Plus, AlertCircle, Check, Camera, Grid3x3, List, Search
 } from 'lucide-react'
-import { CloudinaryUpload, CloudinaryImage } from '@/components/cloudinary'
+import CloudinaryUpload from '@/components/cloudinary/CloudinaryUpload'
+import CloudinaryImage from '@/components/cloudinary/CloudinaryImage'
 import { useCloudinary } from '@/hooks/useCloudinary'
 import toast from 'react-hot-toast'
 

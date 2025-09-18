@@ -1,0 +1,29 @@
+@echo off
+echo.
+echo 🔍 RANDEVUR HİZMET AUTOCOMPLETE TEST
+echo ✅ Anlık hizmet önerileri
+echo ✅ Büyük/küçük harf duyarsız
+echo.
+
+cd /d "C:\Users\ahmetyasin\Desktop\randevu-platform"
+
+echo 🚀 Development server başlatılıyor...
+echo.
+echo 🧪 TEST SENARYOLARI:
+echo   1. "saç" yaz → saç kesimi, saç boyama vb. öneriler gelecek
+echo   2. "temiz" yaz → temizlik hizmetleri listelenecek
+echo   3. "makyaj" yaz → makyaj hizmetleri çıkacak
+echo   4. Önerilerden birine tıkla → otomatik arama yapacak
+echo   5. Kaç işletmede bu hizmet var gösterilecek
+echo.
+echo 💡 ÖZELLİKLER:
+echo   ✅ 2+ karakter yazınca otomatik önerir
+echo   ✅ En popüler hizmetler önce
+echo   ✅ Kaç işletmede var gösterir
+echo   ✅ Loading animation
+echo   ✅ Keyboard friendly
+echo.
+echo 📍 Test URL: http://localhost:3000
+echo.
+
+call npm run dev

@@ -15,7 +15,7 @@ import {
   Cog6ToothIcon
 } from '@heroicons/react/24/outline'
 import { Camera, Loader2 } from 'lucide-react'
-import { CloudinaryImage } from '@/components/cloudinary'
+import CloudinaryImage from '@/components/cloudinary/CloudinaryImage'
 import { useCloudinary } from '@/hooks/useCloudinary'
 import {
   BusinessData,

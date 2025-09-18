@@ -350,15 +350,13 @@ export default function WebsitePreview({
                 ></div>
                 <div className="relative bg-black/50 backdrop-blur-xl border border-white/10 rounded-2xl p-3 hover:bg-black/60 transition-all">
                   {(customizations.profilePhoto || businessData?.profilePhotoUrl) ? (
-                    <CloudinaryImage
-                      publicId={(customizations.profilePhoto || businessData?.profilePhotoUrl) || ''}
-                      alt={businessData?.name || 'Logo'}
-                      className="w-12 h-12 rounded-xl object-cover border-2 border-white/20 group-hover:border-white/40 transition-all"
-                      transformation={{
-                        width: 100,
-                        height: 100,
-                        crop: 'fill',
-                        quality: 'auto'
+                    <div 
+                      className="w-12 h-12 rounded-xl border-2 border-white/20 group-hover:border-white/40 transition-all"
+                      style={{
+                        backgroundImage: `url("https://res.cloudinary.com/ddapurgju/image/upload/w_200,h_200,c_fill,g_auto,q_auto/${customizations.profilePhoto || businessData?.profilePhotoUrl}")`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat'
                       }}
                     />
                   ) : (
@@ -438,15 +436,13 @@ export default function WebsitePreview({
                   <div className="flex items-center justify-between border-b border-gray-200 pb-3 mb-4">
                     <div className="flex items-center gap-2">
                       {(customizations.profilePhoto || businessData?.profilePhotoUrl) ? (
-                        <CloudinaryImage
-                          publicId={(customizations.profilePhoto || businessData?.profilePhotoUrl) || ''}
-                          alt={businessData?.name || 'Logo'}
-                          className="w-8 h-8 rounded-lg object-cover"
-                          transformation={{
-                            width: 64,
-                            height: 64,
-                            crop: 'fill',
-                            quality: 'auto'
+                        <div 
+                          className="w-8 h-8 rounded-lg"
+                          style={{
+                            backgroundImage: `url("https://res.cloudinary.com/ddapurgju/image/upload/w_100,h_100,c_fill,g_auto,q_auto/${customizations.profilePhoto || businessData?.profilePhotoUrl}")`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            backgroundRepeat: 'no-repeat'
                           }}
                         />
                       ) : (
@@ -565,19 +561,16 @@ export default function WebsitePreview({
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-blue-500/20 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500"></div>
                   
                   {/* Profile photo container */}
-                  <div className="relative w-full h-full rounded-full border-4 border-white/30 group-hover:border-white/50 transition-all duration-300 overflow-hidden bg-white/10 backdrop-blur-sm">
-                    <CloudinaryImage
-                      publicId={(customizations.profilePhoto || businessData?.profilePhotoUrl) || ''}
-                      alt={businessData?.name || ''}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      transformation={{
-                        width: 300,
-                        height: 300,
-                        crop: 'fill',
-                        quality: 'auto'
-                      }}
-                    />
-                  </div>
+                  <div 
+                    className="relative w-full h-full rounded-full border-4 border-white/30 group-hover:border-white/50 transition-all duration-300 overflow-hidden bg-white/10 backdrop-blur-sm group-hover:scale-105"
+                    style={{
+                      backgroundImage: `url("https://res.cloudinary.com/ddapurgju/image/upload/w_300,h_300,c_fill,g_auto,q_auto/${customizations.profilePhoto || businessData?.profilePhotoUrl}")`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat',
+                      transition: 'transform 500ms'
+                    }}
+                  />
                   
                   {/* Status indicator */}
                   <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 border-4 border-white/30 rounded-full flex items-center justify-center">
@@ -1064,13 +1057,11 @@ export default function WebsitePreview({
                           src={photo.imageUrl} 
                           alt={photo.title || `Galeri ${index + 1}`}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          style={{ objectFit: 'cover' }}
                           transformation={{
                             width: 600,
                             height: 338, // 16:9 ratio için
                             crop: 'fill',
-                            gravity: 'auto',
-                            quality: 'auto:good'
+                            gravity: 'auto'
                           }}
                         />
                       </div>
@@ -1308,8 +1299,7 @@ export default function WebsitePreview({
                           transformation={{
                             width: 500,
                             height: 300,
-                            crop: 'fill',
-                            quality: 'auto:good'
+                            crop: 'fill'
                           }}
                         />
                       ) : (
@@ -1766,8 +1756,7 @@ export default function WebsitePreview({
     transformation={{
       width: 1200,
       height: 800,
-      crop: 'limit',
-      quality: 'auto:good'
+      crop: 'limit'
     }}
   />
 </div>

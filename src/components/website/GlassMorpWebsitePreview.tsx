@@ -10,7 +10,7 @@ import {
   Scissors, Car, Briefcase, GraduationCap, Building, Dumbbell, Waves, Wind
 } from 'lucide-react'
 
-import { CloudinaryImage } from '@/components/cloudinary'
+import CloudinaryImage from '@/components/cloudinary/CloudinaryImage'
 
 interface BusinessData {
   id: string

@@ -13,7 +13,7 @@ import ProjectInquiryModal from '../modals/ProjectInquiryModal'
 import ConsultationModal from '../modals/ConsultationModal'
 import ContactModal from '../modals/ContactModal'
 import AIChatWidget from '../ai/AIChatWidget'
-import { CloudinaryImage } from '@/components/cloudinary'
+import CloudinaryImage from '@/components/cloudinary/CloudinaryImage'
 
 interface BusinessData {
   id: string
@@ -411,9 +411,13 @@ export default function IOSWebsitePreview({
                   <CloudinaryImage
                     src={customizations.profilePhoto}
                     alt={businessData.name}
-                    width={128}
-                    height={128}
                     className="w-full h-full object-cover"
+                    transformation={{
+                      width: 128,
+                      height: 128,
+                      crop: 'fill',
+                      gravity: 'auto'
+                    }}
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">

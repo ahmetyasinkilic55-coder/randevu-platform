@@ -1,0 +1,8 @@
+// Custom event types for AI Service Suggester
+declare global {
+  interface WindowEventMap {
+    'openAIChat': CustomEvent;
+  }
+}
+
+export {};

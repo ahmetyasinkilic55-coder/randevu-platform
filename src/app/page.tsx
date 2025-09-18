@@ -5,8 +5,9 @@ import { useSession, signOut } from 'next-auth/react'
 import { toast } from 'react-hot-toast'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CloudinaryImage } from '@/components/cloudinary'
+import CloudinaryImage from '@/components/cloudinary/CloudinaryImage'
 import AuthModal from '@/components/AuthModal'
+import ServiceRequestModal from '@/components/ServiceRequestModal'
 import Footer from '@/components/Footer'
 import MainHeader from '@/components/MainHeader'
 import { 
@@ -106,6 +107,7 @@ interface Business {
   profileImage?: string
   logo?: string
   coverPhotoUrl?: string
+  profilePhotoUrl?: string
   rating: number
   reviewCount: number
   distance?: string
@@ -209,8 +211,14 @@ function HomeContent() {
   const [selectedSubcategory, setSelectedSubcategory] = useState(searchParams.get('subcategory') || '')
   const [expandedCategory, setExpandedCategory] = useState('')
   
+  // Autocomplete states
+  const [showAutocomplete, setShowAutocomplete] = useState(false)
+  const [autocompleteServices, setAutocompleteServices] = useState<any[]>([])
+  const [autocompleteLoading, setAutocompleteLoading] = useState(false)
+  
   // UI States
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [showServiceRequestModal, setShowServiceRequestModal] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
   const [userType, setUserType] = useState<'customer' | 'business'>('customer')
   const [locationEnabled, setLocationEnabled] = useState(false)
@@ -765,7 +773,61 @@ function HomeContent() {
     }
   }
 
-  // Debounced search URL update
+  // Autocomplete fonksiyonları
+  const fetchAutocompleteServices = async (query: string) => {
+    console.log('Autocomplete çağrılıyor:', query) // DEBUG
+    
+    if (query.length < 2) {
+      setAutocompleteServices([])
+      setShowAutocomplete(false)
+      return
+    }
+
+    setAutocompleteLoading(true)
+    try {
+      const url = `/api/services/autocomplete?q=${encodeURIComponent(query)}`
+      console.log('API URL:', url) // DEBUG
+      
+      const response = await fetch(url)
+      const data = await response.json()
+      
+      console.log('API Response:', data) // DEBUG
+      
+      if (data.services) {
+        setAutocompleteServices(data.services)
+        setShowAutocomplete(data.services.length > 0)
+        console.log('Services set:', data.services.length) // DEBUG
+      }
+    } catch (error) {
+      console.error('Autocomplete error:', error)
+      setAutocompleteServices([])
+      setShowAutocomplete(false)
+    } finally {
+      setAutocompleteLoading(false)
+    }
+  }
+
+  const handleAutocompleteSelect = (serviceName: string) => {
+    setSearchQuery(serviceName)
+    setShowAutocomplete(false)
+    
+    // URL'yi güncelle ve arama yap
+    updateURL({
+      provinceId: selectedProvinceId,
+      districtId: selectedDistrictId,
+      search: serviceName,
+      category: selectedCategory,
+      subcategory: selectedSubcategory
+    })
+  }
+
+  // Debounced autocomplete
+  const debouncedAutocomplete = useCallback(
+    debounce((query: string) => {
+      fetchAutocompleteServices(query)
+    }, 300),
+    []
+  )
   const debouncedUpdateSearchURL = useCallback(
     debounce((searchValue: string) => {
       updateURL({
@@ -783,6 +845,14 @@ function HomeContent() {
   const handleSearchChange = (value: string) => {
     setSearchQuery(value)
     debouncedUpdateSearchURL(value)
+    
+    // Autocomplete'i tetikle
+    if (value.trim()) {
+      debouncedAutocomplete(value.trim())
+    } else {
+      setShowAutocomplete(false)
+      setAutocompleteServices([])
+    }
   }
 
   // Debounce utility function
@@ -833,6 +903,7 @@ function HomeContent() {
     }
 
     document.addEventListener('mousedown', handleClickOutside)
+    
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
@@ -1040,11 +1111,56 @@ function HomeContent() {
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 w-5 h-5" />
               <input
                 type="text"
-                placeholder="İşletme adı, hizmet ara..."
+                placeholder="İşletme adı, hizmet ara... "
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
+                onFocus={() => {
+                  if (searchQuery.trim() && autocompleteServices.length > 0) {
+                    setShowAutocomplete(true)
+                  }
+                }}
+                onBlur={() => {
+                  // Biraz delay ile kapat ki tıklama çalışsın
+                  setTimeout(() => setShowAutocomplete(false), 150)
+                }}
                 className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white text-slate-800 placeholder-slate-500 shadow-sm hover:border-slate-400 transition-colors"
               />
+              
+              {/* Autocomplete Dropdown */}
+              {showAutocomplete && (autocompleteServices.length > 0 || autocompleteLoading) && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto">
+                  {autocompleteLoading ? (
+                    <div className="p-3 text-center text-slate-500">
+                      <div className="inline-flex items-center space-x-2">
+                        <div className="animate-spin w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full"></div>
+                        <span className="text-sm">Hizmetler aranıyor...</span>
+                      </div>
+                    </div>
+                  ) : (
+                    autocompleteServices.map((service, index) => (
+                      <button
+                        key={service.id}
+                        onClick={() => handleAutocompleteSelect(service.name)}
+                        className={`w-full text-left px-4 py-3 hover:bg-emerald-50 transition-colors ${
+                          index !== autocompleteServices.length - 1 ? 'border-b border-slate-100' : ''
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-slate-900 font-medium">{service.name}</span>
+                            {service.description && (
+                              <p className="text-xs text-slate-500 mt-1">{service.description}</p>
+                            )}
+                          </div>
+                          <span className="text-xs text-slate-400 ml-2">
+                            {service.businessCount} işletme
+                          </span>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -1165,111 +1281,103 @@ function HomeContent() {
 
           {/* Sağ İçerik - İşletmeler */}
           <div className="lg:col-span-3">
-            {/* Responsive Banner Area */}
+            {/* Service Request Section */}
             <div className="w-full mb-6 sm:mb-8">
-              <div className="relative w-full" style={{ aspectRatio: '4/1' }}>
-                <Link href="/business" className="block w-full h-full group">
-                  <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-[1.02]">
-                    <svg 
-                      viewBox="0 0 1200 300" 
-                      className="w-full h-full object-cover"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <defs>
-                        <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" style={{stopColor:'#10b981',stopOpacity:1}} />
-                          <stop offset="25%" style={{stopColor:'#059669',stopOpacity:1}} />
-                          <stop offset="50%" style={{stopColor:'#0d9488',stopOpacity:1}} />
-                          <stop offset="75%" style={{stopColor:'#14b8a6',stopOpacity:1}} />
-                          <stop offset="100%" style={{stopColor:'#06b6d4',stopOpacity:1}} />
-                        </linearGradient>
-                        
-                        <linearGradient id="overlayGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" style={{stopColor:'rgba(0,0,0,0.1)',stopOpacity:1}} />
-                          <stop offset="100%" style={{stopColor:'rgba(0,0,0,0.3)',stopOpacity:1}} />
-                        </linearGradient>
-                        
-                        <radialGradient id="lightEffect" cx="80%" cy="20%" r="50%">
-                          <stop offset="0%" style={{stopColor:'rgba(255,255,255,0.3)',stopOpacity:1}} />
-                          <stop offset="100%" style={{stopColor:'rgba(255,255,255,0)',stopOpacity:0}} />
-                        </radialGradient>
-                        
-                        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                          <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="rgba(0,0,0,0.15)"/>
-                        </filter>
-                      </defs>
+              <div className="relative bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200 overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-5">
+                  <svg className="w-full h-full" viewBox="0 0 200 100">
+                    <defs>
+                      <pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <circle cx="10" cy="10" r="1" fill="#10b981" />
+                      </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#dots)" />
+                  </svg>
+                </div>
+                
+                <div className="relative p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    {/* Left Side - Content */}
+                    <div className="flex-1 text-center sm:text-left">
+                      <div className="flex items-center justify-center sm:justify-start gap-3 mb-3">
+                        <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center shadow-md">
+                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                        </div>
+                        <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+                          Aradığınızı bulamadınız mı?
+                        </h2>
+                      </div>
                       
-                      <rect width="1200" height="300" fill="url(#mainGradient)" rx="16" ry="16"/>
-                      <rect width="1200" height="300" fill="url(#overlayGradient)" rx="16" ry="16"/>
-                      <rect width="1200" height="300" fill="url(#lightEffect)" rx="16" ry="16"/>
+                      <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-0">
+                        İhtiyacınıza uygun işletmelerden anında teklif alın!
+                      </p>
+                    </div>
+                    
+                    {/* Right Side - Button & Features */}
+                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                      {/* Feature badges - Mobile'da gizli */}
+                      <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500">
+                        <div className="flex items-center gap-1">
+                          <svg className="w-3 h-3 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                          <span>Kolay</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <svg className="w-3 h-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                          </svg>
+                          <span>Hızlı</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <svg className="w-3 h-3 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span>Çoklu Teklif</span>
+                        </div>
+                      </div>
                       
-                      <circle cx="950" cy="80" r="60" fill="rgba(255,255,255,0.05)" opacity="0.8">
-                        <animateTransform attributeName="transform" type="translate" values="0,0; 10,5; 0,0" dur="4s" repeatCount="indefinite"/>
-                      </circle>
-                      
-                      <circle cx="1100" cy="200" r="40" fill="rgba(255,255,255,0.08)" opacity="0.6">
-                        <animateTransform attributeName="transform" type="translate" values="0,0; -8,8; 0,0" dur="6s" repeatCount="indefinite"/>
-                      </circle>
-                      
-                      <path d="M800 50 Q850 20 900 50 Q950 80 1000 50" stroke="rgba(255,255,255,0.1)" strokeWidth="2" fill="none" opacity="0.5"/>
-                      
-                      <g transform="translate(60, 80)">
-                        <rect x="0" y="0" width="80" height="80" rx="20" fill="rgba(255,255,255,0.15)" filter="url(#shadow)"/>
-                        <rect x="4" y="4" width="72" height="72" rx="16" fill="rgba(255,255,255,0.9)"/>
-                        <text x="40" y="55" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="36" fontWeight="bold" fill="#10b981">R</text>
-                      </g>
-                      
-                      <g transform="translate(180, 70)">
-                        <text x="0" y="35" fontFamily="Arial, sans-serif" fontSize="32" fontWeight="bold" fill="white" opacity="0.95">
-                          RandeVur ile Randevularınızı
-                        </text>
-                        <text x="0" y="70" fontFamily="Arial, sans-serif" fontSize="32" fontWeight="bold" fill="white" opacity="0.95">
-                          Kolayca Yönetin
-                        </text>
-                        
-                        <text x="0" y="110" fontFamily="Arial, sans-serif" fontSize="16" fill="rgba(255,255,255,0.8)">
-                          2025 yılı boyunca tamamen ücretsiz! Hemen kayıt olun ve avantajlardan yararlanın.
-                        </text>
-                        
-                        <g transform="translate(0, 130)">
-                          <rect x="0" y="0" width="200" height="45" rx="22" fill="rgba(255,255,255,0.9)" filter="url(#shadow)">
-                            <animate attributeName="opacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite"/>
-                          </rect>
-                          <text x="100" y="28" textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="16" fontWeight="600" fill="#10b981">
-                            Hemen Başlayın →
-                          </text>
-                        </g>
-                      </g>
-                      
-                      <g transform="translate(850, 50)">
-                        <rect x="0" y="0" width="120" height="200" rx="15" fill="rgba(255,255,255,0.15)" filter="url(#shadow)"/>
-                        <rect x="8" y="8" width="104" height="184" rx="10" fill="rgba(255,255,255,0.9)"/>
-                        <rect x="15" y="25" width="90" height="150" rx="5" fill="#f8fafc"/>
-                        <rect x="25" y="35" width="70" height="8" rx="4" fill="#e2e8f0"/>
-                        <rect x="25" y="50" width="50" height="6" rx="3" fill="#cbd5e1"/>
-                        <rect x="25" y="65" width="70" height="20" rx="5" fill="#10b981" opacity="0.8"/>
-                        <rect x="25" y="90" width="70" height="20" rx="5" fill="#14b8a6" opacity="0.8"/>
-                        <rect x="25" y="115" width="70" height="20" rx="5" fill="#06b6d4" opacity="0.8"/>
-                        <circle cx="85" cy="150" r="12" fill="#10b981"/>
-                        <path d="M80 150 L84 154 L90 146" stroke="white" strokeWidth="2" fill="none"/>
-                      </g>
-                      
-                      <g opacity="0.6">
-                        <circle cx="200" cy="50" r="3" fill="rgba(255,255,255,0.8)">
-                          <animate attributeName="opacity" values="0;1;0" dur="3s" repeatCount="indefinite" begin="0s"/>
-                        </circle>
-                        <circle cx="350" cy="40" r="2" fill="rgba(255,255,255,0.7)">
-                          <animate attributeName="opacity" values="0;1;0" dur="4s" repeatCount="indefinite" begin="1s"/>
-                        </circle>
-                        <circle cx="500" cy="35" r="2.5" fill="rgba(255,255,255,0.6)">
-                          <animate attributeName="opacity" values="0;1;0" dur="3.5s" repeatCount="indefinite" begin="2s"/>
-                        </circle>
-                      </g>
-                      
-                      <path d="M0 250 Q50 230 100 250 Q150 270 200 250" stroke="rgba(255,255,255,0.1)" strokeWidth="2" fill="none"/>
-                    </svg>
+                      {/* CTA Button */}
+                      <button
+                        onClick={() => setShowServiceRequestModal(true)}
+                        className="group relative px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 overflow-hidden whitespace-nowrap"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                        <div className="relative flex items-center gap-2">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                          <span>Talep Oluştur</span>
+                        </div>
+                      </button>
+                    </div>
                   </div>
-                </Link>
+                  
+                  {/* Mobile features - Sadece mobile'da görünür */}
+                  <div className="sm:hidden flex justify-center gap-4 mt-3 pt-3 border-t border-emerald-100">
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <svg className="w-3 h-3 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span>Ücretsiz</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <svg className="w-3 h-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                      </svg>
+                      <span>Hızlı Yanıt</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <svg className="w-3 h-3 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span>Çoklu Teklif</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1363,7 +1471,7 @@ function HomeContent() {
                     
                     <div className="relative h-48 overflow-hidden">
                       <CloudinaryImage
-                        src={business.image || business.profileImage || business.logo || business.coverPhotoUrl}
+                        src={business.image || business.profilePhotoUrl || business.logo || business.coverPhotoUrl}
                         alt={business.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         transformation={{
@@ -1375,6 +1483,7 @@ function HomeContent() {
                           format: 'auto'
                         }}
                         onError={(e) => {
+                          console.log('Image error for business:', business.name, 'src:', e.currentTarget.src);
                           const target = e.target as HTMLImageElement;
                           target.src = '/default-business.svg';
                         }}
@@ -1518,6 +1627,19 @@ function HomeContent() {
           onClose={() => setShowAuthModal(false)}
           initialMode={authMode}
           initialUserType={userType}
+        />
+      )}
+
+      {showServiceRequestModal && (
+        <ServiceRequestModal
+          isOpen={showServiceRequestModal}
+          onClose={() => setShowServiceRequestModal(false)}
+          categories={categories}
+          provinces={provinces}
+          districts={districts}
+          selectedProvinceId={selectedProvinceId}
+          selectedDistrictId={selectedDistrictId}
+          searchQuery={searchQuery}
         />
       )}
 

@@ -23,7 +23,8 @@ import {
   Bars3Icon,
   XMarkIcon,
   ClockIcon,
-  PencilSquareIcon
+  PencilSquareIcon,
+  StarIcon
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -141,11 +142,12 @@ export default function DashboardLayout({
   const menuItems = [
     { key: 'dashboard', icon: ChartBarIcon, label: 'Panel', href: '/dashboard', badge: null },
     { key: 'appointments', icon: CalendarDaysIcon, label: 'Randevular', href: '/dashboard/appointments', badge: 3 },
+    { key: 'service-requests', icon: ChatBubbleLeftRightIcon, label: 'Servis Talepleri', href: '/dashboard/service-requests', badge: null },
     { key: 'inquiries', icon: DocumentTextIcon, label: 'Talepler', href: '/dashboard/inquiries', badge: null },
     { key: 'services', icon: Cog6ToothIcon, label: 'Hizmetler', href: '/dashboard/services', badge: null },
     { key: 'staff', icon: UserGroupIcon, label: 'Personel', href: '/dashboard/staff', badge: null },
     { key: 'staff-leave', icon: ClockIcon, label: 'İzin Yönetimi', href: '/dashboard/staff-leave', badge: null },
-    { key: 'reviews', icon: ChatBubbleLeftRightIcon, label: 'Değerlendirmeler', href: '/dashboard/reviews', badge: null },
+    { key: 'reviews', icon: StarIcon, label: 'Değerlendirmeler', href: '/dashboard/reviews', badge: null },
     { key: 'blog', icon: PencilSquareIcon, label: 'Blog Yönetimi', href: '/dashboard/blog', badge: null },
     { key: 'gallery', icon: PhotoIcon, label: 'Galeri Yönetimi', href: '/dashboard/gallery', badge: null },
     { key: 'website', icon: CodeBracketIcon, label: 'Web Sitesi', href: '/dashboard/website', badge: null },

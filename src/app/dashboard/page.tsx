@@ -15,7 +15,8 @@ import {
   Cog6ToothIcon,
   PencilIcon,
   ClockIcon,
-  UserIcon
+  UserIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline'
 
 // Animated Counter Hook - Componentin dışında tanımlandı
@@ -344,8 +345,8 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-6">
           {[
             { icon: PlusIcon, label: 'Yeni Randevu', action: () => router.push('/dashboard/appointments') },
+            { icon: ChatBubbleLeftRightIcon, label: 'Servis Talepleri', action: () => router.push('/dashboard/service-requests') },
             { icon: UserGroupIcon, label: 'Personel Yönet', action: () => router.push('/dashboard/staff') },
-            { icon: ClockIcon, label: 'İzin Yönetimi', action: () => router.push('/dashboard/staff-leave') },
             { icon: Cog6ToothIcon, label: 'Hizmet Ekle', action: () => router.push('/dashboard/services') },
             { icon: PencilIcon, label: 'Site Düzenle', action: () => router.push('/dashboard/website') }
           ].map((action, index) => (
